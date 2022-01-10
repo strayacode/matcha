@@ -1,0 +1,81 @@
+#include <common/types.h>
+#include <core/iop/interpreter/interpreter.h>
+
+void IOPInterpreter::slti() {
+    SetReg(inst.i.rt, (s32)GetReg(inst.i.rs) < sign_extend<s32, 16>(inst.i.imm));
+}
+
+void IOPInterpreter::bne() {
+    s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
+
+    if (GetReg(inst.i.rs) != GetReg(inst.i.rt)) {
+        regs.next_pc = regs.pc + offset + 4;
+        branch_delay = true;
+    }
+}
+
+void IOPInterpreter::lui() {
+    SetReg(inst.i.rt, inst.i.imm << 16);
+}
+
+void IOPInterpreter::ori() {
+    SetReg(inst.i.rt, GetReg(inst.i.rs) | inst.i.imm);
+}
+
+void IOPInterpreter::beq() {
+    s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
+
+    if (GetReg(inst.i.rs) == GetReg(inst.i.rt)) {
+        regs.next_pc = regs.pc + offset + 4;
+        branch_delay = true;
+    }
+}
+
+void IOPInterpreter::lw() {
+    SetReg(inst.i.rt, ReadWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+}
+
+void IOPInterpreter::andi() {
+    SetReg(inst.i.rt, GetReg(inst.i.rs) & inst.i.imm);
+}
+
+void IOPInterpreter::addiu() {
+    SetReg(inst.i.rt, GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm));
+}
+
+void IOPInterpreter::addi() {
+    SetReg(inst.i.rt, GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm));
+}
+
+void IOPInterpreter::sw() {
+    WriteWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+}
+
+void IOPInterpreter::sb() {
+    WriteByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+}
+
+void IOPInterpreter::lb() {
+    SetReg(inst.i.rt, sign_extend<s32, 8>(ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm))));
+}
+
+void IOPInterpreter::jal() {
+    SetReg(31, regs.pc + 8);
+    regs.next_pc = (regs.pc & 0xF0000000) + (inst.j.offset << 2);
+    branch_delay = true;
+}
+
+void IOPInterpreter::lh() {
+    u32 addr = regs.gpr[inst.i.rs] + sign_extend<s32, 16>(inst.i.imm);
+
+    SetReg(inst.i.rt, sign_extend<s32, 16>(ReadHalf(addr)));
+}
+
+void IOPInterpreter::j() {
+    regs.next_pc = (regs.pc & 0xF0000000) + (inst.j.offset << 2);
+    branch_delay = true;
+}
+
+void IOPInterpreter::lbu() {
+    SetReg(inst.i.rt, ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+}

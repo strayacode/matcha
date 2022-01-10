@@ -1,0 +1,5 @@
+/bios
+/build
+/roms
+.*
+!/.gitignore
