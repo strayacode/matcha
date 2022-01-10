@@ -1,6 +1,6 @@
 #pragma once
 
-#include <common/types.h>
+#include "common/types.h"
 
 // turns out both the r3000 and r5900
 // use the same instruction encoding, so
@@ -36,4 +36,10 @@ union CPUInstruction {
 enum class InstructionTable {
     Primary,
     Secondary,
+    RegImm,
+    COP0,
+    COP1,
+    COP2,
+    TLB,
+    MMI,
 };

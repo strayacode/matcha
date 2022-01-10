@@ -1,0 +1,154 @@
+#include "core/ee/interpreter_table.h"
+#include "core/ee/ee_interpreter.h"
+#include "core/ee/ee_core.h"
+
+void InterpreterTable::Generate() {
+    primary_table.fill(&EEInterpreter::unknown_instruction);
+    secondary_table.fill(&EEInterpreter::unknown_instruction);
+    regimm_table.fill(&EEInterpreter::unknown_instruction);
+    cop0_table.fill(&EEInterpreter::unknown_instruction);
+    tlb_table.fill(&EEInterpreter::unknown_instruction);
+    mmi_table.fill(&EEInterpreter::unknown_instruction);
+
+    RegisterOpcode(&EEInterpreter::j, 2, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::jal, 3, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::beq, 4, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::bne, 5, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::blez, 6, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::bgtz, 7, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::addiu, 9, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::slti, 10, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sltiu, 11, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::andi, 12, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::ori, 13, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::xori, 14, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lui, 15, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::beql, 20, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::bnel, 21, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::daddiu, 25, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::ldl, 26, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::ldr, 27, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lq, 30, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sq, 31, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lb, 32, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lh, 33, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lw, 35, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lbu, 36, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lhu, 37, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lwu, 39, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sb, 40, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sh, 41, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sw, 43, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sdl, 44, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sdr, 45, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::cache, 47, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::ld, 55, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::swc1, 57, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::sd, 63, InstructionTable::Primary);
+
+    // secondary instructions
+    RegisterOpcode(&EEInterpreter::sll, 0, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::srl, 2, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::sra, 3, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::sllv, 4, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::srlv, 6, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::srav, 7, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::jr, 8, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::jalr, 9, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::movz, 10, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::movn, 11, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::syscall_exception, 12, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::break_exception, 13, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::sync, 15, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mfhi, 16, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mflo, 18, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsllv, 20, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsrav, 23, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mult, 24, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::div, 26, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::divu, 27, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::addu, 33, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::subu, 35, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::andd, 36, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::orr, 37, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::nor, 39, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::slt, 42, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::sltu, 43, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::daddu, 45, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsll, 56, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsrl, 58, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsll32, 60, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsrl32, 62, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsra32, 63, InstructionTable::Secondary);
+
+    // regimm instructions
+    RegisterOpcode(&EEInterpreter::bltz, 0, InstructionTable::RegImm);
+    RegisterOpcode(&EEInterpreter::bgez, 1, InstructionTable::RegImm);
+    RegisterOpcode(&EEInterpreter::bltzl, 2, InstructionTable::RegImm);
+
+    // cop0 instructions
+    RegisterOpcode(&EEInterpreter::mfc0, 0, InstructionTable::COP0);
+    RegisterOpcode(&EEInterpreter::mtc0, 4, InstructionTable::COP0);
+
+    // tlb instructions
+    RegisterOpcode(&EEInterpreter::tlbwi, 2, InstructionTable::TLB);
+
+    // mmi instructions
+    RegisterOpcode(&EEInterpreter::mflo1, 18, InstructionTable::MMI);
+    RegisterOpcode(&EEInterpreter::mult1, 24, InstructionTable::MMI);
+    RegisterOpcode(&EEInterpreter::divu1, 27, InstructionTable::MMI);
+}
+
+InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, CPUInstruction inst) {
+    switch (inst.i.opcode) {
+    case 0:
+        return secondary_table[inst.r.func];
+    case 1:
+        return regimm_table[inst.i.rt];
+    case 16:
+        switch (inst.i.rs) {
+        case 16:
+            return tlb_table[inst.r.func];
+        }
+
+        return cop0_table[inst.i.rs];
+    case 17:
+        log_fatal("[InterpreterTable] handle cop1");
+        break;
+    case 18:
+        log_fatal("[InterpreterTable] handle cop2");
+        break;
+    case 28:
+        return mmi_table[inst.r.func];
+    }
+
+    return primary_table[inst.i.opcode];
+}
+
+void InterpreterTable::Execute(EECore& cpu, CPUInstruction inst) {
+    InterpreterInstruction handler = GetInterpreterInstruction(cpu, inst);
+    handler(cpu, inst);
+}
+
+void InterpreterTable::RegisterOpcode(InterpreterInstruction handler, int index, InstructionTable table) {
+    switch (table) {
+    case InstructionTable::Primary:
+        primary_table[index] = handler;
+        break;
+    case InstructionTable::Secondary:
+        secondary_table[index] = handler;
+        break;
+    case InstructionTable::RegImm:
+        regimm_table[index] = handler;
+        break;
+    case InstructionTable::COP0:
+        cop0_table[index] = handler;
+        break;
+    case InstructionTable::TLB:
+        tlb_table[index] = handler;
+        break;
+    case InstructionTable::MMI:
+        mmi_table[index] = handler;
+        break;
+    }
+}

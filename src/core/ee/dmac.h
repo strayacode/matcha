@@ -8,13 +8,13 @@ enum class DMAChannelType : int {
     VIF0 = 0,
     VIF1 = 1,
     GIF = 2,
-    IPU_FROM = 3,
-    IPU_TO = 4,
+    IPUFrom = 3,
+    IPUTo = 4,
     SIF0 = 5,
     SIF1 = 6,
     SIF2 = 7,
-    SPR_FROM = 8,
-    SPR_TO = 9,
+    SPRFrom = 8,
+    SPRTo = 9,
 };
 
 struct DMAChannel {

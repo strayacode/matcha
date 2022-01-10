@@ -3,8 +3,6 @@
 #include "common/log.h"
 #include "core/ee/ee_core.h"
 #include <core/memory/memory.h>
-#include <core/ee/cop0.h>
-#include <core/ee/cop1.h>
 #include <core/ee/intc.h>
 #include <core/scheduler.h>
 #include <core/gif/gif.h>
@@ -41,7 +39,6 @@ public:
     EECore ee_core;
     std::unique_ptr<IOPCore> iop_core;
     Memory memory;
-    EECOP1 ee_cop1;
     IOPCOP0 iop_cop0;
     IOPDMAC iop_dmac;
     EEINTC ee_intc;

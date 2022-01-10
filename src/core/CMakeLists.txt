@@ -8,6 +8,8 @@ add_library(core
     ee/cop0.h ee/cop0.cpp
     ee/cop1.h ee/cop1.cpp
     ee/disassembler.h ee/disassembler.cpp
+    ee/ee_interpreter.h ee/ee_interpreter.cpp
+    ee/interpreter_table.h ee/interpreter_table.cpp
 
     ee/intc.h ee/intc.cpp
     ee/timers.h ee/timers.cpp

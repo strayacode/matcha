@@ -2,10 +2,34 @@
 
 #include "common/types.h"
 #include "common/cpu_types.h"
+#include "common/int128.h"
 #include "core/ee/cpu_regs.h"
 #include "core/ee/cop0.h"
+#include "core/ee/cop1.h"
+#include "core/ee/interpreter_table.h"
 
 class System;
+
+enum class ExceptionType : int {
+    Interrupt = 0,
+    TLBModified = 1,
+    TLBRefillInstruction = 2,
+    TLBRefillStore = 3,
+    AddressErrorInstruction = 4,
+    AddressErrorStore = 5,
+    BusErrorInstruction = 6,
+    BusErrorStore = 7,
+    Syscall = 8,
+    Break = 9,
+    Reserved = 10,
+    CoprocessorUnusable = 11,
+    Overflow = 12,
+    Trap = 13,
+    Reset = 14,
+    NMI = 15,
+    PerformanceCounter = 16,
+    Debug = 18,
+};
 
 class EECore {
 public:
@@ -39,10 +63,25 @@ public:
         }
     }
 
+    u8 ReadByte(u32 addr);
+    u16 ReadHalf(u32 addr);
+    u32 ReadWord(u32 addr);
+    u64 ReadDouble(u32 addr);
+
+    void WriteByte(u32 addr, u8 data);
+    void WriteHalf(u32 addr, u16 data);
+    void WriteWord(u32 addr, u32 data);
+    void WriteDouble(u32 addr, u64 data);
+    void WriteQuad(u32 addr, u128 data);
+
+    void DoException(u32 target, ExceptionType exception);
+
     EERegs regs;
     System& system;
-    EECOP0 ee_cop0;
+    EECOP0 cop0;
+    EECOP1 cop1;
     bool branch_delay;
     bool branch;
     CPUInstruction inst;
+    InterpreterTable interpreter_table;
 };

@@ -4,7 +4,7 @@
 
 class IOPDMAC {
 public:
-    void reset();
+    void Reset();
 
     // dma priority/enable
     // used for the first 7 channels

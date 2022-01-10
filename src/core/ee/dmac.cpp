@@ -114,10 +114,10 @@ int DMAC::GetChannelIndex(u32 addr) {
         index = DMAChannelType::GIF;
         break;
     case 0xB0:
-        index = DMAChannelType::IPU_FROM;
+        index = DMAChannelType::IPUFrom;
         break;
     case 0xB4:
-        index = DMAChannelType::IPU_TO;
+        index = DMAChannelType::IPUTo;
         break;
     case 0xC0:
         index = DMAChannelType::SIF0;
@@ -129,10 +129,10 @@ int DMAC::GetChannelIndex(u32 addr) {
         index = DMAChannelType::SIF2;
         break;
     case 0xD0:
-        index = DMAChannelType::SPR_FROM;
+        index = DMAChannelType::SPRFrom;
         break;
     case 0xD4:
-        index = DMAChannelType::SPR_TO;
+        index = DMAChannelType::SPRTo;
         break;
     default:
         log_fatal("[DMAC] Random behaviour!");
@@ -227,8 +227,8 @@ void DMAC::CheckInterruptSignal() {
     }
 }
 
-// // note:
-// // dmac can transfer one quadword (16 bytes / 128 bits) per bus cycle
+// note:
+// dmac can transfer one quadword (16 bytes / 128 bits) per bus cycle
 void DMAC::Run(int cycles) {
     // don't run anything if the dmac is not enabled
     if (!(control & 0x1)) {
