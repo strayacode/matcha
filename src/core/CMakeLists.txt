@@ -4,7 +4,6 @@ add_library(core
     scheduler.h scheduler.cpp
 
     ee/ee_core.h ee/ee_core.cpp
-    ee/cpu_regs.h
     ee/cop0.h ee/cop0.cpp
     ee/cop1.h ee/cop1.cpp
     ee/disassembler.h ee/disassembler.cpp

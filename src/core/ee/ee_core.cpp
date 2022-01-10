@@ -5,16 +5,16 @@ EECore::EECore(System& system) : system(system) {}
 
 void EECore::Reset() {
     for (int i = 0; i < 512; i++) {
-        regs.gpr[i] = 0;
+        gpr[i] = 0;
     }
 
-    regs.pc = 0xBFC00000;
-    regs.next_pc = 0;
-    regs.hi = 0;
-    regs.lo = 0;
-    regs.hi1 = 0;
-    regs.lo1 = 0;
-    regs.sa = 0;
+    pc = 0xBFC00000;
+    next_pc = 0;
+    hi = 0;
+    lo = 0;
+    hi1 = 0;
+    lo1 = 0;
+    sa = 0;
     inst.data = 0;
     branch_delay = false;
     branch = false;
@@ -26,15 +26,15 @@ void EECore::Reset() {
 
 void EECore::Run(int cycles) {
     while (cycles--) {
-        inst = CPUInstruction{ReadWord(regs.pc)};
+        inst = CPUInstruction{ReadWord(pc)};
 
         interpreter_table.Execute(*this, inst);
 
-        regs.pc += 4;
+        pc += 4;
 
         if (branch_delay) {
             if (branch) {
-                regs.pc = regs.next_pc;
+                pc = next_pc;
                 branch_delay = false;
                 branch = false;
             } else {
@@ -94,15 +94,15 @@ void EECore::DoException(u32 target, ExceptionType exception) {
     } else {
         cause |= (code << 2);
         if (branch_delay) {
-            cop0.SetReg(14, regs.pc - 4);
+            cop0.SetReg(14, pc - 4);
             cause |= (1 << 31);
         } else {
-            cop0.SetReg(14, regs.pc);
+            cop0.SetReg(14, pc);
             cause &= ~(1 << 31);
         }
 
         status |= (1 << 1);
-        regs.pc = target - 4;
+        pc = target - 4;
     }
 
     cop0.SetReg(12, status);

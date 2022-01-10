@@ -33,3 +33,11 @@ void IOPInterpreter::slt() {
 void IOPInterpreter::sra() {
     SetReg(inst.r.rd, (s32)GetReg(inst.r.rt) >> inst.r.sa);
 }
+
+void IOPInterpreter::srl() {
+    SetReg(inst.r.rd, GetReg(inst.r.rt) >> inst.r.sa);
+}
+
+void IOPInterpreter::subu() {
+    SetReg(inst.r.rd, GetReg(inst.r.rs) - GetReg(inst.r.rt));
+}

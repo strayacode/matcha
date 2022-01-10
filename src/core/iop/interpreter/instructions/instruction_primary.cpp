@@ -79,3 +79,20 @@ void IOPInterpreter::j() {
 void IOPInterpreter::lbu() {
     SetReg(inst.i.rt, ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
 }
+
+void IOPInterpreter::sltiu() {
+    SetReg(inst.i.rt, GetReg(inst.i.rs) < (u32)sign_extend<s32, 16>(inst.i.imm));
+}
+
+void IOPInterpreter::lhu() {
+    u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+
+    SetReg(inst.i.rt, ReadHalf(addr));
+}
+
+void IOPInterpreter::blez() {
+    if (static_cast<s32>(GetReg(inst.i.rs)) <= 0) {
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+        branch_delay = true;
+    }
+}

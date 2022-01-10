@@ -61,6 +61,11 @@ private:
     void j();
     void lbu();
     void sra();
+    void sltiu();
+    void lhu();
+    void srl();
+    void subu();
+    void blez();
 
     CPUInstruction inst;
 

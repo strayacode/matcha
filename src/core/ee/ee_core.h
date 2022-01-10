@@ -3,7 +3,6 @@
 #include "common/types.h"
 #include "common/cpu_types.h"
 #include "common/int128.h"
-#include "core/ee/cpu_regs.h"
 #include "core/ee/cop0.h"
 #include "core/ee/cop1.h"
 #include "core/ee/interpreter_table.h"
@@ -41,25 +40,25 @@ public:
     // credit goes to DobieStation for the elegant way of accessing 128 bit registers
     template <typename T>
     T GetReg(int reg) {
-        return *(T*)&regs.gpr[reg * sizeof(u64) * 2];
+        return *(T*)&gpr[reg * sizeof(u64) * 2];
     }
 
     template <typename T>
     T GetReg(int reg, int offset) {
-        return *(T*)&regs.gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))];
+        return *(T*)&gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))];
     }
 
     template <typename T>
     void SetReg(int reg, T data) {
         if (reg) {
-            *(T*)&regs.gpr[reg * sizeof(u64) * 2] = data;
+            *(T*)&gpr[reg * sizeof(u64) * 2] = data;
         }
     }
 
     template <typename T>
     void SetReg(int reg, T data, int offset) {
         if (reg) {
-            *(T*)&regs.gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))] = data;
+            *(T*)&gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))] = data;
         }
     }
 
@@ -76,7 +75,15 @@ public:
 
     void DoException(u32 target, ExceptionType exception);
 
-    EERegs regs;
+    u8 gpr[32 * sizeof(u64) * 2];
+    u32 pc;
+    u32 next_pc;
+    u64 hi;
+    u64 lo;
+    u64 hi1;
+    u64 lo1;
+    u64 sa;
+
     System& system;
     EECOP0 cop0;
     EECOP1 cop1;

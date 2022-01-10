@@ -14,9 +14,11 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::jal, 3, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::beq, 4, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::bne, 5, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::blez, 6, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::addi, 8, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::addiu, 9, InstructionTable::Primary);
-    RegisterOpcode(&IOPInterpreter::slti, 10, InstructionTable::Primary);    
+    RegisterOpcode(&IOPInterpreter::slti, 10, InstructionTable::Primary);   
+    RegisterOpcode(&IOPInterpreter::sltiu, 11, InstructionTable::Primary); 
     RegisterOpcode(&IOPInterpreter::andi, 12, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::ori, 13, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lui, 15, InstructionTable::Primary);
@@ -25,14 +27,17 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::lh, 33, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lw, 35, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lbu, 36, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::lhu, 37, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sb, 40, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sw, 43, InstructionTable::Primary);
 
     // secondary instructions
     RegisterOpcode(&IOPInterpreter::sll, 0, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::srl, 2, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sra, 3, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jr, 8, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::addu, 33, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::subu, 35, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::andd, 36, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::orr, 37, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::slt, 42, InstructionTable::Secondary);

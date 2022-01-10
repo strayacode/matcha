@@ -29,23 +29,23 @@ void EEInterpreter::ctc2(EECore& cpu, CPUInstruction inst) {
 // MMI instructions
 void EEInterpreter::divu1(EECore& cpu, CPUInstruction inst) {
     if (cpu.GetReg<u32>(inst.r.rt)) {
-        cpu.regs.lo1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) / cpu.GetReg<u32>(inst.r.rt));
-        cpu.regs.hi1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) % cpu.GetReg<u32>(inst.r.rt));
+        cpu.lo1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) / cpu.GetReg<u32>(inst.r.rt));
+        cpu.hi1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) % cpu.GetReg<u32>(inst.r.rt));
     } else {
-        cpu.regs.lo1 = 0xFFFFFFFFFFFFFFFF;
-        cpu.regs.hi1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs));
+        cpu.lo1 = 0xFFFFFFFFFFFFFFFF;
+        cpu.hi1 = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs));
     }
 }
 
 void EEInterpreter::mflo1(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.lo1);
+    cpu.SetReg<u64>(inst.r.rd, cpu.lo1);
 }
 
 void EEInterpreter::mult1(EECore& cpu, CPUInstruction inst) {
     s64 result = cpu.GetReg<s32>(inst.r.rt) * cpu.GetReg<s32>(inst.r.rs);
-    cpu.regs.lo1 = sign_extend<s64, 32>(result & 0xFFFFFFFF);
-    cpu.regs.hi1 = sign_extend<s64, 32>(result >> 32);
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.lo1);
+    cpu.lo1 = sign_extend<s64, 32>(result & 0xFFFFFFFF);
+    cpu.hi1 = sign_extend<s64, 32>(result >> 32);
+    cpu.SetReg<u64>(inst.r.rd, cpu.lo1);
 }
 
 void EEInterpreter::por(EECore& cpu, CPUInstruction inst) {
@@ -73,7 +73,7 @@ void EEInterpreter::bne(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<u64>(inst.i.rs) != cpu.GetReg<u64>(inst.i.rt)) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -100,8 +100,8 @@ void EEInterpreter::sd(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::jal(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(31, cpu.regs.pc + 8);
-    cpu.regs.next_pc = ((cpu.regs.pc + 4) & 0xF0000000) + (inst.j.offset << 2);
+    cpu.SetReg<u64>(31, cpu.pc + 8);
+    cpu.next_pc = ((cpu.pc + 4) & 0xF0000000) + (inst.j.offset << 2);
     cpu.branch_delay = true;
 }
 
@@ -113,7 +113,7 @@ void EEInterpreter::beq(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<u64>(inst.i.rs) == cpu.GetReg<u64>(inst.i.rt)) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -122,10 +122,10 @@ void EEInterpreter::beql(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<u64>(inst.i.rs) == cpu.GetReg<u64>(inst.i.rt)) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
-        cpu.regs.pc += 4;
+        cpu.pc += 4;
     }
 }
 
@@ -137,10 +137,10 @@ void EEInterpreter::bnel(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<u64>(inst.i.rs) != cpu.GetReg<u64>(inst.i.rt)) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
-        cpu.regs.pc += 4;
+        cpu.pc += 4;
     }
 }
 
@@ -157,7 +157,7 @@ void EEInterpreter::ld(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::j(EECore& cpu, CPUInstruction inst) {
-    cpu.regs.next_pc = ((cpu.regs.pc + 4) & 0xF0000000) + (inst.j.offset << 2);
+    cpu.next_pc = ((cpu.pc + 4) & 0xF0000000) + (inst.j.offset << 2);
     cpu.branch_delay = true;
 }
 
@@ -173,7 +173,7 @@ void EEInterpreter::blez(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<s64>(inst.i.rs) <= 0) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -186,7 +186,7 @@ void EEInterpreter::bgtz(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<s64>(inst.i.rs) > 0) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -299,7 +299,7 @@ void EEInterpreter::bgez(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<s64>(inst.i.rs) >= 0) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -308,7 +308,7 @@ void EEInterpreter::bltz(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<s64>(inst.i.rs) < 0) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -317,10 +317,10 @@ void EEInterpreter::bltzl(EECore& cpu, CPUInstruction inst) {
     s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
 
     if (cpu.GetReg<s64>(inst.i.rs) < 0) {
-        cpu.regs.next_pc = cpu.regs.pc + offset + 4;
+        cpu.next_pc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
-        cpu.regs.pc += 4;
+        cpu.pc += 4;
     }
 }
 
@@ -331,7 +331,7 @@ void EEInterpreter::sll(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::jr(EECore& cpu, CPUInstruction inst) {
-    cpu.regs.next_pc = cpu.GetReg<u32>(inst.i.rs);
+    cpu.next_pc = cpu.GetReg<u32>(inst.i.rs);
     cpu.branch_delay = true;
 }
 
@@ -340,8 +340,8 @@ void EEInterpreter::sync(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::jalr(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.pc + 8);
-    cpu.regs.next_pc = cpu.GetReg<u32>(inst.r.rs);
+    cpu.SetReg<u64>(inst.r.rd, cpu.pc + 8);
+    cpu.next_pc = cpu.GetReg<u32>(inst.r.rs);
     cpu.branch_delay = true;
 }
 
@@ -355,18 +355,18 @@ void EEInterpreter::orr(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::mult(EECore& cpu, CPUInstruction inst) {
     s64 result = cpu.GetReg<s32>(inst.r.rs) * cpu.GetReg<s32>(inst.r.rt);
-    cpu.regs.lo = (s32)(result & 0xFFFFFFFF);
-    cpu.regs.hi = (s32)(result >> 32);
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.lo);
+    cpu.lo = (s32)(result & 0xFFFFFFFF);
+    cpu.hi = (s32)(result >> 32);
+    cpu.SetReg<u64>(inst.r.rd, cpu.lo);
 }
 
 void EEInterpreter::divu(EECore& cpu, CPUInstruction inst) {
     if (cpu.GetReg<u32>(inst.r.rt) == 0) {
-        cpu.regs.lo = 0xFFFFFFFFFFFFFFFF;
-        cpu.regs.hi = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs));
+        cpu.lo = 0xFFFFFFFFFFFFFFFF;
+        cpu.hi = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs));
     } else {
-        cpu.regs.lo = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) / cpu.GetReg<u32>(inst.r.rt));
-        cpu.regs.hi = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) % cpu.GetReg<u32>(inst.r.rt));
+        cpu.lo = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) / cpu.GetReg<u32>(inst.r.rt));
+        cpu.hi = sign_extend<s64, 32>(cpu.GetReg<u32>(inst.r.rs) % cpu.GetReg<u32>(inst.r.rt));
     }
 }
 
@@ -375,7 +375,7 @@ void EEInterpreter::break_exception(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::mflo(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.lo);
+    cpu.SetReg<u64>(inst.r.rd, cpu.lo);
 }
 
 void EEInterpreter::srl(EECore& cpu, CPUInstruction inst) {
@@ -418,18 +418,18 @@ void EEInterpreter::subu(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::div(EECore& cpu, CPUInstruction inst) {
     if ((cpu.GetReg<s32>(inst.r.rs) == (s32)0x80000000) && (cpu.GetReg<s32>(inst.r.rt) == -1)) {
-        cpu.regs.lo = 0x80000000;
-        cpu.regs.hi = 0;
+        cpu.lo = 0x80000000;
+        cpu.hi = 0;
     } else if (cpu.GetReg<s32>(inst.r.rt) == 0) {
         log_fatal("can't divide by 0");
     } else {
-        cpu.regs.lo = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.r.rs) / cpu.GetReg<s32>(inst.r.rt));
-        cpu.regs.hi = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.r.rs) % cpu.GetReg<s32>(inst.r.rt));
+        cpu.lo = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.r.rs) / cpu.GetReg<s32>(inst.r.rt));
+        cpu.hi = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.r.rs) % cpu.GetReg<s32>(inst.r.rt));
     }
 }
 
 void EEInterpreter::mfhi(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(inst.r.rd, cpu.regs.hi);
+    cpu.SetReg<u64>(inst.r.rd, cpu.hi);
 }
 
 void EEInterpreter::dsrav(EECore& cpu, CPUInstruction inst) {
@@ -512,13 +512,13 @@ void EEInterpreter::eret(EECore& cpu, CPUInstruction inst) {
     u32 errorepc = cpu.cop0.GetReg(30);
     u32 epc = cpu.cop0.GetReg(14);
 
-    log_warn("eret pc %08x", cpu.regs.pc);
+    log_warn("eret pc %08x", cpu.pc);
 
     if (erl) {
-        cpu.regs.pc = errorepc - 4;
+        cpu.pc = errorepc - 4;
         cpu.cop0.SetReg(12, status & ~(1 << 2));
     } else {
-        cpu.regs.pc = epc - 4;
+        cpu.pc = epc - 4;
         cpu.cop0.SetReg(12, status & ~(1 << 1));
     }
 }
@@ -563,5 +563,5 @@ void EEInterpreter::MMIInstruction(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
-    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.regs.pc).c_str(), inst.data, cpu.regs.pc, inst.i.opcode, inst.r.func, inst.i.rt);
+    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt);
 }
