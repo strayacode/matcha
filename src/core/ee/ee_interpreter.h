@@ -87,9 +87,6 @@ namespace EEInterpreter {
     void syscall_exception(EECore& cpu, CPUInstruction inst);
     void bltzl(EECore& cpu, CPUInstruction inst);
     void ei(EECore& cpu, CPUInstruction inst);
-    void COP1Instruction(EECore& cpu, CPUInstruction inst);
-    void COP2Instruction(EECore& cpu, CPUInstruction inst);
-    void RegImmInstruction(EECore& cpu, CPUInstruction inst);
-    void MMIInstruction(EECore& cpu, CPUInstruction inst);
     void unknown_instruction(EECore& cpu, CPUInstruction inst);
+    void stub_instruction(EECore& cpu, CPUInstruction inst);
 }

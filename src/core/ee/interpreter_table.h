@@ -19,6 +19,10 @@ private:
     std::array<InterpreterInstruction, 64> secondary_table;
     std::array<InterpreterInstruction, 32> regimm_table;
     std::array<InterpreterInstruction, 32> cop0_table;
+    std::array<InterpreterInstruction, 32> cop1_table;
+    std::array<InterpreterInstruction, 32> cop2_table;
     std::array<InterpreterInstruction, 64> tlb_table;
     std::array<InterpreterInstruction, 64> mmi_table;
+    std::array<InterpreterInstruction, 32> mmi1_table;
+    std::array<InterpreterInstruction, 32> mmi3_table;
 };

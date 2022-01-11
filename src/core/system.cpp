@@ -56,7 +56,7 @@ void System::RunFrame() {
         int bus_cycles = scheduler.CalculateBusCycles();
         int iop_cycles = scheduler.CalculateIOPCycles();
 
-        iop_core->Run(iop_cycles);
+        // iop_core->Run(iop_cycles);
         ee_core.Run(ee_cycles);
         timers.Run(bus_cycles);
         dmac.Run(bus_cycles);

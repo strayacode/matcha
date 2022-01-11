@@ -7,9 +7,14 @@ void InterpreterTable::Generate() {
     secondary_table.fill(&EEInterpreter::unknown_instruction);
     regimm_table.fill(&EEInterpreter::unknown_instruction);
     cop0_table.fill(&EEInterpreter::unknown_instruction);
+    cop1_table.fill(&EEInterpreter::stub_instruction);
+    cop2_table.fill(&EEInterpreter::stub_instruction);
     tlb_table.fill(&EEInterpreter::unknown_instruction);
     mmi_table.fill(&EEInterpreter::unknown_instruction);
+    mmi1_table.fill(&EEInterpreter::unknown_instruction);
+    mmi3_table.fill(&EEInterpreter::unknown_instruction);
 
+    // primary instructions
     RegisterOpcode(&EEInterpreter::j, 2, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::jal, 3, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::beq, 4, InstructionTable::Primary);
@@ -90,13 +95,26 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::mfc0, 0, InstructionTable::COP0);
     RegisterOpcode(&EEInterpreter::mtc0, 4, InstructionTable::COP0);
 
+    // cop2 instructions
+    RegisterOpcode(&EEInterpreter::cfc2, 2, InstructionTable::COP2);
+    RegisterOpcode(&EEInterpreter::ctc2, 6, InstructionTable::COP2);
+
     // tlb instructions
     RegisterOpcode(&EEInterpreter::tlbwi, 2, InstructionTable::TLB);
+    RegisterOpcode(&EEInterpreter::eret, 24, InstructionTable::TLB);
+    RegisterOpcode(&EEInterpreter::ei, 56, InstructionTable::TLB);
+    RegisterOpcode(&EEInterpreter::di, 57, InstructionTable::TLB);
 
     // mmi instructions
     RegisterOpcode(&EEInterpreter::mflo1, 18, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::mult1, 24, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::divu1, 27, InstructionTable::MMI);
+
+    // mmi1 instructions
+    RegisterOpcode(&EEInterpreter::padduw, 16, InstructionTable::MMI1);
+
+    // mmi3 instructions
+    RegisterOpcode(&EEInterpreter::por, 18, InstructionTable::MMI3);
 }
 
 InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, CPUInstruction inst) {
@@ -113,12 +131,17 @@ InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, 
 
         return cop0_table[inst.i.rs];
     case 17:
-        log_fatal("[InterpreterTable] handle cop1");
-        break;
+        return cop1_table[inst.i.rs];
     case 18:
-        log_fatal("[InterpreterTable] handle cop2");
-        break;
+        return cop2_table[inst.i.rs];
     case 28:
+        switch (inst.r.func) {
+        case 40:
+            return mmi1_table[inst.r.sa];
+        case 41:
+            return mmi3_table[inst.r.sa];
+        }
+
         return mmi_table[inst.r.func];
     }
 
@@ -144,11 +167,23 @@ void InterpreterTable::RegisterOpcode(InterpreterInstruction handler, int index,
     case InstructionTable::COP0:
         cop0_table[index] = handler;
         break;
+    case InstructionTable::COP1:
+        cop1_table[index] = handler;
+        break;
+    case InstructionTable::COP2:
+        cop2_table[index] = handler;
+        break;
     case InstructionTable::TLB:
         tlb_table[index] = handler;
         break;
     case InstructionTable::MMI:
         mmi_table[index] = handler;
+        break;
+    case InstructionTable::MMI1:
+        mmi1_table[index] = handler;
+        break;
+    case InstructionTable::MMI3:
+        mmi3_table[index] = handler;
         break;
     }
 }

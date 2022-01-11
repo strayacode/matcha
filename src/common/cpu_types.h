@@ -42,4 +42,6 @@ enum class InstructionTable {
     COP2,
     TLB,
     MMI,
+    MMI1,
+    MMI3,
 };

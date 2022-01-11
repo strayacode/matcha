@@ -535,33 +535,10 @@ void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {
     } 
 }
 
-void EEInterpreter::COP1Instruction(EECore& cpu, CPUInstruction inst) {
-    // TODO: handle fpu instructions
-}
-
-void EEInterpreter::COP2Instruction(EECore& cpu, CPUInstruction inst) {
-    // TODO: handle vu0 instructions
-    // switch (inst.i.rs) {
-    // case 2:
-    //     cfc2();
-    //     break;
-    // case 6:
-    //     ctc2();
-    //     break;
-    // default:
-    //     log_fatal("handle %d", inst.i.rs);
-    //     UndefinedInstruction();
-    // }
-}
-
-void EEInterpreter::RegImmInstruction(EECore& cpu, CPUInstruction inst) {
-
-}
-
-void EEInterpreter::MMIInstruction(EECore& cpu, CPUInstruction inst) {
-    
-}
-
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
     log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt);
+}
+
+void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
+    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt);
 }
