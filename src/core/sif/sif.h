@@ -11,12 +11,16 @@ public:
     void WriteIOPControl(u32 data);
     void WriteBD6(u32 data);
     void WriteMSCOM(u32 data);
+    void WriteSMCOM(u32 data);
     void SetMSFLAG(u32 data);
+    void SetSMFLAG(u32 data);
+    void ResetSMFLAG(u32 data);
 
     u32 ReadMSFLAG();
     u32 ReadMSCOM();
     u32 ReadSMFLAG();
     u32 ReadSMCOM();
+    u32 ReadControl();
 private:
     // no clue what this is for
     u32 control;

@@ -16,6 +16,7 @@
 #include <core/iop/cpu_core.h>
 #include <core/iop/interpreter/interpreter.h>
 #include "core/iop/dmac.h"
+#include "core/elf_loader.h"
 #include <memory>
 
 enum class CoreType {
@@ -31,7 +32,7 @@ public:
     void RunFrame();
     void VBlankStart();
     void VBlankFinish();
-    void FastBoot();
+    void SetGamePath(std::string path);
 
     Scheduler scheduler;
 
@@ -50,6 +51,7 @@ public:
     VIF vif1;
     IPU ipu;
     SIF sif;
+    ELFLoader elf_loader;
 
     std::function<void()> VBlankStartEvent;
     std::function<void()> VBlankFinishEvent;

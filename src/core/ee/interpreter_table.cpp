@@ -90,6 +90,7 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::bltz, 0, InstructionTable::RegImm);
     RegisterOpcode(&EEInterpreter::bgez, 1, InstructionTable::RegImm);
     RegisterOpcode(&EEInterpreter::bltzl, 2, InstructionTable::RegImm);
+    RegisterOpcode(&EEInterpreter::bgezl, 3, InstructionTable::RegImm);
 
     // cop0 instructions
     RegisterOpcode(&EEInterpreter::mfc0, 0, InstructionTable::COP0);

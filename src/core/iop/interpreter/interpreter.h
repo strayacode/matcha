@@ -92,6 +92,8 @@ private:
     void rfe();
     void mult();
     void nor();
+    void srlv();
+    void add();
 
     CPUInstruction inst;
 

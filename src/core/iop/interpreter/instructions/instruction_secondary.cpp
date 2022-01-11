@@ -106,3 +106,11 @@ void IOPInterpreter::mult() {
 void IOPInterpreter::nor() {
     SetReg(inst.r.rd, 0xFFFFFFFF ^ (GetReg(inst.r.rs) | GetReg(inst.r.rt)));
 }
+
+void IOPInterpreter::srlv() {
+    SetReg(inst.r.rd, GetReg(inst.r.rt) >> (GetReg(inst.r.rs) & 0x1F));
+}
+
+void IOPInterpreter::add() {
+    SetReg(inst.r.rd, GetReg(inst.r.rs) + GetReg(inst.r.rt));
+}

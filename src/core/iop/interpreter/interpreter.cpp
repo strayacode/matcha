@@ -39,6 +39,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::srl, 2, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sra, 3, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sllv, 4, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::srlv, 6, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jr, 8, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jalr, 9, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::syscall_exception, 12, InstructionTable::Secondary);
@@ -49,6 +50,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::mult, 24, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::multu, 25, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::divu, 27, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::add, 32, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::addu, 33, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::subu, 35, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::andd, 36, InstructionTable::Secondary);

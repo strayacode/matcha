@@ -43,9 +43,21 @@ void SIF::WriteMSCOM(u32 data) {
     mscom = data;
 }
 
+void SIF::WriteSMCOM(u32 data) {
+    smcom = data;
+}
+
 void SIF::SetMSFLAG(u32 data) {
     // log_warn("[SIF] write msflag %08x", data);
     msflag |= data;
+}
+
+void SIF::SetSMFLAG(u32 data) {
+    smflag |= data;
+}
+
+void SIF::ResetSMFLAG(u32 data) {
+    smflag &= ~data;
 }
 
 u32 SIF::ReadMSFLAG() {
@@ -66,4 +78,8 @@ u32 SIF::ReadSMFLAG() {
 u32 SIF::ReadSMCOM() {
     // log_warn("[SIF] read smcom %08x", smcom);
     return smcom;
+}
+
+u32 SIF::ReadControl() {
+    return control;
 }

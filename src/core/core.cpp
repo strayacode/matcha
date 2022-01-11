@@ -31,3 +31,7 @@ CoreState Core::GetState() {
 void Core::RunFrame() {
     system.RunFrame();
 }
+
+void Core::SetGamePath(std::string path) {
+    system.SetGamePath(path);
+}

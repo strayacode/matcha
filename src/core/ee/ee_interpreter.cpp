@@ -324,6 +324,17 @@ void EEInterpreter::bltzl(EECore& cpu, CPUInstruction inst) {
     }
 }
 
+void EEInterpreter::bgezl(EECore& cpu, CPUInstruction inst) {
+    s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
+
+    if (cpu.GetReg<s64>(inst.i.rs) >= 0) {
+        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.branch_delay = true;
+    } else {
+        cpu.pc += 4;
+    }
+}
+
 // secondary instructions
 void EEInterpreter::sll(EECore& cpu, CPUInstruction inst) {
     u32 result = cpu.GetReg<u32>(inst.r.rt) << inst.r.sa;
@@ -511,8 +522,6 @@ void EEInterpreter::eret(EECore& cpu, CPUInstruction inst) {
     bool erl = status & (1 << 2);
     u32 errorepc = cpu.cop0.GetReg(30);
     u32 epc = cpu.cop0.GetReg(14);
-
-    log_warn("eret pc %08x", cpu.pc);
 
     if (erl) {
         cpu.pc = errorepc - 4;

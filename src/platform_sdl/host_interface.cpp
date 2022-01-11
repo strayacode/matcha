@@ -44,6 +44,7 @@ bool HostInterface::Initialise() {
 
 void HostInterface::Run(std::string path) {
     core.Reset();
+    core.SetGamePath(path);
     core.SetState(CoreState::Running);
 
     while (true) {

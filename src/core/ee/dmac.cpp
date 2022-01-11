@@ -33,6 +33,10 @@ u32 DMAC::ReadChannel(u32 addr) {
     case 0x00:
         log_warn("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;
+    case 0x20:
+        return channels[index].quadword_count;
+    case 0x30:
+        return channels[index].tag_address;
     default:
         log_fatal("[DMAC] Handle %02x", addr & 0xFF);
     }
@@ -251,6 +255,9 @@ void DMAC::Transfer(int index) {
     switch (static_cast<DMAChannelType>(index)) {
     case DMAChannelType::SIF0:
         TransferSIF0();
+        break;
+    case DMAChannelType::SIF1:
+        // TODO: handle sif1 transfers
         break;
     default:
         log_fatal("handle %d", index);

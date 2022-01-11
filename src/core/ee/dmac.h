@@ -55,7 +55,6 @@ public:
 
     void EndTransfer(int index);
     
-private:
     int GetChannelIndex(u32 addr);
     void CheckInterruptSignal();
 

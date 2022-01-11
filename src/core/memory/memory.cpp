@@ -191,6 +191,8 @@ u32 Memory::EEReadWord(u32 addr) {
         }
 
         break;
+    case 0x1000F520:
+        return system->dmac.disabled_status;
     case 0x1F80141C:
         // what is this
         return 0;
@@ -317,6 +319,9 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F220:
         system->sif.SetMSFLAG(data);
         break;
+    case 0x1000F230:
+        system->sif.SetSMFLAG(data);
+        break;
     case 0x1000F240:
         system->sif.WriteEEControl(data);
         break;
@@ -337,6 +342,9 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F500:
     case 0x1000F510:
         // some undocumented stuff
+        break;
+    case 0x1000F590:
+        system->dmac.disabled_status = data;
         break;
     case 0x1000F430:
         if ((((data >> 16) & 0xFFF) == 0x21) && (((data >> 6) & 0xF) == 1) && (((mch_drd >> 7) & 1) == 0)) {
@@ -469,8 +477,14 @@ u16 Memory::IOPReadHalf(u32 addr) {
 
 u32 Memory::IOPReadWord(u32 addr) {
     switch (addr) {
+    case 0x1D000010:
+        return system->sif.ReadSMCOM();
     case 0x1D000020:
         return system->sif.ReadMSFLAG();
+    case 0x1D000030:
+        return system->sif.ReadSMFLAG();
+    case 0x1D000040:
+        return system->sif.ReadControl();
     case 0x1F80100C:
     case 0x1F801010:
     case 0x1F801400:
@@ -528,12 +542,18 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
     case 0x1F8014A4:
         break;
     default:
-        log_fatal("handle slow half write %08x = %04x", addr, data);
+        log_warn("handle slow half write %08x = %04x", addr, data);
     }
 }
 
 void Memory::IOPWriteWord(u32 addr, u32 data) {
     switch (addr) {
+    case 0x1D000010:
+        system->sif.WriteSMCOM(data);
+        break;
+    case 0x1D000030:
+        system->sif.SetSMFLAG(data);
+        break;
     case 0x1D000040:
         system->sif.WriteIOPControl(data);
         break;

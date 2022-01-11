@@ -18,6 +18,8 @@ public:
     void SetState(CoreState new_state);
     CoreState GetState();
     void RunFrame();
+    void SetGamePath(std::string path);
+    
 private:
     CoreState state = CoreState::Idle;
 

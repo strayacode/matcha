@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : ee_core(*this), memory(this), ee_intc(this), gif(this), gs(this), dmac(this) {
+System::System() : ee_core(*this), memory(this), ee_intc(this), gif(this), gs(this), dmac(this), elf_loader(*this) {
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
 }
@@ -69,4 +69,8 @@ void System::VBlankStart() {
 
 void System::VBlankFinish() {
     ee_intc.RequestInterrupt(Interrupt::VBlankFinish);
+}
+
+void System::SetGamePath(std::string path) {
+    elf_loader.SetPath(path);
 }
