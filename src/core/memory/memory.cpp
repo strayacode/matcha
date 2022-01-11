@@ -468,10 +468,11 @@ u32 Memory::IOPReadWord(u32 addr) {
     switch (addr) {
     case 0x1F801010:
     case 0x1F801450:
+    case 0x1F801578:
         // not sure what this is
         return 0;
     default:
-        log_fatal("handle slow word read %08x", addr);
+        log_fatal("[Memory] unhandled iop word read %08x", addr);
     }
 
     return 0;
@@ -534,6 +535,9 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F80141C:
     case 0x1F801420:
     case 0x1F802070:
+    case 0x1F801060:
+    case 0x1F801450:
+    case 0x1F801578:
         // not sure what this is
         break;
     case 0x1F8010F0:
@@ -543,7 +547,8 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
         system->iop_dmac.dpcr2 = data;
         break;
     default:
-        printf("[Memory] unhandled iop word write %08x = %08x\n", addr, data);
+        log_debug("%08x", system->iop_core->regs.pc);
+        log_fatal("[Memory] unhandled iop word write %08x = %08x", addr, data);
         break;
     }
 }

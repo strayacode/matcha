@@ -30,10 +30,6 @@ void EECore::Run(int cycles) {
 
         interpreter_table.Execute(*this, inst);
 
-        // if (pc >= 0x00100000 && pc < 0x00100010) {
-        //     log_fatal("pog time");
-        // }
-
         pc += 4;
 
         if (branch_delay) {

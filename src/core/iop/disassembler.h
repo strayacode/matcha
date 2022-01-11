@@ -10,3 +10,4 @@
 #include <common/log.h>
 
 std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc);
+std::string GetRegisterName(int reg);

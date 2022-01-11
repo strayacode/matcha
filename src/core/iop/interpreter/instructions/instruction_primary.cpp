@@ -96,3 +96,16 @@ void IOPInterpreter::blez() {
         branch_delay = true;
     }
 }
+
+void IOPInterpreter::bgtz() {
+    if (static_cast<s32>(GetReg(inst.i.rs)) > 0) {
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+        branch_delay = true;
+    }
+}
+
+void IOPInterpreter::sh() {
+    u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+    
+    WriteHalf(addr, GetReg(inst.i.rt));
+}

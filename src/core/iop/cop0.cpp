@@ -35,7 +35,7 @@ void IOPCOP0::Reset() {
 
 u32 IOPCOP0::GetReg(int reg) {
     switch (reg) {
-    case 15:
+    case 12: case 15:
         return cpr[reg];
     default:
         log_fatal("handle cop0 read %d", reg);

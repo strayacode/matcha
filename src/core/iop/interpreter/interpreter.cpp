@@ -15,6 +15,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::beq, 4, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::bne, 5, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::blez, 6, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::bgtz, 7, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::addi, 8, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::addiu, 9, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::slti, 10, InstructionTable::Primary);   
@@ -29,6 +30,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::lbu, 36, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lhu, 37, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sb, 40, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::sh, 41, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sw, 43, InstructionTable::Primary);
 
     // secondary instructions
@@ -36,6 +38,9 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::srl, 2, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sra, 3, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jr, 8, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::jalr, 9, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::mflo, 18, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::divu, 27, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::addu, 33, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::subu, 35, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::andd, 36, InstructionTable::Secondary);
@@ -61,6 +66,15 @@ void IOPInterpreter::Reset() {
 void IOPInterpreter::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(regs.pc)};
+
+        log_debug("%08x %s", regs.pc, IOPDisassembleInstruction(inst, regs.pc).c_str());
+
+        if (regs.pc == 0x00000064) {
+            for (int i = 0; i < 32; i++) {
+                log_warn("%s = %08x", GetRegisterName(i).c_str(), regs.gpr[i]);
+            }
+            log_warn("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.i.opcode, inst.r.func, inst.i.rt);
+        }
 
         (this->*primary_table[inst.i.opcode])();
 

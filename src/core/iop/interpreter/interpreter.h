@@ -66,6 +66,11 @@ private:
     void srl();
     void subu();
     void blez();
+    void bgtz();
+    void divu();
+    void mflo();
+    void sh();
+    void jalr();
 
     CPUInstruction inst;
 

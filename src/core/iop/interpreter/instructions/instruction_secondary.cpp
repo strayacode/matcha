@@ -41,3 +41,26 @@ void IOPInterpreter::srl() {
 void IOPInterpreter::subu() {
     SetReg(inst.r.rd, GetReg(inst.r.rs) - GetReg(inst.r.rt));
 }
+
+void IOPInterpreter::divu() {
+    if (GetReg(inst.i.rt) == 0) {
+        regs.lo = 0xFFFFFFFF;
+        regs.hi = GetReg(inst.i.rs);
+    } else {
+        regs.lo = GetReg(inst.i.rs) / GetReg(inst.i.rt);
+        regs.hi = GetReg(inst.i.rs) % GetReg(inst.i.rt);
+    }
+}
+
+void IOPInterpreter::mflo() {
+    SetReg(inst.r.rd, regs.lo);
+}
+
+void IOPInterpreter::jalr() {
+    u32 addr = GetReg(inst.r.rs);
+
+    SetReg(inst.r.rd, regs.pc + 8);
+    
+    regs.next_pc = addr;
+    branch_delay = true;
+}
