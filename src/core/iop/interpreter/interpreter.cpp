@@ -10,6 +10,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
 
     // primary instructions
     RegisterOpcode(&IOPInterpreter::SecondaryInstruction, 0, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::bcondz, 1, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::j, 2, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::jal, 3, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::beq, 4, InstructionTable::Primary);
@@ -37,14 +38,23 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::sll, 0, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::srl, 2, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sra, 3, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::sllv, 4, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jr, 8, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jalr, 9, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::syscall_exception, 12, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::mfhi, 16, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::mthi, 17, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::mflo, 18, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::mtlo, 19, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::mult, 24, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::multu, 25, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::divu, 27, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::addu, 33, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::subu, 35, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::andd, 36, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::orr, 37, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::xorr, 38, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::nor, 39, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::slt, 42, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sltu, 43, InstructionTable::Secondary);
 }
@@ -63,6 +73,7 @@ void IOPInterpreter::Reset() {
     branch = false;
 
     cop0.Reset();
+    interrupt_controller.Reset();
 }
 
 void IOPInterpreter::Run(int cycles) {
@@ -135,7 +146,46 @@ void IOPInterpreter::COP0Instruction() {
     case 4:
         mtc0();
         break;
+    case 16:
+        rfe();
+        break;
     default:
         log_fatal("handle %d", format);
     }
+}
+
+void IOPInterpreter::DoException(ExceptionType exception) {
+    // store the address where the exception took place
+    // in cop0 epc
+    // if we are currently in a branch delay slot with a syscall
+    // instruction then we save the address of the branch instruction
+    // (pc - 4)
+    if (branch_delay) {
+        cop0.SetReg(14, regs.pc - 4);
+    } else {
+        cop0.SetReg(14, regs.pc);
+    }
+
+    // record the cause of the exception (in this case a syscall)
+    cop0.SetReg(13, static_cast<u8>(exception) << 2);
+
+    u32 exception_base = 0;
+
+    if (cop0.GetReg(12) & (1 << 22)) {
+        // exception base address in rom/kseg1
+        exception_base = 0xBFC00180;
+    } else {
+        // exception base address in rom/kseg0
+        exception_base = 0x80000080;
+    }
+
+    // shift the interrupt and kernel/user mode bit 
+    // by 2 bits to the left to act as a stack with maximum of 3 entries
+    u8 stack = cop0.gpr[12] & 0x3F;
+    cop0.gpr[12] &= ~0x3F;
+    cop0.gpr[12] |= (stack << 2) & 0x3F;
+
+    // since we increment by 4 after each instruction we need to account for that
+    // so that we can execute at the exception base on the next instruction
+    regs.pc = exception_base - 4;
 }

@@ -13,6 +13,9 @@ public:
     // dma priority/enable 2
     // used for the remaining channels
     u32 dpcr2;
+
+    u32 dicr;
+    u32 dicr2;
 private:
 
 };

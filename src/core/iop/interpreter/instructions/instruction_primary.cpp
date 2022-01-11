@@ -125,3 +125,18 @@ void IOPInterpreter::sh() {
         WriteHalf(addr, GetReg(inst.i.rt));
     }
 }
+
+void IOPInterpreter::bcondz() {
+    bool link = (inst.i.rt & 0x1E) == 0x10;
+    bool ge = inst.i.rt & 0x1;
+    bool branch = (static_cast<s32>(GetReg(inst.i.rs)) < 0) ^ ge;
+
+    if (branch) {
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+        branch_delay = true;
+    }
+
+    if (link) {
+        SetReg(31, regs.pc + 8);
+    }
+}

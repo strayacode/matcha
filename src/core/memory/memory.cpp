@@ -315,7 +315,7 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
         system->sif.WriteMSCOM(data);
         break;
     case 0x1000F220:
-        system->sif.WriteMSFLAG(data);
+        system->sif.SetMSFLAG(data);
         break;
     case 0x1000F240:
         system->sif.WriteEEControl(data);
@@ -448,6 +448,9 @@ T Memory::IOPRead(VAddr vaddr) {
 
 u8 Memory::IOPReadByte(u32 addr) {
     switch (addr) {
+    case 0x1F402005:
+        // cdvd n command status
+        return 0;
     default:
         log_fatal("handle slow byte read %08x", addr);
     }
@@ -466,13 +469,23 @@ u16 Memory::IOPReadHalf(u32 addr) {
 
 u32 Memory::IOPReadWord(u32 addr) {
     switch (addr) {
+    case 0x1D000020:
+        return system->sif.ReadMSFLAG();
+    case 0x1F80100C:
     case 0x1F801010:
+    case 0x1F801400:
     case 0x1F801450:
     case 0x1F801578:
         // not sure what this is
         return 0;
+    case 0x1F801070:
+        return system->iop_core->interrupt_controller.ReadRegister(0);
+    case 0x1F801074:
+        return system->iop_core->interrupt_controller.ReadRegister(4);
+    case 0x1F801078:
+        return system->iop_core->interrupt_controller.ReadRegister(8);
     default:
-        log_fatal("[Memory] unhandled iop word read %08x", addr);
+        log_warn("[Memory] unhandled iop word read %08x", addr);
     }
 
     return 0;
@@ -510,7 +523,10 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
 }
 
 void Memory::IOPWriteHalf(u32 addr, u16 data) {
+    // TODO: handle iop timers
     switch (addr) {
+    case 0x1F8014A4:
+        break;
     default:
         log_fatal("handle slow half write %08x = %04x", addr, data);
     }
@@ -518,6 +534,9 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
 
 void Memory::IOPWriteWord(u32 addr, u32 data) {
     switch (addr) {
+    case 0x1D000040:
+        system->sif.WriteIOPControl(data);
+        break;
     case 0x1F801004:
     case 0x1F80100C:
     case 0x1F801010:
@@ -540,15 +559,41 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F801578:
         // not sure what this is
         break;
+    case 0x1F801074:
+        system->iop_core->interrupt_controller.WriteRegister(4, data);
+        break;
+    case 0x1F801078:
+        system->iop_core->interrupt_controller.WriteRegister(8, data);
+        break;
+    case 0x1F801080:
+    case 0x1F801084:
+    case 0x1F801088:
+        break;
+    case 0x1F801090:
+    case 0x1F801094:
+    case 0x1F801098:
+        break;
+    case 0x1F8010A0:
+    case 0x1F8010A4:
+    case 0x1F8010A8:
+        break;
+    // TODO: handle iop dmas later
     case 0x1F8010F0:
         system->iop_dmac.dpcr = data;
+        break;
+    case 0x1F8010F4:
+        system->iop_dmac.dicr = data;
         break;
     case 0x1F801570:
         system->iop_dmac.dpcr2 = data;
         break;
+    case 0x1F801574:
+        system->iop_dmac.dicr2 = data;
+        break;
+    case 0x1F8015F0:
+        break;
     default:
-        log_debug("%08x", system->iop_core->regs.pc);
-        log_fatal("[Memory] unhandled iop word write %08x = %08x", addr, data);
+        log_warn("[Memory] unhandled iop word write %08x = %08x", addr, data);
         break;
     }
 }

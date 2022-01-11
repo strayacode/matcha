@@ -23,6 +23,7 @@ add_library(core
     iop/interpreter/instructions/instruction_secondary.cpp
     iop/interpreter/instructions/instruction_primary.cpp
     iop/dmac.h iop/dmac.cpp
+    iop/interrupt_controller.h iop/interrupt_controller.cpp
 
     memory/memory.h memory/memory.cpp
 

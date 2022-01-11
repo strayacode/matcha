@@ -17,38 +17,53 @@ void SIF::WriteEEControl(u32 data) {
     }
 }
 
+void SIF::WriteIOPControl(u32 data) {
+    // not sure how this works tbh. figure out later
+    u8 value = data & 0xF0;
+
+    if (data & 0xA0)
+    {
+        control &= ~0xF000;
+        control |= 0x2000;
+    }
+
+    if (control & value)
+        control &= ~value;
+    else
+        control |= value;
+}
+
 void SIF::WriteBD6(u32 data) {
-    log_warn("[SIF] write bd6 %08x", data);
+    // log_warn("[SIF] write bd6 %08x", data);
     bd6 = data;
 }
 
 void SIF::WriteMSCOM(u32 data) {
-    log_warn("[SIF] write mscom %08x", data);
+    // log_warn("[SIF] write mscom %08x", data);
     mscom = data;
 }
 
-void SIF::WriteMSFLAG(u32 data) {
-    log_warn("[SIF] write msflag %08x", data);
-    msflag = data;
+void SIF::SetMSFLAG(u32 data) {
+    // log_warn("[SIF] write msflag %08x", data);
+    msflag |= data;
 }
 
 u32 SIF::ReadMSFLAG() {
-    log_warn("[SIF] read msflag %08x", msflag);
+    // log_warn("[SIF] read msflag %08x", msflag);
     return msflag;
 }
 
 u32 SIF::ReadMSCOM() {
-    log_warn("[SIF] read mscom %08x", mscom);
+    // log_warn("[SIF] read mscom %08x", mscom);
     return mscom;
 }
 
 u32 SIF::ReadSMFLAG() {
-    log_warn("[SIF] read smflag %08x", 0x10000);
-    // fake the iop response for fastbooting isos and elfs
-    return 0x10000;
+    // log_warn("[SIF] read smflag %08x", smflag);
+    return smflag;
 }
 
 u32 SIF::ReadSMCOM() {
-    log_warn("[SIF] read smcom %08x", smcom);
+    // log_warn("[SIF] read smcom %08x", smcom);
     return smcom;
 }

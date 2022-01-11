@@ -4,6 +4,7 @@
 #include "common/log.h"
 #include "core/iop/cpu_regs.h"
 #include "core/iop/cop0.h"
+#include "core/iop/interrupt_controller.h"
 
 class System;
 
@@ -24,8 +25,12 @@ public:
         }
     }
 
+    void EnableHardwareInterrupt();
+    void DisableHardwareInterrupt();
+
     IOPRegs regs;
     IOPCOP0 cop0;
     System* system;
+    IOPInterruptController interrupt_controller;
     // FILE* fp = fopen("../../log-stuff/iop1.log", "w");
 };

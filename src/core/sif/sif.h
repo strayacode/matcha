@@ -8,9 +8,10 @@ public:
     void Reset();
 
     void WriteEEControl(u32 data);
+    void WriteIOPControl(u32 data);
     void WriteBD6(u32 data);
     void WriteMSCOM(u32 data);
-    void WriteMSFLAG(u32 data);
+    void SetMSFLAG(u32 data);
 
     u32 ReadMSFLAG();
     u32 ReadMSCOM();
