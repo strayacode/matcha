@@ -27,16 +27,16 @@ enum COP0Regs {
 
 void IOPCOP0::Reset() {
     for (int i = 0; i < 32; i++) {
-        cpr[i] = 0;
+        gpr[i] = 0;
     }
 
-    cpr[PRId] = 0x1F;
+    gpr[PRId] = 0x1F;
 }
 
 u32 IOPCOP0::GetReg(int reg) {
     switch (reg) {
     case 12: case 15:
-        return cpr[reg];
+        return gpr[reg];
     default:
         log_fatal("handle cop0 read %d", reg);
     }
@@ -45,7 +45,7 @@ u32 IOPCOP0::GetReg(int reg) {
 void IOPCOP0::SetReg(int reg, u32 data) {
     switch (reg) {
     case 12:
-        cpr[reg] = data;
+        gpr[reg] = data;
         break;
     default:
         printf("[IOPCOP0] handle cop0 write %d = %08x\n", reg, data);

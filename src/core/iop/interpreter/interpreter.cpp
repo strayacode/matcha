@@ -61,20 +61,13 @@ void IOPInterpreter::Reset() {
     inst.data = 0;
     branch_delay = false;
     branch = false;
+
+    cop0.Reset();
 }
 
 void IOPInterpreter::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(regs.pc)};
-
-        log_debug("%08x %s", regs.pc, IOPDisassembleInstruction(inst, regs.pc).c_str());
-
-        if (regs.pc == 0x00000064) {
-            for (int i = 0; i < 32; i++) {
-                log_warn("%s = %08x", GetRegisterName(i).c_str(), regs.gpr[i]);
-            }
-            log_warn("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.i.opcode, inst.r.func, inst.i.rt);
-        }
 
         (this->*primary_table[inst.i.opcode])();
 

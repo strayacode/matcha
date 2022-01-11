@@ -485,7 +485,7 @@ template <typename T>
 void Memory::IOPWrite(VAddr vaddr, T data) {
     u32 addr = vaddr & 0x1FFFFFFF;
     u8* page = iop_table[PageIndex(addr)];
-    
+
     if (page) {
         memcpy(page + PageOffset(addr), &data, sizeof(T));
     } else {

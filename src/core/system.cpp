@@ -23,7 +23,6 @@ void System::Reset() {
     ee_core.Reset();
     iop_core->Reset();
     memory.Reset();
-    iop_cop0.Reset();
     iop_dmac.Reset();
     ee_intc.Reset();
     gif.Reset();

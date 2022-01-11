@@ -1,7 +1,9 @@
 #pragma once
 
-#include <common/types.h>
-#include <core/iop/cpu_regs.h>
+#include "common/types.h"
+#include "common/log.h"
+#include "core/iop/cpu_regs.h"
+#include "core/iop/cop0.h"
 
 class System;
 
@@ -23,5 +25,7 @@ public:
     }
 
     IOPRegs regs;
+    IOPCOP0 cop0;
     System* system;
+    // FILE* fp = fopen("../../log-stuff/iop1.log", "w");
 };

@@ -15,7 +15,6 @@
 #include <core/sif/sif.h>
 #include <core/iop/cpu_core.h>
 #include <core/iop/interpreter/interpreter.h>
-#include <core/iop/cop0.h>
 #include "core/iop/dmac.h"
 #include <memory>
 
@@ -39,7 +38,6 @@ public:
     EECore ee_core;
     std::unique_ptr<IOPCore> iop_core;
     Memory memory;
-    IOPCOP0 iop_cop0;
     IOPDMAC iop_dmac;
     EEINTC ee_intc;
     GIF gif;

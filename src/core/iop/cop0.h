@@ -10,5 +10,5 @@ public:
     u32 GetReg(int reg);
     void SetReg(int reg, u32 data);
 
-    u32 cpr[32];
+    u32 gpr[32];
 };

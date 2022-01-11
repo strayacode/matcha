@@ -32,7 +32,9 @@ void IOPInterpreter::beq() {
 }
 
 void IOPInterpreter::lw() {
-    SetReg(inst.i.rt, ReadWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        SetReg(inst.i.rt, ReadWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+    }
 }
 
 void IOPInterpreter::andi() {
@@ -48,15 +50,21 @@ void IOPInterpreter::addi() {
 }
 
 void IOPInterpreter::sw() {
-    WriteWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        WriteWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+    }
 }
 
 void IOPInterpreter::sb() {
-    WriteByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        WriteByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+    }
 }
 
 void IOPInterpreter::lb() {
-    SetReg(inst.i.rt, sign_extend<s32, 8>(ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm))));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        SetReg(inst.i.rt, sign_extend<s32, 8>(ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm))));
+    }
 }
 
 void IOPInterpreter::jal() {
@@ -66,9 +74,11 @@ void IOPInterpreter::jal() {
 }
 
 void IOPInterpreter::lh() {
-    u32 addr = regs.gpr[inst.i.rs] + sign_extend<s32, 16>(inst.i.imm);
+    if (!(cop0.gpr[12] & 0x10000)) {
+        u32 addr = regs.gpr[inst.i.rs] + sign_extend<s32, 16>(inst.i.imm);
 
-    SetReg(inst.i.rt, sign_extend<s32, 16>(ReadHalf(addr)));
+        SetReg(inst.i.rt, sign_extend<s32, 16>(ReadHalf(addr)));
+    }
 }
 
 void IOPInterpreter::j() {
@@ -77,7 +87,9 @@ void IOPInterpreter::j() {
 }
 
 void IOPInterpreter::lbu() {
-    SetReg(inst.i.rt, ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        SetReg(inst.i.rt, ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+    }
 }
 
 void IOPInterpreter::sltiu() {
@@ -85,9 +97,11 @@ void IOPInterpreter::sltiu() {
 }
 
 void IOPInterpreter::lhu() {
-    u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+    if (!(cop0.gpr[12] & 0x10000)) {
+        u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
 
-    SetReg(inst.i.rt, ReadHalf(addr));
+        SetReg(inst.i.rt, ReadHalf(addr));
+    }
 }
 
 void IOPInterpreter::blez() {
@@ -105,7 +119,9 @@ void IOPInterpreter::bgtz() {
 }
 
 void IOPInterpreter::sh() {
-    u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
-    
-    WriteHalf(addr, GetReg(inst.i.rt));
+    if (!(cop0.gpr[12] & 0x10000)) {
+        u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+        
+        WriteHalf(addr, GetReg(inst.i.rt));
+    }
 }
