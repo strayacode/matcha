@@ -370,6 +370,11 @@ void Memory::EEWriteDouble(u32 addr, u64 data) {
         return;
     }
 
+    if (in_range(0x10000000, 0x10002000, addr)) {
+        system->timers.WriteChannel(addr, data);
+        return;
+    }
+
     switch (addr) {
     case 0x12000010:
         system->gs.WriteSMODE1(data);

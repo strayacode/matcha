@@ -1,4 +1,7 @@
-#include <core/ee/timers.h>
+#include "core/ee/timers.h"
+#include "core/system.h"
+
+Timers::Timers(System& system) : system(system) {}
 
 void Timers::Reset() {
     for (int i = 0; i < 4; i++) {
@@ -20,6 +23,15 @@ void Timers::Run(int cycles) {
                 case 0:
                     // since timers are ran at bus clock speed we can just increment by 1
                     Tick(i, 1);
+                    break;
+                case 2:
+                    // bus speed / 16
+                    channels[i].ticks++;
+
+                    if (channels[i].ticks >= 16) {
+                        Tick(i, 1);
+                        channels[i].ticks = 0;
+                    }
                     break;
                 case 3:
                     channels[i].ticks++;
@@ -115,7 +127,25 @@ void Timers::Tick(int index, int ticks) {
 
     if (channels[index].counter > 0xFFFF) {
         if (channels[index].control & (1 << 9)) {
-            log_fatal("handle timer interrupt with overflow");
+            channels[index].counter = 0;
+
+            // set the overflow interrupt flag and request 
+            channels[index].control |= (1 << 11);
+
+            switch (index) {
+            case 0:
+                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer0);
+                break;
+            case 1:
+                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer1);
+                break;
+            case 2:
+                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer2);
+                break;
+            case 3:
+                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer3);
+                break;
+            }
         }
     }
 }

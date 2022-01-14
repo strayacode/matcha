@@ -80,6 +80,7 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::slt, 42, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::sltu, 43, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::daddu, 45, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::dsubu, 47, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::dsll, 56, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::dsrl, 58, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::dsll32, 60, InstructionTable::Secondary);

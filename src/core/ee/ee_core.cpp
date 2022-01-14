@@ -47,6 +47,7 @@ void EECore::Run(int cycles) {
         }
 
         cop0.CountUp();
+        CheckInterrupts();
     }
 }
 
@@ -111,4 +112,39 @@ void EECore::DoException(u32 target, ExceptionType exception) {
 
     cop0.SetReg(12, status);
     cop0.SetReg(13, cause);
+}
+
+void EECore::SendInterruptSignal(int signal, bool value) {
+    cop0.gpr[13] |= (1 << (10 + signal));
+}
+
+void EECore::CheckInterrupts() {
+    if (InterruptsEnabled()) {
+        bool int0_enable = (cop0.gpr[12] >> 10) & 0x1;
+        bool int0_pending = (cop0.gpr[13] >> 10) & 0x1;
+        
+        if (int0_enable && int0_pending) {
+            DoException(0x80000200, ExceptionType::Interrupt);
+            return;
+        }
+
+        bool int1_enable = (cop0.gpr[12] >> 11) & 0x1;
+        bool int1_pending = (cop0.gpr[13] >> 11) & 0x1;
+
+        if (int1_enable && int1_pending) {
+            log_fatal("handle");
+            return;
+        }
+
+        // TODO: handle cop0 compare interrupts
+    }
+}
+
+bool EECore::InterruptsEnabled() {
+    bool ie = cop0.gpr[12] & 0x1;
+    bool eie = (cop0.gpr[12] >> 16) & 0x1;
+    bool exl = (cop0.gpr[12] >> 1) & 0x1;
+    bool erl = (cop0.gpr[12] >> 2) & 0x1;
+
+    return ie && eie && !exl && !erl;
 }

@@ -1,4 +1,5 @@
-#include <core/ee/intc.h>
+#include "core/ee/intc.h"
+#include "core/system.h"
 
 EEINTC::EEINTC(System* system) : system(system) {
 
@@ -39,12 +40,10 @@ void EEINTC::WriteStat(u16 data) {
 
 // when stat & mask is true, an int0 signal is assert into Cause.10. When Status.10 is true, an interrupt occurs and the ee jumps to 0x80000200 
 void EEINTC::CheckInterruptSignal() {
-    if (stat & mask) {
-        log_fatal("handle int0 signal");
-    }
+    system->ee_core.SendInterruptSignal(0, stat & mask);
 }
 
-void EEINTC::RequestInterrupt(Interrupt interrupt) {
+void EEINTC::RequestInterrupt(EEInterruptSource interrupt) {
     stat |= (1 << static_cast<int>(interrupt));
     CheckInterruptSignal();
 }

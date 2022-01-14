@@ -4,7 +4,7 @@
 #include <common/types.h>
 #include <common/log.h>
 
-enum class Interrupt : int {
+enum class EEInterruptSource : int {
     GS = 0,
     SBUS = 1,
     VBlankStart = 2,
@@ -40,7 +40,7 @@ public:
 
     void CheckInterruptSignal();
 
-    void RequestInterrupt(Interrupt interrupt);
+    void RequestInterrupt(EEInterruptSource interrupt);
 private:
     u16 mask;
     u16 stat;

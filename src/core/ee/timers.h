@@ -1,7 +1,7 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include "common/types.h"
+#include "common/log.h"
 
 struct TimerChannel {
     u32 counter;
@@ -11,8 +11,12 @@ struct TimerChannel {
     int ticks;
 };
 
+class System;
+
 class Timers {
 public:
+    Timers(System& system);
+
     void Reset();
 
     void WriteChannel(u32 addr, u32 data);
@@ -28,4 +32,6 @@ public:
     void Run(int cycles);
 private:
     TimerChannel channels[4];
+
+    System& system;
 };

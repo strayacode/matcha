@@ -12,5 +12,5 @@ public:
 
     void CountUp();
 
-    u32 cpr[32];
+    u32 gpr[32];
 };

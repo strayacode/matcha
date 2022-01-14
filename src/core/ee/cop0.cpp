@@ -27,16 +27,16 @@ enum COP0Regs {
 
 void EECOP0::Reset() {
     for (int i = 0; i < 32; i++) {
-        cpr[i] = 0;
+        gpr[i] = 0;
     }
 
-    cpr[PRId] = 0x2E20;
+    gpr[PRId] = 0x2E20;
 }
 
 u32 EECOP0::GetReg(int reg) {
     switch (reg) {
     case 9: case 12: case 13: case 14: case 15: case 30:
-        return cpr[reg];
+        return gpr[reg];
     default:
         log_fatal("handle cop0 read %d", reg);
     }
@@ -46,17 +46,17 @@ void EECOP0::SetReg(int reg, u32 data) {
     switch (reg) {
     case 0: case 2: case 3: case 5: case 6: 
     case 9: case 10: case 12: case 13: case 16:
-        cpr[reg] = data;
+        gpr[reg] = data;
         break;
     case 11:
         // writing to compare clears timer interrupt pending bit
         // in cause
-        cpr[Cause] &= ~(1 << 15);
-        cpr[reg] = data;
+        gpr[Cause] &= ~(1 << 15);
+        gpr[reg] = data;
         break;
     case 14:
-        log_warn("[COP0] write EPC %08x", data);
-        cpr[EPC] = data;
+        // log_warn("[COP0] write EPC %08x", data);
+        gpr[EPC] = data;
         break;
     default:
         log_fatal("handle cop0 write %d = %08x", reg, data);
@@ -64,9 +64,9 @@ void EECOP0::SetReg(int reg, u32 data) {
 }
 
 void EECOP0::CountUp() {
-    cpr[Count]++;
+    gpr[Count]++;
 
-    if (cpr[Count] == cpr[Compare]) {
-        cpr[Cause] |= (1 << 15);
+    if (gpr[Count] == gpr[Compare]) {
+        gpr[Cause] |= (1 << 15);
     }
 }

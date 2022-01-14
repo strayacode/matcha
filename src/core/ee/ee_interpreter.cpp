@@ -357,7 +357,7 @@ void EEInterpreter::jalr(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::daddu(EECore& cpu, CPUInstruction inst) {
-    cpu.SetReg<u64>(inst.r.rd, cpu.GetReg<u64>(inst.r.rs) + cpu.GetReg<u64>(inst.r.rt));
+    cpu.SetReg<u64>(inst.r.rd, cpu.GetReg<s64>(inst.r.rs) + cpu.GetReg<s64>(inst.r.rt));
 }
 
 void EEInterpreter::orr(EECore& cpu, CPUInstruction inst) {
@@ -498,6 +498,10 @@ void EEInterpreter::dsrl32(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     cpu.DoException(0x80000180, ExceptionType::Syscall);
+}
+
+void EEInterpreter::dsubu(EECore& cpu, CPUInstruction inst) {
+    cpu.SetReg<u64>(inst.r.rd, cpu.GetReg<s64>(inst.r.rs) - cpu.GetReg<s64>(inst.r.rt));
 }
 
 // tlb instructions
