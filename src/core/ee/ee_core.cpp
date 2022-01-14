@@ -28,10 +28,6 @@ void EECore::Reset() {
 
 void EECore::Run(int cycles) {
     while (cycles--) {
-        if (pc == 0x82000) {
-            system.elf_loader.Load();
-        }
-
         inst = CPUInstruction{ReadWord(pc)};
 
         interpreter_table.Execute(*this, inst);

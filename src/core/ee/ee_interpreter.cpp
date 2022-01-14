@@ -2,6 +2,7 @@
 #include "common/arithmetic.h"
 #include "core/ee/ee_interpreter.h"
 #include "core/ee/disassembler.h"
+#include "core/system.h"
 
 // COP0 instructions
 void EEInterpreter::mfc0(EECore& cpu, CPUInstruction inst) {
@@ -226,14 +227,14 @@ void EEInterpreter::daddiu(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::sq(EECore& cpu, CPUInstruction inst) {
     u128 reg = cpu.GetReg<u128>(inst.i.rt);
-    u32 addr = cpu.GetReg<u32>(inst.i.rs) + (s16)inst.i.imm;
+    u32 addr = (cpu.GetReg<u32>(inst.i.rs) + (s16)inst.i.imm) & ~0xF;
 
     cpu.WriteQuad(addr, reg);
 }
 
 void EEInterpreter::lq(EECore& cpu, CPUInstruction inst) {
     u128 data;
-    u32 addr = cpu.GetReg<u32>(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+    u32 addr = (cpu.GetReg<u32>(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)) & ~0xF;
 
     data.i.lo = cpu.ReadDouble(addr);
     data.i.hi = cpu.ReadDouble(addr + 8);
@@ -574,5 +575,5 @@ void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
-    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt);
+    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined %ld", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt, cpu.system.scheduler.GetCurrentTime());
 }
