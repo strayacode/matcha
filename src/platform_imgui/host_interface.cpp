@@ -40,7 +40,7 @@ bool HostInterface::Initialise() {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 15.0f);
+    io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 13.0f);
     SetupStyle();
 
     return true;
@@ -112,6 +112,7 @@ void HostInterface::RenderMenubar() {
     file_dialog.Display();
     if (file_dialog.HasSelected()) {
         core.Reset();
+        core.SetGamePath(file_dialog.GetSelected().string());
         core.SetState(CoreState::Running);
         file_dialog.ClearSelected();
     }
@@ -120,10 +121,13 @@ void HostInterface::RenderMenubar() {
 void HostInterface::SetupStyle() {
     ImGui::GetStyle().WindowBorderSize = 0.0f;
     ImGui::GetStyle().PopupBorderSize = 0.0f;
-    ImGui::GetStyle().WindowRounding = 10.0f;
-    ImGui::GetStyle().FrameRounding = 4.0f;
-    ImGui::GetStyle().PopupRounding = 6.0f;
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.160f, 0.273f, 0.632f, 1.000f);
+    ImGui::GetStyle().ChildBorderSize = 0.0f;
+    ImGui::GetStyle().WindowRounding = 5.0f;
+    ImGui::GetStyle().FrameRounding = 0.0f;
+    ImGui::GetStyle().PopupRounding = 0.0f;
+    ImGui::GetStyle().ChildRounding = 0.0f;
+    ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.059f, 0.059f, 0.059f, 1.000f);
+    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.059f, 0.059f, 0.059f, 1.000f);
     ImGui::GetStyle().Colors[ImGuiCol_Header] = ImVec4(0.140f, 0.140f, 0.140f, 1.000f);
     ImGui::GetStyle().Colors[ImGuiCol_HeaderHovered] = ImVec4(0.160f, 0.273f, 0.632f, 1.000f);
     ImGui::GetStyle().Colors[ImGuiCol_HeaderActive] = ImVec4(0.160f, 0.273f, 0.632f, 1.000f);
@@ -139,8 +143,12 @@ void HostInterface::SetupStyle() {
     ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.140f, 0.140f, 0.140f, 1.000f);
     ImGui::GetStyle().Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.160f, 0.273f, 0.632f, 1.000f);
     ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive] = ImVec4(0.160f, 0.273f, 0.632f, 1.000f);
+    ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.114f, 0.114f, 0.114f, 1.000f);
 }
 
 void HostInterface::UpdateTitle(float fps) {
-
+    char window_title[100];
+    float percent_usage = (fps / 60.0f) * 100;
+    snprintf(window_title, 100, "otterstation | %0.2f FPS | %0.2f%s", fps, percent_usage, "%");
+    SDL_SetWindowTitle(window, window_title);
 }

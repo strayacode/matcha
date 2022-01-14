@@ -1,5 +1,7 @@
+#include <assert.h>
 #include "core/ee/ee_core.h"
 #include "core/system.h"
+#include "core/ee/disassembler.h"
 
 EECore::EECore(System& system) : system(system) {}
 
@@ -122,6 +124,9 @@ void EECore::CheckInterrupts() {
     if (InterruptsEnabled()) {
         bool int0_enable = (cop0.gpr[12] >> 10) & 0x1;
         bool int0_pending = (cop0.gpr[13] >> 10) & 0x1;
+        bool timer_enable = (cop0.gpr[12] >> 15) & 0x1;
+
+        assert(timer_enable == false);
         
         if (int0_enable && int0_pending) {
             DoException(0x80000200, ExceptionType::Interrupt);

@@ -108,6 +108,7 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::di, 57, InstructionTable::TLB);
 
     // mmi instructions
+    RegisterOpcode(&EEInterpreter::plzcw, 4, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::mflo1, 18, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::mult1, 24, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::divu1, 27, InstructionTable::MMI);
