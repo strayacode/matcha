@@ -27,6 +27,11 @@ union CPUInstruction {
         u32 : 6;
     } r;
 
+    struct {
+        u16 hi;
+        u16 there;
+    };
+
     u32 data;
 
     CPUInstruction(u32 data) : data(data) {};

@@ -11,6 +11,7 @@ class System;
 class IOPCore {
 public:
     IOPCore(System* system);
+    virtual ~IOPCore() {}
 
     virtual void Reset() = 0;
     virtual void Run(int cycles) = 0;

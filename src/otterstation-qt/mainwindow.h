@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QMainWindow>
-#include "otterstation-qt/debugger/debuggerwindow.h"
 #include "core/core.h"
 
 class MainWindow : public QMainWindow {
@@ -13,14 +12,11 @@ private:
     void CreateMenubar();
     void CreateFileMenu();
     void CreateEmulationMenu();
-    void CreateViewMenu();
-    void ShowDebuggerWindow();
     void LoadFile();
     void UpdateTitle(float fps);
 
-    DebuggerWindow* debugger_window;
     QAction* pause_action;
-    
     Core core;
+
 protected:
 };
