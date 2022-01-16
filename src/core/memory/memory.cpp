@@ -1,9 +1,8 @@
-#include <core/memory/memory.h>
-#include <core/system.h>
+#include "core/memory/memory.h"
+#include "core/memory/memory_constants.h"
+#include "core/system.h"
 
-Memory::Memory(System* system) : system(system) {
-
-}
+Memory::Memory(System* system) : system(system) {}
 
 Memory::~Memory() {
     if (rdram) {
@@ -39,6 +38,18 @@ void Memory::Reset() {
     mch_drd = 0;
     rdram_sdevid = 0;
     mch_ricm = 0;
+}
+
+bool Memory::InRange(u32 base, u32 size, u32 addr) {
+    return (addr >= base) && (addr < (base + size));
+}
+
+// TODO: check if this affects performance
+bool Memory::ValidEECodeRegion(VAddr vaddr) {
+    u32 addr = TranslateVirtualAddress(vaddr);
+
+    // for now we just assume code is in main ram or the bios
+    return (InRange(RDRAM_BASE, RDRAM_SIZE, addr) || InRange(BIOS_BASE, BIOS_SIZE, addr));
 }
 
 void Memory::InitialiseMemory() {

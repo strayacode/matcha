@@ -1,4 +1,4 @@
-set(IMGUI_SOURCES
+set(SOURCES
     imgui/imconfig.h
     imgui/imgui.cpp
     imgui/imgui.h
@@ -15,9 +15,12 @@ set(IMGUI_SOURCES
     imgui/imgui_impl_opengl3.h
     imgui/imgui_impl_sdl.cpp
     imgui/imgui_impl_sdl.h
+    main.cpp
+    host_interface.cpp
+    debugger/ee.cpp
 )
 
-add_executable(otterstation main.cpp host_interface.cpp ${IMGUI_SOURCES})
+add_executable(otterstation ${SOURCES})
 
 find_package(SDL2 REQUIRED)
 

@@ -26,6 +26,7 @@ add_library(core
     iop/interrupt_controller.h iop/interrupt_controller.cpp
 
     memory/memory.h memory/memory.cpp
+    memory/memory_constants.h
 
     gif/gif.h gif/gif.cpp
 

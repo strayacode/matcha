@@ -11,6 +11,7 @@
 #include "imgui/imfilebrowser.h"
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include "otterstation-imgui/debugger/ee.h"
 
 class HostInterface {
 public:
@@ -31,8 +32,9 @@ private:
 
     SDL_Window* window;
     SDL_GLContext gl_context;
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     bool running = true;
     ImGui::FileBrowser file_dialog;
+    EEDebugger ee_debugger;
 };

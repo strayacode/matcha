@@ -21,6 +21,8 @@ public:
     ~Memory();
 
     void Reset();
+    bool InRange(u32 base, u32 size, u32 addr);
+    bool ValidEECodeRegion(VAddr vaddr);
     void InitialiseMemory();
     void LoadBIOS();
     u32 TranslateVirtualAddress(VAddr vaddr);

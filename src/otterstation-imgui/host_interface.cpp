@@ -41,6 +41,7 @@ bool HostInterface::Initialise() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 13.0f);
+    io.Fonts->AddFontFromFileTTF("../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
 
     return true;
@@ -61,6 +62,14 @@ void HostInterface::Run() {
         // show demo window
         if (show_demo_window) {
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
+
+        if (ee_debugger.show_registers_window) {
+            ee_debugger.RegistersWindow(core.system.ee_core);
+        }
+
+        if (ee_debugger.show_disassembly_window) {
+            ee_debugger.DisassemblyWindow(core);
         }
 
         // rendering
@@ -103,6 +112,16 @@ void HostInterface::RenderMenubar() {
             if (ImGui::MenuItem("Quit")) {
                 running = false;
             }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Debugger")) {
+            if (ImGui::BeginMenu("EE")) {
+                ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
+                ImGui::MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMenu();
         }
 
