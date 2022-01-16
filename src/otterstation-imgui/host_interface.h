@@ -12,6 +12,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include "otterstation-imgui/debugger/ee.h"
+#include "otterstation-imgui/debugger/iop.h"
 
 class HostInterface {
 public:
@@ -37,4 +38,5 @@ private:
     bool running = true;
     ImGui::FileBrowser file_dialog;
     EEDebugger ee_debugger;
+    IOPDebugger iop_debugger;
 };

@@ -32,14 +32,6 @@ private:
     typedef void (IOPInterpreter::*InstructionHandler)();
     void RegisterOpcode(InstructionHandler handler, int index, InstructionTable table);
 
-    u8 ReadByte(u32 addr);
-    u16 ReadHalf(u32 addr);
-    u32 ReadWord(u32 addr);
-
-    void WriteByte(u32 addr, u8 data);
-    void WriteHalf(u32 addr, u16 data);
-    void WriteWord(u32 addr, u32 data);
-
     void UndefinedInstruction();
     void SecondaryInstruction();
     void COP0Instruction();

@@ -72,6 +72,14 @@ void HostInterface::Run() {
             ee_debugger.DisassemblyWindow(core);
         }
 
+        if (iop_debugger.show_registers_window) {
+            iop_debugger.RegistersWindow(*core.system.iop_core);
+        }
+
+        if (iop_debugger.show_disassembly_window) {
+            iop_debugger.DisassemblyWindow(core);
+        }
+
         // rendering
         ImGui::Render();
         glViewport(0, 0, 1280, 720);
@@ -119,6 +127,12 @@ void HostInterface::RenderMenubar() {
             if (ImGui::BeginMenu("EE")) {
                 ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
                 ImGui::MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("IOP")) {
+                ImGui::MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
+                ImGui::MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
                 ImGui::EndMenu();
             }
 

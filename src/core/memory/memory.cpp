@@ -52,6 +52,13 @@ bool Memory::ValidEECodeRegion(VAddr vaddr) {
     return (InRange(RDRAM_BASE, RDRAM_SIZE, addr) || InRange(BIOS_BASE, BIOS_SIZE, addr));
 }
 
+bool Memory::ValidIOPCodeRegion(VAddr vaddr) {
+    u32 addr = vaddr & 0x1FFFFFFF;
+
+    // for now we just assume code is in iop ram or the bios
+    return (InRange(IOP_RAM_BASE, IOP_RAM_SIZE, addr) || InRange(BIOS_BASE, BIOS_SIZE, addr));
+}
+
 void Memory::InitialiseMemory() {
     rdram = new u8[0x2000000];
     iop_ram = new u8[0x200000];

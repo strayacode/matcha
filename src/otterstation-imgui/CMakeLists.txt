@@ -18,6 +18,7 @@ set(SOURCES
     main.cpp
     host_interface.cpp
     debugger/ee.cpp
+    debugger/iop.cpp
 )
 
 add_executable(otterstation ${SOURCES})

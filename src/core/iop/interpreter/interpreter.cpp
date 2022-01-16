@@ -98,30 +98,6 @@ void IOPInterpreter::Run(int cycles) {
     }
 }
 
-u8 IOPInterpreter::ReadByte(u32 addr) {
-    return system->memory.IOPRead<u8>(addr);
-}
-
-u16 IOPInterpreter::ReadHalf(u32 addr) {
-    return system->memory.IOPRead<u16>(addr);
-}
-
-u32 IOPInterpreter::ReadWord(u32 addr) {
-    return system->memory.IOPRead<u32>(addr);
-}
-
-void IOPInterpreter::WriteByte(u32 addr, u8 data) {
-    system->memory.IOPWrite<u8>(addr, data);
-}
-
-void IOPInterpreter::WriteHalf(u32 addr, u16 data) {
-    system->memory.IOPWrite<u16>(addr, data);
-}
-
-void IOPInterpreter::WriteWord(u32 addr, u32 data) {
-    system->memory.IOPWrite<u32>(addr, data);
-}
-
 void IOPInterpreter::RegisterOpcode(InstructionHandler handler, int index, InstructionTable table) {
     if (table == InstructionTable::Primary) {
         primary_table[index] = handler;
