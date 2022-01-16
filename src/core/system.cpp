@@ -3,6 +3,7 @@
 System::System() : ee_core(*this), memory(this), ee_intc(this), gif(this), gs(this), timers(*this), dmac(this), elf_loader(*this) {
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
+    InitialiseIOPCore(CoreType::Interpreter);
 }
 
 // credit goes to pcsx2
@@ -19,7 +20,6 @@ System::System() : ee_core(*this), memory(this), ee_intc(this), gif(this), gs(th
 
 void System::Reset() {
     scheduler.Reset();
-    InitialiseIOPCore(CoreType::Interpreter);
     ee_core.Reset();
     iop_core->Reset();
     memory.Reset();

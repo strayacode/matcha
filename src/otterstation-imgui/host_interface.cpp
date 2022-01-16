@@ -123,6 +123,14 @@ void HostInterface::RenderMenubar() {
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Emulator")) {
+            if (ImGui::MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
+                TogglePause();
+            }
+
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Debugger")) {
             if (ImGui::BeginMenu("EE")) {
                 ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
@@ -184,4 +192,12 @@ void HostInterface::UpdateTitle(float fps) {
     float percent_usage = (fps / 60.0f) * 100;
     snprintf(window_title, 100, "otterstation | %0.2f FPS | %0.2f%s", fps, percent_usage, "%");
     SDL_SetWindowTitle(window, window_title);
+}
+
+void HostInterface::TogglePause() {
+    if (core.GetState() == CoreState::Running) {
+        core.SetState(CoreState::Paused);
+    } else {
+        core.SetState(CoreState::Running);
+    }
 }

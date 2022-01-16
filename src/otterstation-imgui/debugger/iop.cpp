@@ -3,23 +3,50 @@
 
 void IOPDebugger::RegistersWindow(IOPCore& iop_core) {
     ImGui::Begin("IOP Registers");
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
-    for (int i = 0; i < 32; i++) {
-        ImGui::Text("%d", i);
-        ImGui::SameLine(90);
-        ImGui::Text("%08x", iop_core.GetReg(i));
+    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("IOPTabs", tab_bar_flags)) {
+        if (ImGui::BeginTabItem("GPR")) {
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+
+            for (int i = 0; i < 32; i++) {
+                ImGui::Text("%s", IOPGetRegisterName(i).c_str());
+                ImGui::SameLine(90);
+                ImGui::Text("%08x", iop_core.GetReg(i));
+            }
+
+            ImGui::Text("pc");
+            ImGui::SameLine(90);
+            ImGui::Text("%08x", iop_core.regs.pc);
+
+            ImGui::Text("npc");
+            ImGui::SameLine(90);
+            ImGui::Text("%08x", iop_core.regs.next_pc);
+
+            ImGui::PopFont();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("COP0")) {
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+
+            for (int i = 0; i < 32; i++) {
+                if (IOPCOP0GetRegisterName(i).compare("") == 0) {
+                    continue;
+                }
+
+                ImGui::Text("%s", IOPCOP0GetRegisterName(i).c_str());
+                ImGui::SameLine(90);
+                ImGui::Text("%08x", iop_core.cop0.gpr[i]);
+            }
+
+            ImGui::PopFont();
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
     }
 
-    ImGui::Text("pc");
-    ImGui::SameLine(90);
-    ImGui::Text("%08x", iop_core.regs.pc);
-
-    ImGui::Text("npc");
-    ImGui::SameLine(90);
-    ImGui::Text("%08x", iop_core.regs.next_pc);
-
-    ImGui::PopFont();
     ImGui::End();
 }
 

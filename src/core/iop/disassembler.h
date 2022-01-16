@@ -5,9 +5,10 @@
 #include <sstream>
 #include <iomanip>
 #include <map>
-#include <common/cpu_types.h>
-#include <common/types.h>
-#include <common/log.h>
+#include "common/cpu_types.h"
+#include "common/types.h"
+#include "common/log.h"
 
 std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc);
 std::string IOPGetRegisterName(int reg);
+std::string IOPCOP0GetRegisterName(int reg);
