@@ -77,6 +77,7 @@ public:
     void SendInterruptSignal(int signal, bool value);
     void CheckInterrupts();
     bool InterruptsEnabled();
+    void PrintRegs();
 
     u8 gpr[32 * sizeof(u64) * 2];
     u32 pc;

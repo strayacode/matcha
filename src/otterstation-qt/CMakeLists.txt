@@ -11,6 +11,7 @@ set(SOURCES
     main.cpp
     mainwindow.cpp
     debugger/debuggerwindow.cpp
+    debugger/registersmodel.cpp
 )
 
 find_package(Qt5 COMPONENTS Core Widgets)

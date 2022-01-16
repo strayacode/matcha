@@ -14,6 +14,7 @@ MainWindow::MainWindow() :
 
 void MainWindow::CreateMenubar() {
     CreateFileMenu();
+    CreateEmulationMenu();
     CreateViewMenu();
 }
 
@@ -28,6 +29,20 @@ void MainWindow::CreateFileMenu() {
     connect(exit_action, &QAction::triggered, this, &QWidget::close);
 }
 
+void MainWindow::CreateEmulationMenu() {
+    QMenu* emulation_menu = menuBar()->addMenu(tr("Emulation"));
+
+    pause_action = emulation_menu->addAction(tr("Pause"));
+
+    connect(pause_action, &QAction::triggered, this, [this]() {
+        if (core.GetState() == CoreState::Running) {
+            core.SetState(CoreState::Paused);
+        } else {
+            core.SetState(CoreState::Running);
+        }
+    });
+}
+
 void MainWindow::CreateViewMenu() {
     QMenu* view_menu = menuBar()->addMenu(tr("View"));
     QAction* debugger_action = view_menu->addAction(tr("Debugger"));
@@ -36,7 +51,8 @@ void MainWindow::CreateViewMenu() {
 }
 
 void MainWindow::ShowDebuggerWindow() {
-    debugger_window.show();
+    debugger_window = new DebuggerWindow(core.system.ee_core);
+    debugger_window->show();
 }
 
 void MainWindow::LoadFile() {

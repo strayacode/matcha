@@ -327,3 +327,7 @@ std::string EEDisassembleInstruction(CPUInstruction inst, u32 pc) {
 
     return disassembled;
 }
+
+std::string EEGetRegisterName(int reg) {
+    return reg_names[reg];
+}

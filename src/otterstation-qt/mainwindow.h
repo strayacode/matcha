@@ -12,12 +12,14 @@ public:
 private:
     void CreateMenubar();
     void CreateFileMenu();
+    void CreateEmulationMenu();
     void CreateViewMenu();
     void ShowDebuggerWindow();
     void LoadFile();
     void UpdateTitle(float fps);
 
-    DebuggerWindow debugger_window;
+    DebuggerWindow* debugger_window;
+    QAction* pause_action;
     
     Core core;
 protected:

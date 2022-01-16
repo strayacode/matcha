@@ -149,3 +149,9 @@ bool EECore::InterruptsEnabled() {
 
     return ie && eie && !exl && !erl;
 }
+
+void EECore::PrintRegs() {
+    for (int i = 0; i < 32; i++) {
+        log_debug("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(gpr[i]).i.hi, GetReg<u128>(gpr[i]).i.lo);
+    }
+}

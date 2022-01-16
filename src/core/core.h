@@ -19,10 +19,10 @@ public:
     CoreState GetState();
     void RunFrame();
     void SetGamePath(std::string path);
+
+    System system;
     
 private:
     CoreState state = CoreState::Idle;
-
     EmuThread emu_thread;
-    System system;
 };
