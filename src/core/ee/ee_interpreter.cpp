@@ -18,6 +18,20 @@ void EEInterpreter::swc1(EECore& cpu, CPUInstruction inst) {
     cpu.WriteWord(cpu.GetReg<u32>(inst.rs) + inst.simm, cpu.cop1.GetReg(inst.rt));
 }
 
+void EEInterpreter::mtc1(EECore& cpu, CPUInstruction inst) {
+    cpu.cop1.SetReg(inst.rd, cpu.GetReg<u32>(inst.rt));
+}
+
+void EEInterpreter::adda_s(EECore& cpu, CPUInstruction inst) {
+    cpu.cop1.accumulator.f = cpu.cop1.AsFloat(cpu.cop1.GetReg(inst.rd)) + cpu.cop1.AsFloat(cpu.cop1.GetReg(inst.rt));
+
+    // TODO: handle overflows and underflows
+}
+
+void EEInterpreter::ctc1(EECore& cpu, CPUInstruction inst) {
+    cpu.cop1.SetControlReg(inst.rd, cpu.GetReg<u32>(inst.rt));
+}
+
 // COP2 instructions
 void EEInterpreter::cfc2(EECore& cpu, CPUInstruction inst) {
     // handle vu stuff
@@ -571,9 +585,9 @@ void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
-    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
+    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, fmt = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs);
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
-    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
+    // log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
 }

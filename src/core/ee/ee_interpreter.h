@@ -90,6 +90,9 @@ namespace EEInterpreter {
     void ei(EECore& cpu, CPUInstruction inst);
     void dsubu(EECore& cpu, CPUInstruction inst);
     void plzcw(EECore& cpu, CPUInstruction inst);
+    void mtc1(EECore& cpu, CPUInstruction inst);
+    void adda_s(EECore& cpu, CPUInstruction inst);
+    void ctc1(EECore& cpu, CPUInstruction inst);
     void unknown_instruction(EECore& cpu, CPUInstruction inst);
     void stub_instruction(EECore& cpu, CPUInstruction inst);
 }

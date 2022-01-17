@@ -8,6 +8,7 @@ void InterpreterTable::Generate() {
     regimm_table.fill(&EEInterpreter::unknown_instruction);
     cop0_table.fill(&EEInterpreter::unknown_instruction);
     cop1_table.fill(&EEInterpreter::unknown_instruction);
+    fpu_s_table.fill(&EEInterpreter::unknown_instruction);
     cop2_table.fill(&EEInterpreter::stub_instruction);
     tlb_table.fill(&EEInterpreter::unknown_instruction);
     mmi_table.fill(&EEInterpreter::unknown_instruction);
@@ -97,6 +98,13 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::mfc0, 0, InstructionTable::COP0);
     RegisterOpcode(&EEInterpreter::mtc0, 4, InstructionTable::COP0);
 
+    // cop1 instructions
+    RegisterOpcode(&EEInterpreter::mtc1, 4, InstructionTable::COP1);
+    RegisterOpcode(&EEInterpreter::ctc1, 6, InstructionTable::COP1);
+
+    // fpu_s instructions
+    RegisterOpcode(&EEInterpreter::adda_s, 24, InstructionTable::FPUS);
+
     // cop2 instructions
     RegisterOpcode(&EEInterpreter::cfc2, 2, InstructionTable::COP2);
     RegisterOpcode(&EEInterpreter::ctc2, 6, InstructionTable::COP2);
@@ -134,6 +142,11 @@ InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, 
 
         return cop0_table[inst.rs];
     case 17:
+        switch (inst.rs) {
+        case 16:
+            return fpu_s_table[inst.func];
+        }
+
         return cop1_table[inst.rs];
     case 18:
         return cop2_table[inst.rs];
@@ -172,6 +185,9 @@ void InterpreterTable::RegisterOpcode(InterpreterInstruction handler, int index,
         break;
     case InstructionTable::COP1:
         cop1_table[index] = handler;
+        break;
+    case InstructionTable::FPUS:
+        fpu_s_table[index] = handler;
         break;
     case InstructionTable::COP2:
         cop2_table[index] = handler;

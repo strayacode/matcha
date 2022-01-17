@@ -20,6 +20,7 @@ private:
     std::array<InterpreterInstruction, 32> regimm_table;
     std::array<InterpreterInstruction, 32> cop0_table;
     std::array<InterpreterInstruction, 32> cop1_table;
+    std::array<InterpreterInstruction, 64> fpu_s_table;
     std::array<InterpreterInstruction, 32> cop2_table;
     std::array<InterpreterInstruction, 64> tlb_table;
     std::array<InterpreterInstruction, 64> mmi_table;

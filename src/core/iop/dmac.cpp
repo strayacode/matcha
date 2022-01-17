@@ -18,6 +18,14 @@ void IOPDMAC::Reset() {
     global_dma_interrupt_control = false;
 }
 
+void IOPDMAC::Run(int cycles) {
+    for (int i = 0; i < 13; i++) {
+        if (GetChannelEnable(i) && channels[i].control & (1 << 24)) {
+            log_fatal("handle enabled channel %d", i);
+        }
+    }
+}
+
 u32 IOPDMAC::ReadRegister(u32 addr) {
     switch (addr) {
     case 0x1F8010F0:
@@ -92,22 +100,37 @@ int IOPDMAC::GetChannelIndex(u32 addr) {
     }
 }
 
+bool IOPDMAC::GetChannelEnable(int index) {
+    if (index < 7) {
+        bool enable = (dpcr >> (3 + (index * 4))) & 0x1;
+        return enable;
+    } else {
+        index -= 7;
+        bool enable = (dpcr2 >> (3 + (index * 4))) & 0x1;
+        return enable;
+    }
+}
+
 void IOPDMAC::WriteChannel(u32 addr, u32 data) {
     int channel = GetChannelIndex(addr);
     int index = addr & 0xF;
 
     switch (index) {
     case 0x0:
+        log_warn("[IOPDMAC %d] address write %08x", channel, data);
         channels[channel].address = data & 0xFFFFFF;
         break;
     case 0x4:
+        log_warn("[IOPDMAC %d] block size and count write %08x", channel, data);
         channels[channel].block_size = data & 0xFFFF;
         channels[channel].block_count = (data >> 16) & 0xFFFF;
         break;
     case 0x8:
+        log_warn("[IOPDMAC %d] control write %08x", channel, data);
         channels[channel].control = data;
         break;
     case 0xC:
+        log_warn("[IOPDMAC %d] tag address %08x", channel, data);
         channels[channel].tag_address = data;
         break;
     default:

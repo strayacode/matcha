@@ -262,6 +262,7 @@ void DMAC::Transfer(int index) {
 }
 
 void DMAC::DoSIF0Transfer() {
+    log_debug("do sif0 transfer %08x", system->ee_core.pc);
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {

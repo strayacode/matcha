@@ -30,6 +30,7 @@ enum class InstructionTable {
     RegImm,
     COP0,
     COP1,
+    FPUS,
     COP2,
     TLB,
     MMI,

@@ -26,9 +26,21 @@ void EECore::Reset() {
     interpreter_table.Generate();
 }
 
+bool disassemble = false;
+FILE* fp = fopen("../../log-stuff/ee.log", "w");
+
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
+
+        if (pc == 0x82000) {
+            disassemble = true;
+            log_debug("start eeload module");
+        }
+
+        if (disassemble) {
+            fprintf(fp, "%08x %08x\n", pc, inst.data);
+        }
 
         interpreter_table.Execute(*this, inst);
 

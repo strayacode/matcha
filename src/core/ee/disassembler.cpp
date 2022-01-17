@@ -171,6 +171,9 @@ static std::map<int, DisassemblyInfo> cop2_table = {
 
 static std::map<int, DisassemblyInfo> tlb_table = {
     {2, DisassemblyInfo{"tlbwi", InstructionType::None}},
+    {24, DisassemblyInfo{"eret", InstructionType::None}},
+    {56, DisassemblyInfo{"ei", InstructionType::None}},
+    {57, DisassemblyInfo{"di", InstructionType::None}},
 };
 
 static std::map<int, DisassemblyInfo> mmi_table = {

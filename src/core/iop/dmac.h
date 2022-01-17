@@ -5,11 +5,13 @@
 class IOPDMAC {
 public:
     void Reset();
+    void Run(int cycles);
     u32 ReadRegister(u32 addr);
     u32 ReadChannel(u32 addr);
     void WriteRegister(u32 addr, u32 data);
     void WriteChannel(u32 addr, u32 data);
     int GetChannelIndex(u32 addr);
+    bool GetChannelEnable(int index);
 
     // dma priority/enable
     // used for the first 7 channels
