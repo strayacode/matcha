@@ -7,32 +7,18 @@
 // we make this common
 union CPUInstruction {
     struct {
-        u32 imm : 16;
-        u32 rt : 5;
-        u32 rs : 5;
-        u32 opcode : 6;
-    } i;
-
-    struct {
-        u32 offset : 26;
-        u32 : 6;
-    } j;
-
-    struct {
         u32 func : 6;
-        u32 sa : 5;
+        u32 imm5 : 5;
         u32 rd : 5;
         u32 rt : 5;
         u32 rs : 5;
-        u32 : 6;
-    } r;
-
-    struct {
-        u16 hi;
-        u16 there;
+        u32 opcode : 6;
     };
 
     u32 data;
+    s16 simm;
+    u16 imm;
+    u32 offset : 26;
 
     CPUInstruction(u32 data) : data(data) {};
     CPUInstruction() : data(0) {};

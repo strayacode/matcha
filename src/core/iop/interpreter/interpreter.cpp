@@ -82,7 +82,7 @@ void IOPInterpreter::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(regs.pc)};
 
-        (this->*primary_table[inst.i.opcode])();
+        (this->*primary_table[inst.opcode])();
 
         regs.pc += 4;
 
@@ -107,15 +107,15 @@ void IOPInterpreter::RegisterOpcode(InstructionHandler handler, int index, Instr
 }
 
 void IOPInterpreter::UndefinedInstruction() {
-    log_fatal("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.i.opcode, inst.r.func, inst.i.rt);
+    log_fatal("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.opcode, inst.func, inst.rt);
 }
 
 void IOPInterpreter::SecondaryInstruction() {
-    (this->*secondary_table[inst.r.func])();
+    (this->*secondary_table[inst.func])();
 }
 
 void IOPInterpreter::COP0Instruction() {
-    u8 format = inst.i.rs;
+    u8 format = inst.rs;
 
     switch (format) {
     case 0:

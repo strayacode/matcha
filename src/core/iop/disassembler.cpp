@@ -198,16 +198,16 @@ static std::string DisassembleImmediate(CPUInstruction inst, u32 pc, std::string
 
     while (i < format.length()) {
         if (format.compare(i, 3, "$rt") == 0) {
-            disassembled += "$" + reg_names[inst.i.rt];
+            disassembled += "$" + reg_names[inst.rt];
             i += 3;
         } else if (format.compare(i, 3, "$rs") == 0) {
-            disassembled += "$" + reg_names[inst.i.rs];
+            disassembled += "$" + reg_names[inst.rs];
             i += 3;
         } else if (format.compare(i, 4, "$imm") == 0) {
-            disassembled += ConvertHex<u16>(inst.i.imm);
+            disassembled += ConvertHex<u16>(inst.imm);
             i += 4;
         } else if (format.compare(i, 7, "$offset") == 0) {
-            disassembled += ConvertHex<u32>(pc + (((s16)inst.i.imm) << 2) + 4);
+            disassembled += ConvertHex<u32>(pc + (((s16)inst.imm) << 2) + 4);
             i += 7;
         } else {
             disassembled += format[i];
@@ -224,7 +224,7 @@ static std::string DisassembleJump(CPUInstruction inst, u32 pc, std::string form
 
     while (i < format.length()) {
         if (format.compare(i, 7, "$target") == 0) {
-            disassembled += ConvertHex<u32>(((pc + 4) & 0xF0000000) + (inst.j.offset << 2));
+            disassembled += ConvertHex<u32>(((pc + 4) & 0xF0000000) + (inst.offset << 2));
             i += 7;
         } else {
             disassembled += format[i];
@@ -241,19 +241,19 @@ static std::string DisassembleRegister(CPUInstruction inst, u32 pc, std::string 
 
     while (i < format.length()) {
         if (format.compare(i, 3, "$rt") == 0) {
-            disassembled += "$" + reg_names[inst.r.rt];
+            disassembled += "$" + reg_names[inst.rt];
             i += 3;
         } else if (format.compare(i, 3, "$rd") == 0) {
-            disassembled += "$" + reg_names[inst.r.rd];
+            disassembled += "$" + reg_names[inst.rd];
             i += 3;
         } else if (format.compare(i, 3, "$cd") == 0) {
-            disassembled += cop0_names[inst.r.rd];
+            disassembled += cop0_names[inst.rd];
             i += 3;
         } else if (format.compare(i, 3, "$rs") == 0) {
-            disassembled += "$" + reg_names[inst.r.rs];
+            disassembled += "$" + reg_names[inst.rs];
             i += 3;
         } else if (format.compare(i, 3, "$sa") == 0) {
-            disassembled += ConvertHex<u16>(inst.r.sa);
+            disassembled += ConvertHex<u16>(inst.imm5);
             i += 3;
         } else {
             disassembled += format[i];
@@ -267,12 +267,12 @@ static std::string DisassembleRegister(CPUInstruction inst, u32 pc, std::string 
 std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc) {
     std::string disassembled;
 
-    DisassemblyInfo info = primary_table[inst.i.opcode];
+    DisassemblyInfo info = primary_table[inst.opcode];
 
     if (info.format.compare("secondary") == 0) {
-        info = secondary_table[inst.r.func];
+        info = secondary_table[inst.func];
     } else if (info.format.compare("cop0") == 0) {
-        info = cop0_table[inst.i.rs];
+        info = cop0_table[inst.rs];
     }
 
     switch (info.type) {

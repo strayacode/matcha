@@ -2,30 +2,30 @@
 #include <core/iop/interpreter/interpreter.h>
 
 void IOPInterpreter::slti() {
-    SetReg(inst.i.rt, (s32)GetReg(inst.i.rs) < sign_extend<s32, 16>(inst.i.imm));
+    SetReg(inst.rt, (s32)GetReg(inst.rs) < sign_extend<s32, 16>(inst.imm));
 }
 
 void IOPInterpreter::bne() {
-    s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
+    s32 offset = sign_extend<s32, 16>(inst.imm) << 2;
 
-    if (GetReg(inst.i.rs) != GetReg(inst.i.rt)) {
+    if (GetReg(inst.rs) != GetReg(inst.rt)) {
         regs.next_pc = regs.pc + offset + 4;
         branch_delay = true;
     }
 }
 
 void IOPInterpreter::lui() {
-    SetReg(inst.i.rt, inst.i.imm << 16);
+    SetReg(inst.rt, inst.imm << 16);
 }
 
 void IOPInterpreter::ori() {
-    SetReg(inst.i.rt, GetReg(inst.i.rs) | inst.i.imm);
+    SetReg(inst.rt, GetReg(inst.rs) | inst.imm);
 }
 
 void IOPInterpreter::beq() {
-    s32 offset = sign_extend<s32, 16>(inst.i.imm) << 2;
+    s32 offset = sign_extend<s32, 16>(inst.imm) << 2;
 
-    if (GetReg(inst.i.rs) == GetReg(inst.i.rt)) {
+    if (GetReg(inst.rs) == GetReg(inst.rt)) {
         regs.next_pc = regs.pc + offset + 4;
         branch_delay = true;
     }
@@ -33,106 +33,106 @@ void IOPInterpreter::beq() {
 
 void IOPInterpreter::lw() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        SetReg(inst.i.rt, ReadWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+        SetReg(inst.rt, ReadWord(GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm)));
     }
 }
 
 void IOPInterpreter::andi() {
-    SetReg(inst.i.rt, GetReg(inst.i.rs) & inst.i.imm);
+    SetReg(inst.rt, GetReg(inst.rs) & inst.imm);
 }
 
 void IOPInterpreter::addiu() {
-    SetReg(inst.i.rt, GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm));
+    SetReg(inst.rt, GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm));
 }
 
 void IOPInterpreter::addi() {
-    SetReg(inst.i.rt, GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm));
+    SetReg(inst.rt, GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm));
 }
 
 void IOPInterpreter::sw() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        WriteWord(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+        WriteWord(GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm), GetReg(inst.rt));
     }
 }
 
 void IOPInterpreter::sb() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        WriteByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm), GetReg(inst.i.rt));
+        WriteByte(GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm), GetReg(inst.rt));
     }
 }
 
 void IOPInterpreter::lb() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        SetReg(inst.i.rt, sign_extend<s32, 8>(ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm))));
+        SetReg(inst.rt, sign_extend<s32, 8>(ReadByte(GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm))));
     }
 }
 
 void IOPInterpreter::jal() {
     SetReg(31, regs.pc + 8);
-    regs.next_pc = (regs.pc & 0xF0000000) + (inst.j.offset << 2);
+    regs.next_pc = (regs.pc & 0xF0000000) + (inst.offset << 2);
     branch_delay = true;
 }
 
 void IOPInterpreter::lh() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        u32 addr = regs.gpr[inst.i.rs] + sign_extend<s32, 16>(inst.i.imm);
+        u32 addr = regs.gpr[inst.rs] + sign_extend<s32, 16>(inst.imm);
 
-        SetReg(inst.i.rt, sign_extend<s32, 16>(ReadHalf(addr)));
+        SetReg(inst.rt, sign_extend<s32, 16>(ReadHalf(addr)));
     }
 }
 
 void IOPInterpreter::j() {
-    regs.next_pc = (regs.pc & 0xF0000000) + (inst.j.offset << 2);
+    regs.next_pc = (regs.pc & 0xF0000000) + (inst.offset << 2);
     branch_delay = true;
 }
 
 void IOPInterpreter::lbu() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        SetReg(inst.i.rt, ReadByte(GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm)));
+        SetReg(inst.rt, ReadByte(GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm)));
     }
 }
 
 void IOPInterpreter::sltiu() {
-    SetReg(inst.i.rt, GetReg(inst.i.rs) < (u32)sign_extend<s32, 16>(inst.i.imm));
+    SetReg(inst.rt, GetReg(inst.rs) < (u32)sign_extend<s32, 16>(inst.imm));
 }
 
 void IOPInterpreter::lhu() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+        u32 addr = GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm);
 
-        SetReg(inst.i.rt, ReadHalf(addr));
+        SetReg(inst.rt, ReadHalf(addr));
     }
 }
 
 void IOPInterpreter::blez() {
-    if (static_cast<s32>(GetReg(inst.i.rs)) <= 0) {
-        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+    if (static_cast<s32>(GetReg(inst.rs)) <= 0) {
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 }
 
 void IOPInterpreter::bgtz() {
-    if (static_cast<s32>(GetReg(inst.i.rs)) > 0) {
-        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+    if (static_cast<s32>(GetReg(inst.rs)) > 0) {
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 }
 
 void IOPInterpreter::sh() {
     if (!(cop0.gpr[12] & 0x10000)) {
-        u32 addr = GetReg(inst.i.rs) + sign_extend<s32, 16>(inst.i.imm);
+        u32 addr = GetReg(inst.rs) + sign_extend<s32, 16>(inst.imm);
         
-        WriteHalf(addr, GetReg(inst.i.rt));
+        WriteHalf(addr, GetReg(inst.rt));
     }
 }
 
 void IOPInterpreter::bcondz() {
-    bool link = (inst.i.rt & 0x1E) == 0x10;
-    bool ge = inst.i.rt & 0x1;
-    bool branch = (static_cast<s32>(GetReg(inst.i.rs)) < 0) ^ ge;
+    bool link = (inst.rt & 0x1E) == 0x10;
+    bool ge = inst.rt & 0x1;
+    bool branch = (static_cast<s32>(GetReg(inst.rs)) < 0) ^ ge;
 
     if (branch) {
-        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.i.imm) << 2) + 4;
+        regs.next_pc = regs.pc + (sign_extend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 

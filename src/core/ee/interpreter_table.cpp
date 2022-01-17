@@ -7,7 +7,7 @@ void InterpreterTable::Generate() {
     secondary_table.fill(&EEInterpreter::unknown_instruction);
     regimm_table.fill(&EEInterpreter::unknown_instruction);
     cop0_table.fill(&EEInterpreter::unknown_instruction);
-    cop1_table.fill(&EEInterpreter::stub_instruction);
+    cop1_table.fill(&EEInterpreter::unknown_instruction);
     cop2_table.fill(&EEInterpreter::stub_instruction);
     tlb_table.fill(&EEInterpreter::unknown_instruction);
     mmi_table.fill(&EEInterpreter::unknown_instruction);
@@ -121,34 +121,34 @@ void InterpreterTable::Generate() {
 }
 
 InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, CPUInstruction inst) {
-    switch (inst.i.opcode) {
+    switch (inst.opcode) {
     case 0:
-        return secondary_table[inst.r.func];
+        return secondary_table[inst.func];
     case 1:
-        return regimm_table[inst.i.rt];
+        return regimm_table[inst.rt];
     case 16:
-        switch (inst.i.rs) {
+        switch (inst.rs) {
         case 16:
-            return tlb_table[inst.r.func];
+            return tlb_table[inst.func];
         }
 
-        return cop0_table[inst.i.rs];
+        return cop0_table[inst.rs];
     case 17:
-        return cop1_table[inst.i.rs];
+        return cop1_table[inst.rs];
     case 18:
-        return cop2_table[inst.i.rs];
+        return cop2_table[inst.rs];
     case 28:
-        switch (inst.r.func) {
+        switch (inst.func) {
         case 40:
-            return mmi1_table[inst.r.sa];
+            return mmi1_table[inst.imm5];
         case 41:
-            return mmi3_table[inst.r.sa];
+            return mmi3_table[inst.imm5];
         }
 
-        return mmi_table[inst.r.func];
+        return mmi_table[inst.func];
     }
 
-    return primary_table[inst.i.opcode];
+    return primary_table[inst.opcode];
 }
 
 void InterpreterTable::Execute(EECore& cpu, CPUInstruction inst) {

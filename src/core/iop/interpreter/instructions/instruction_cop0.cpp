@@ -3,11 +3,11 @@
 #include "core/system.h"
 
 void IOPInterpreter::mfc0() {
-    SetReg(inst.r.rt, cop0.GetReg(inst.r.rd));
+    SetReg(inst.rt, cop0.GetReg(inst.rd));
 }
 
 void IOPInterpreter::mtc0() {
-    cop0.SetReg(inst.r.rd, GetReg(inst.r.rt));
+    cop0.SetReg(inst.rd, GetReg(inst.rt));
 }
 
 void IOPInterpreter::rfe() {
