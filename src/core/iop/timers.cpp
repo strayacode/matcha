@@ -9,6 +9,20 @@ void IOPTimers::Reset() {
     }
 }
 
+u32 IOPTimers::ReadRegister(u32 addr) {
+    int channel = GetTimerIndex(addr);
+    int index = addr & 0xF;
+
+    switch (index) {
+    case 0x0:
+        return channels[channel].counter;
+    case 0x8:
+        return channels[channel].target;
+    default:
+        log_warn("handle %02x", index);
+    }
+}
+
 void IOPTimers::WriteRegister(u32 addr, u32 data) {
     int channel = GetTimerIndex(addr);
     int index = addr & 0xF;

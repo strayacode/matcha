@@ -502,6 +502,9 @@ u32 Memory::IOPReadWord(u32 addr) {
     if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
         (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
         return system->iop_dmac.ReadRegister(addr);
+    } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
+        (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
+        return system->iop_timers.ReadRegister(addr);
     } else if ((addr >> 24) == 0x1E) {
         // what is this
         return 0;
@@ -516,6 +519,8 @@ u32 Memory::IOPReadWord(u32 addr) {
         return system->sif.ReadSMFLAG();
     case 0x1D000040:
         return system->sif.ReadControl();
+    case 0x1D000060:
+        return system->sif.bd6;
     case 0x1F80100C:
     case 0x1F801010:
     case 0x1F801400:
@@ -565,10 +570,17 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
 }
 
 void Memory::IOPWriteHalf(u32 addr, u16 data) {
-    // TODO: handle iop timers
+    if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        system->iop_dmac.WriteRegister(addr, data);
+        return;
+    } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
+        (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
+        system->iop_timers.WriteRegister(addr, data);
+        return;
+    }
+
     switch (addr) {
-    case 0x1F8014A4:
-        break;
     default:
         log_fatal("handle slow half write %08x = %04x", addr, data);
     }

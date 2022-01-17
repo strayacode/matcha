@@ -21,7 +21,7 @@ public:
     u32 ReadSMFLAG();
     u32 ReadSMCOM();
     u32 ReadControl();
-private:
+
     // no clue what this is for
     u32 control;
     u32 bd6;

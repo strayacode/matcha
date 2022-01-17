@@ -20,10 +20,38 @@ void IOPDMAC::Reset() {
 
 u32 IOPDMAC::ReadRegister(u32 addr) {
     switch (addr) {
+    case 0x1F8010F0:
+        return dpcr;
+    case 0x1F8010F4:
+        return dicr;
+    case 0x1F801570:
+        return dpcr2;
+    case 0x1F801574:
+        return dicr2;
     case 0x1F801578:
         return global_dma_enable;
+    case 0x1F80157C:
+        return global_dma_interrupt_control;
     default:
-        log_fatal("handle %08x", addr);
+        return ReadChannel(addr);
+    }
+}
+
+u32 IOPDMAC::ReadChannel(u32 addr) {
+    int channel = GetChannelIndex(addr);
+    int index = addr & 0xF;
+
+    switch (index) {
+    // case 0x0:
+    //     return channels[channel].address;
+    // case 0x4:
+    //     return (channels[channel].block_count << 16) | channels[channel].block_size;
+    // case 0x8:
+    //     return channels[channel].control;
+    // case 0xC:
+    //     return channels[channel].tag_address;
+    default:
+        log_fatal("handle %02x", index);
     }
 }
 

@@ -575,5 +575,5 @@ void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
-    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined %ld", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt, cpu.system.scheduler.GetCurrentTime());
+    log_warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.i.opcode, inst.r.func, inst.i.rt);
 }

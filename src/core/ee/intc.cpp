@@ -40,9 +40,7 @@ void EEINTC::WriteStat(u16 data) {
 
 // when stat & mask is true, an int0 signal is assert into Cause.10. When Status.10 is true, an interrupt occurs and the ee jumps to 0x80000200 
 void EEINTC::CheckInterruptSignal() {
-    log_debug("%08x %08x", stat, mask);
     system.ee_core.SendInterruptSignal(0, stat & mask);
-    log_debug("finish send interrupt");
 }
 
 void EEINTC::RequestInterrupt(EEInterruptSource interrupt) {
