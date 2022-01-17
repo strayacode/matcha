@@ -51,7 +51,8 @@ public:
 
     void Transfer(int index);
 
-    void TransferSIF0();
+    void DoSIF0Transfer();
+    void DoSIF1Transfer();
 
     void EndTransfer(int index);
     

@@ -254,17 +254,14 @@ void DMAC::Run(int cycles) {
 void DMAC::Transfer(int index) {
     switch (static_cast<DMAChannelType>(index)) {
     case DMAChannelType::SIF0:
-        TransferSIF0();
-        break;
-    case DMAChannelType::SIF1:
-        // TODO: handle sif1 transfers
+        DoSIF0Transfer();
         break;
     default:
         log_fatal("handle %d", index);
     }
 }
 
-void DMAC::TransferSIF0() {
+void DMAC::DoSIF0Transfer() {
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {
@@ -272,6 +269,10 @@ void DMAC::TransferSIF0() {
     } else {
         EndTransfer(5);
     }
+}
+
+void DMAC::DoSIF1Transfer() {
+
 }
 
 void DMAC::EndTransfer(int index) {

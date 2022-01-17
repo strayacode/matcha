@@ -1,8 +1,7 @@
 #pragma once
 
-// use a namespace for the iop and ee
-#include <common/types.h>
-#include <common/log.h>
+#include "common/types.h"
+#include "common/log.h"
 
 enum class EEInterruptSource : int {
     GS = 0,
@@ -28,7 +27,7 @@ class System;
 // and can send interrupts to the ee core via the int0 signal
 class EEINTC {
 public:
-    EEINTC(System* system);
+    EEINTC(System& system);
 
     void Reset();
 
@@ -45,5 +44,5 @@ private:
     u16 mask;
     u16 stat;
 
-    System* system;
+    System& system;
 };

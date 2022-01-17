@@ -16,6 +16,7 @@
 #include <core/iop/cpu_core.h>
 #include <core/iop/interpreter/interpreter.h>
 #include "core/iop/dmac.h"
+#include "core/iop/timers.h"
 #include "core/elf_loader.h"
 #include <memory>
 
@@ -40,6 +41,7 @@ public:
     std::unique_ptr<IOPCore> iop_core;
     Memory memory;
     IOPDMAC iop_dmac;
+    IOPTimers iop_timers;
     EEINTC ee_intc;
     GIF gif;
     GS gs;

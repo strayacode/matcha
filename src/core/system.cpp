@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : ee_core(*this), memory(this), ee_intc(this), gif(this), gs(this), timers(*this), dmac(this), elf_loader(*this) {
+System::System() : ee_core(*this), memory(this), ee_intc(*this), gif(this), gs(this), timers(*this), dmac(this), elf_loader(*this) {
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
     InitialiseIOPCore(CoreType::Interpreter);
@@ -24,6 +24,7 @@ void System::Reset() {
     iop_core->Reset();
     memory.Reset();
     iop_dmac.Reset();
+    iop_timers.Reset();
     ee_intc.Reset();
     gif.Reset();
     gs.Reset();

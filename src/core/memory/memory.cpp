@@ -499,6 +499,14 @@ u16 Memory::IOPReadHalf(u32 addr) {
 }
 
 u32 Memory::IOPReadWord(u32 addr) {
+    if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        return system->iop_dmac.ReadRegister(addr);
+    } else if ((addr >> 24) == 0x1E) {
+        // what is this
+        return 0;
+    }
+
     switch (addr) {
     case 0x1D000010:
         return system->sif.ReadSMCOM();
@@ -512,9 +520,6 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801010:
     case 0x1F801400:
     case 0x1F801450:
-    case 0x1F801578:
-        // not sure what this is
-        return 0;
     case 0x1F801070:
         return system->iop_core->interrupt_controller.ReadRegister(0);
     case 0x1F801074:
@@ -522,7 +527,7 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801078:
         return system->iop_core->interrupt_controller.ReadRegister(8);
     default:
-        log_warn("[Memory] unhandled iop word read %08x", addr);
+        log_fatal("[Memory] unhandled iop word read %08x", addr);
     }
 
     return 0;
@@ -554,7 +559,7 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
     case 0x1F802070:
         return;
     default:
-        printf("[Memory] unhandled iop byte write %08x = %02x\n", addr, data);
+        log_fatal("[Memory] unhandled iop byte write %08x = %02x", addr, data);
         break;
     }
 }
@@ -565,11 +570,21 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
     case 0x1F8014A4:
         break;
     default:
-        log_warn("handle slow half write %08x = %04x", addr, data);
+        log_fatal("handle slow half write %08x = %04x", addr, data);
     }
 }
 
 void Memory::IOPWriteWord(u32 addr, u32 data) {
+    if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        system->iop_dmac.WriteRegister(addr, data);
+        return;
+    } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
+        (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
+        system->iop_timers.WriteRegister(addr, data);
+        return;
+    }
+
     switch (addr) {
     case 0x1D000010:
         system->sif.WriteSMCOM(data);
@@ -599,7 +614,6 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F802070:
     case 0x1F801060:
     case 0x1F801450:
-    case 0x1F801578:
         // not sure what this is
         break;
     case 0x1F801074:
@@ -608,35 +622,9 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F801078:
         system->iop_core->interrupt_controller.WriteRegister(8, data);
         break;
-    case 0x1F801080:
-    case 0x1F801084:
-    case 0x1F801088:
-        break;
-    case 0x1F801090:
-    case 0x1F801094:
-    case 0x1F801098:
-        break;
-    case 0x1F8010A0:
-    case 0x1F8010A4:
-    case 0x1F8010A8:
-        break;
-    // TODO: handle iop dmas later
-    case 0x1F8010F0:
-        system->iop_dmac.dpcr = data;
-        break;
-    case 0x1F8010F4:
-        system->iop_dmac.dicr = data;
-        break;
-    case 0x1F801570:
-        system->iop_dmac.dpcr2 = data;
-        break;
-    case 0x1F801574:
-        system->iop_dmac.dicr2 = data;
-        break;
     case 0x1F8015F0:
         break;
     default:
-        log_warn("[Memory] unhandled iop word write %08x = %08x", addr, data);
-        break;
+        log_fatal("[Memory] unhandled iop word write %08x = %08x", addr, data);
     }
 }

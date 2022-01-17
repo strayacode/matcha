@@ -1,7 +1,8 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include <array>
+#include "common/types.h"
+#include "common/log.h"
 
 class EECOP0 {
 public:
@@ -12,5 +13,5 @@ public:
 
     void CountUp();
 
-    u32 gpr[32];
+    std::array<u32, 32> gpr;
 };
