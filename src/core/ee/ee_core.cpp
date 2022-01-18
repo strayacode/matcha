@@ -32,16 +32,12 @@ void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
 
-        if (pc == 0x82000) {
-            disassemble = true;
-        }
+        // if (pc == 0x82000) {
+        //     disassemble = true;
+        // }
 
-        if (disassemble) {
-            fprintf(fp, "%08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
-        }
-
-        // if (print_regs) {
-        //     PrintRegs();
+        // if (disassemble) {
+        //     fprintf(fp, "%08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
         // }
 
         interpreter_table.Execute(*this, inst);
@@ -123,7 +119,7 @@ void EECore::DoException(u32 target, ExceptionType exception) {
     }
 
     cop0.SetReg(12, status);
-    cop0.SetReg(13, cause);
+    cop0.gpr[13] = cause;
 }
 
 void EECore::SendInterruptSignal(int signal, bool value) {
