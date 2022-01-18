@@ -534,6 +534,7 @@ void EEInterpreter::dsrl32(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     cpu.DoException(0x80000180, ExceptionType::Syscall);
+    cpu.print_regs = true;
 }
 
 void EEInterpreter::dsubu(EECore& cpu, CPUInstruction inst) {
@@ -585,7 +586,7 @@ void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
-    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, fmt = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs);
+    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, fmt = %d, imm5 = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {

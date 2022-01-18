@@ -13,6 +13,7 @@ void InterpreterTable::Generate() {
     tlb_table.fill(&EEInterpreter::unknown_instruction);
     mmi_table.fill(&EEInterpreter::unknown_instruction);
     mmi1_table.fill(&EEInterpreter::unknown_instruction);
+    mmi2_table.fill(&EEInterpreter::unknown_instruction);
     mmi3_table.fill(&EEInterpreter::unknown_instruction);
 
     // primary instructions
@@ -152,6 +153,8 @@ InterpreterInstruction InterpreterTable::GetInterpreterInstruction(EECore& cpu, 
         return cop2_table[inst.rs];
     case 28:
         switch (inst.func) {
+        case 9:
+            return mmi2_table[inst.imm5];
         case 40:
             return mmi1_table[inst.imm5];
         case 41:
@@ -200,6 +203,9 @@ void InterpreterTable::RegisterOpcode(InterpreterInstruction handler, int index,
         break;
     case InstructionTable::MMI1:
         mmi1_table[index] = handler;
+        break;
+    case InstructionTable::MMI2:
+        mmi2_table[index] = handler;
         break;
     case InstructionTable::MMI3:
         mmi3_table[index] = handler;

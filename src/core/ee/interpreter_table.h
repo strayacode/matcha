@@ -25,5 +25,6 @@ private:
     std::array<InterpreterInstruction, 64> tlb_table;
     std::array<InterpreterInstruction, 64> mmi_table;
     std::array<InterpreterInstruction, 32> mmi1_table;
+    std::array<InterpreterInstruction, 32> mmi2_table;
     std::array<InterpreterInstruction, 32> mmi3_table;
 };

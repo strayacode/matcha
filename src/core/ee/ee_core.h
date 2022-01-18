@@ -97,4 +97,5 @@ public:
     InterpreterTable interpreter_table;
 
     FILE* fp = fopen("../../log-stuff/ps2.log", "w");
+    bool print_regs = false;
 };

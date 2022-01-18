@@ -35,5 +35,6 @@ enum class InstructionTable {
     TLB,
     MMI,
     MMI1,
+    MMI2,
     MMI3,
 };

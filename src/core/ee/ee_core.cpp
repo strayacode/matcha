@@ -40,6 +40,10 @@ void EECore::Run(int cycles) {
             fprintf(fp, "%08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
         }
 
+        // if (print_regs) {
+        //     PrintRegs();
+        // }
+
         interpreter_table.Execute(*this, inst);
 
         pc += 4;
@@ -123,7 +127,11 @@ void EECore::DoException(u32 target, ExceptionType exception) {
 }
 
 void EECore::SendInterruptSignal(int signal, bool value) {
-    cop0.gpr[13] |= (1 << (10 + signal));
+    if (value) {
+        cop0.gpr[13] |= (1 << (10 + signal));
+    } else {
+        cop0.gpr[13] &= ~(1 << (10 + signal));
+    }
 }
 
 void EECore::CheckInterrupts() {
@@ -162,6 +170,6 @@ bool EECore::InterruptsEnabled() {
 
 void EECore::PrintRegs() {
     for (int i = 0; i < 32; i++) {
-        log_debug("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(gpr[i]).i.hi, GetReg<u128>(gpr[i]).i.lo);
+        fprintf(fp, "%s: %016lx%016lx\n", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
     }
 }

@@ -82,9 +82,9 @@ void IOPInterpreter::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(regs.pc)};
 
-        if (regs.pc == 0x00012C48 || regs.pc == 0x0001420C || regs.pc == 0x0001430C) {
-            IOPPuts();
-        }
+        // if (regs.pc == 0x00012C48 || regs.pc == 0x0001420C || regs.pc == 0x0001430C) {
+        //     IOPPuts();
+        // }
 
         (this->*primary_table[inst.opcode])();
 
