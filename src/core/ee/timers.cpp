@@ -126,9 +126,9 @@ void Timers::Tick(int index, int ticks) {
     }
 
     if (channels[index].counter > 0xFFFF) {
-        if (channels[index].control & (1 << 9)) {
-            channels[index].counter = 0;
+        channels[index].counter = 0;
 
+        if (channels[index].control & (1 << 9)) {
             // set the overflow interrupt flag and request 
             channels[index].control |= (1 << 11);
 

@@ -87,6 +87,8 @@ private:
     void srlv();
     void add();
 
+    void IOPPuts();
+
     CPUInstruction inst;
 
     std::array<InstructionHandler, 64> primary_table;

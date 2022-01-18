@@ -21,7 +21,13 @@ void IOPDMAC::Reset() {
 void IOPDMAC::Run(int cycles) {
     for (int i = 0; i < 13; i++) {
         if (GetChannelEnable(i) && channels[i].control & (1 << 24)) {
-            log_fatal("handle enabled channel %d", i);
+            switch (i) {
+            case 10:
+                DoSIF1Transfer();
+                break;
+            default:
+                log_fatal("[IOPDMAC] handle transfer for channel %d", i);
+            }
         }
     }
 }
@@ -66,6 +72,7 @@ u32 IOPDMAC::ReadChannel(u32 addr) {
 void IOPDMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1F8010F0:
+        log_warn("[IOPDMAC] dpcr write %08x", data);
         dpcr = data;
         break;
     case 0x1F8010F4:
@@ -136,4 +143,14 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
     default:
         log_fatal("handle %02x", index);
     }
+}
+
+void IOPDMAC::DoSIF1Transfer() {
+    Channel& channel = channels[10];
+
+    // if (channel.block_count) {
+    //     log_fatal("handle non zero sif1 transfer block count");
+    // } else {
+    //     log_fatal("handle zero sif1 transfer block count");
+    // }
 }

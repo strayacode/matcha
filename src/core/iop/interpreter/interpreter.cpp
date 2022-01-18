@@ -82,6 +82,10 @@ void IOPInterpreter::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(regs.pc)};
 
+        if (regs.pc == 0x00012C48 || regs.pc == 0x0001420C || regs.pc == 0x0001430C) {
+            IOPPuts();
+        }
+
         (this->*primary_table[inst.opcode])();
 
         regs.pc += 4;
@@ -166,4 +170,14 @@ void IOPInterpreter::DoException(ExceptionType exception) {
     // since we increment by 4 after each instruction we need to account for that
     // so that we can execute at the exception base on the next instruction
     regs.pc = exception_base - 4;
+}
+
+void IOPInterpreter::IOPPuts() {
+    u32 address = GetReg(5);
+    u32 length = GetReg(6);
+    
+    for (int i = 0; i < length; i++) {
+        printf("yes %c\n", system->memory.iop_ram[address & 0x1FFFFF]);
+        address++;
+    }
 }

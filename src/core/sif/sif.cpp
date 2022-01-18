@@ -7,6 +7,12 @@ void SIF::Reset() {
     msflag = 0;
     smflag = 0;
     smcom = 0;
+
+    std::queue<u32> sif0_empty;
+    std::queue<u32> sif1_empty;
+    
+    sif0_fifo.swap(sif0_empty);
+    sif1_fifo.swap(sif1_empty);
 }
 
 void SIF::WriteEEControl(u32 data) {

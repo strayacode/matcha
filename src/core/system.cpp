@@ -65,6 +65,19 @@ void System::RunFrame() {
     }
 }
 
+void System::SingleStep() {
+    int ee_cycles = scheduler.CalculateEECycles();
+    int bus_cycles = scheduler.CalculateBusCycles();
+    int iop_cycles = scheduler.CalculateIOPCycles();
+
+    iop_core->Run(iop_cycles);
+    iop_dmac.Run(iop_cycles);
+    ee_core.Run(ee_cycles);
+    timers.Run(bus_cycles);
+    dmac.Run(bus_cycles);
+    scheduler.Tick(ee_cycles);
+}
+
 void System::VBlankStart() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);
 }

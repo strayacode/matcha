@@ -45,8 +45,14 @@ u32 EECOP0::GetReg(int reg) {
 void EECOP0::SetReg(int reg, u32 data) {
     switch (reg) {
     case 0: case 2: case 3: case 5: case 6: 
-    case 9: case 10: case 12: case 13: case 16:
+    case 9: case 10: case 12: case 16:
         gpr[reg] = data;
+        break;
+    case 13:
+        // cause can't be written to.
+        // this would allow some interrupt pending bits to possibly be set,
+        // which can result in unintentional interrupts
+        
         break;
     case 11:
         // writing to compare clears timer interrupt pending bit

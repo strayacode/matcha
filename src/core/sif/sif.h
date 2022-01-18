@@ -1,7 +1,8 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include <queue>
+#include "common/types.h"
+#include "common/log.h"
 
 class SIF {
 public:
@@ -34,4 +35,8 @@ public:
 
     u32 msflag;
     u32 smflag;
+
+    // TODO: do more research into sif dmas and sif fifo
+    std::queue<u32> sif0_fifo;
+    std::queue<u32> sif1_fifo;
 };

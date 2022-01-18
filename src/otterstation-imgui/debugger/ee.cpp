@@ -41,6 +41,11 @@ void EEDebugger::RegistersWindow(EECore& ee_core) {
 
 void EEDebugger::DisassemblyWindow(Core& core) {
     ImGui::Begin("EE Disassembly");
+
+    if (ImGui::Button("Single Step")) {
+        core.system.SingleStep();
+    }
+
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
     if (core.GetState() != CoreState::Idle) {

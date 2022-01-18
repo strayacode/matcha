@@ -31,6 +31,7 @@ public:
     void Reset();
     void InitialiseIOPCore(CoreType core_type);
     void RunFrame();
+    void SingleStep();
     void VBlankStart();
     void VBlankFinish();
     void SetGamePath(std::string path);

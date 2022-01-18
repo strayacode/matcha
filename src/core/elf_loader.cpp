@@ -55,6 +55,7 @@ void ELFLoader::LoadHeader() {
     }
 
     log_debug("[ELFLoader] entrypoint: %08x", header.entry);
+    fprintf(system.ee_core.fp, "[ELFLoader] entrypoint: %08x\n", header.entry);
     system.ee_core.pc = header.entry;
 }
 

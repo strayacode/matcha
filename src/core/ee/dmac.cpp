@@ -157,7 +157,8 @@ void DMAC::WriteInterruptStatus(u32 data) {
 
         if (data & (1 << (16 + i))) {
             // reverse that bit in interrupt_status
-            interrupt_status ^= (1 << i);
+            interrupt_status ^= (1 << (16 + i));
+            log_debug("interrupt status is now %08x", interrupt_status);
         }
     }
 
@@ -262,7 +263,7 @@ void DMAC::Transfer(int index) {
 }
 
 void DMAC::DoSIF0Transfer() {
-    log_debug("do sif0 transfer %08x", system->ee_core.pc);
+    log_debug("do sif0 transfer");
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {
