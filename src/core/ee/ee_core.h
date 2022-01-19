@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "common/types.h"
 #include "common/cpu_types.h"
 #include "common/int128.h"
@@ -78,6 +79,7 @@ public:
     void CheckInterrupts();
     bool InterruptsEnabled();
     void PrintRegs();
+    std::string GetSyscallInfo(int index);
 
     u8 gpr[32 * sizeof(u64) * 2];
     u32 pc;

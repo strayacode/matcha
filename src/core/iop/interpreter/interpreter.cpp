@@ -177,7 +177,7 @@ void IOPInterpreter::IOPPuts() {
     u32 length = GetReg(6);
     
     for (int i = 0; i < length; i++) {
-        printf("yes %c\n", system->memory.iop_ram[address & 0x1FFFFF]);
+        printf("%c", system->memory.iop_ram[address & 0x1FFFFF]);
         address++;
     }
 }

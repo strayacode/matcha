@@ -1,7 +1,49 @@
 #include <assert.h>
+#include <array>
 #include "core/ee/ee_core.h"
 #include "core/system.h"
 #include "core/ee/disassembler.h"
+
+static std::array<std::string, 256> syscall_info = {
+    "RFU000_FullReset", "ResetEE", "SetGsCrt", "RFU003",
+    "Exit",	"RFU005", "LoadExecPS2", "ExecPS2",
+    "RFU008", "RFU009",	"AddSbusIntcHandler", "RemoveSbusIntcHandler",
+    "Interrupt2Iop", "SetVTLBRefillHandler", "SetVCommonHandler", "SetVInterruptHandler",
+    "AddIntcHandler", "RemoveIntcHandler", "AddDmacHandler", "RemoveDmacHandler",
+    "_EnableIntc", "_DisableIntc", "_EnableDmac", "_DisableDmac",
+    "_SetAlarm", "_ReleaseAlarm", "_iEnableIntc", "_iDisableIntc",
+    "_iEnableDmac", "_iDisableDmac", "_iSetAlarm", "_iReleaseAlarm",
+    "CreateThread", "DeleteThread", "StartThread", "ExitThread",
+    "ExitDeleteThread", "TerminateThread", "iTerminateThread", "DisableDispatchThread",
+    "EnableDispatchThread", "ChangeThreadPriority", "iChangeThreadPriority", "RotateThreadReadyQueue",
+    "iRotateThreadReadyQueue", "ReleaseWaitThread",	"iReleaseWaitThread", "GetThreadId",
+    "ReferThreadStatus", "iReferThreadStatus", "SleepThread", "WakeupThread",
+    "_iWakeupThread", "CancelWakeupThread",	"iCancelWakeupThread", "SuspendThread",
+    "iSuspendThread", "ResumeThread", "iResumeThread", "JoinThread",
+    "RFU060", "RFU061", "EndOfHeap", "RFU063",
+    "CreateSema", "DeleteSema", "SignalSema", "iSignalSema",
+    "WaitSema",  "PollSema", "iPollSema", "ReferSemaStatus",
+    "iReferSemaStatus", "RFU073", "SetOsdConfigParam", "GetOsdConfigParam",
+    "GetGsHParam", "GetGsVParam", "SetGsHParam", "SetGsVParam",
+    "RFU080_CreateEventFlag", "RFU081_DeleteEventFlag",
+    "RFU082_SetEventFlag", "RFU083_iSetEventFlag",
+    "RFU084_ClearEventFlag", "RFU085_iClearEventFlag",
+    "RFU086_WaitEventFlag", "RFU087_PollEventFlag",
+    "RFU088_iPollEventFlag", "RFU089_ReferEventFlagStatus",
+    "RFU090_iReferEventFlagStatus", "RFU091_GetEntryAddress",
+    "EnableIntcHandler_iEnableIntcHandler",
+    "DisableIntcHandler_iDisableIntcHandler",
+    "EnableDmacHandler_iEnableDmacHandler",
+    "DisableDmacHandler_iDisableDmacHandler",
+    "KSeg0", "EnableCache", "DisableCache", "GetCop0",
+    "FlushCache", "RFU101", "CpuConfig", "iGetCop0",
+    "iFlushCache", "RFU105", "iCpuConfig", "sceSifStopDma",
+    "SetCPUTimerHandler", "SetCPUTimer", "SetOsdConfigParam2", "SetOsdConfigParam2",
+    "GsGetIMR_iGsGetIMR", "GsGetIMR_iGsPutIMR", "SetPgifHandler", "SetVSyncFlag",
+    "RFU116", "print", "sceSifDmaStat_isceSifDmaStat", "sceSifSetDma_isceSifSetDma",
+    "sceSifSetDChain_isceSifSetDChain", "sceSifSetReg", "sceSifGetReg", "ExecOSD",
+    "Deci2Call", "PSMode", "MachineType", "GetMemorySize",
+};
 
 EECore::EECore(System& system) : system(system) {}
 
@@ -31,14 +73,6 @@ bool disassemble = false;
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
-
-        // if (pc == 0x82000) {
-        //     disassemble = true;
-        // }
-
-        // if (disassemble) {
-        //     fprintf(fp, "%08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
-        // }
 
         interpreter_table.Execute(*this, inst);
 
@@ -147,7 +181,7 @@ void EECore::CheckInterrupts() {
         bool int1_pending = (cop0.gpr[13] >> 11) & 0x1;
 
         if (int1_enable && int1_pending) {
-            log_fatal("handle");
+            DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
 
@@ -168,4 +202,14 @@ void EECore::PrintRegs() {
     for (int i = 0; i < 32; i++) {
         fprintf(fp, "%s: %016lx%016lx\n", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
     }
+}
+
+std::string EECore::GetSyscallInfo(int index) {
+    index = (s8)(u8)index;
+
+    if (index < 0) {
+        index = -index;
+    }
+
+    return syscall_info[index];
 }

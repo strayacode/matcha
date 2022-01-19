@@ -1,5 +1,10 @@
-#include <core/ee/dmac.h>
-#include <core/system.h>
+#include "core/ee/dmac.h"
+#include "core/system.h"
+
+static const char* channel_names[10] = {
+    "VIF0", "VIF1", "GIF", "IPU_FROM", "IPU_TO",
+    "SIF0", "SIF1", "SIF2", "SPR_FROM", "SPR_TO",
+};
 
 DMAC::DMAC(System* system) : system(system) {
 
@@ -42,60 +47,83 @@ u32 DMAC::ReadChannel(u32 addr) {
     }
 }
 
+void DMAC::WriteRegister(u32 addr, u32 data) {
+    switch (addr) {
+    case 0x1000E000:
+        log_debug("[DMAC] D_CTRL write %08x", data);
+        control = data;
+        break;
+    case 0x1000E010:
+        log_debug("[DMAC] D_STAT write %08x", data);
+
+        // for bits (0..9) they get cleared if 1 is written
+        interrupt_status &= ~(data & 0x3FF);
+
+        // for bits (16..25) they get reversed if 1 is written
+        interrupt_status ^= (data & 0x3FF0000);
+
+        CheckInterruptSignal();
+        break;
+    case 0x1000E020:
+        log_debug("[DMAC] D_PCR write %08x", data);
+        priority_control = data;
+        break;
+    case 0x1000E030:
+        log_debug("[DMAC] D_SQWC write %08x", data);
+        skip_quadword = data;
+        break;
+    case 0x1000E040:
+        log_debug("[DMAC] D_RBSR write %08x", data);
+        ringbuffer_size = data;
+        break;
+    case 0x1000E050:
+        log_debug("[DMAC] D_RBOR write %08x", data);
+        ringbuffer_offset = data;
+        break;
+    default:
+        if (addr >= 0x1000E000) {
+            log_fatal("[DMAC] handle write %08x = %08x", addr, data);
+        } else {
+            WriteChannel(addr, data);
+        }
+
+        break;
+    }
+}
+
 void DMAC::WriteChannel(u32 addr, u32 data) {
     int index = GetChannelIndex(addr);
+    const char* channel_name = channel_names[index];
 
     switch (addr & 0xFF) {
     case 0x00:
-        // TODO: mask bits properly
-        log_warn("[DMAC %d] control write %08x", index, data);
+        log_debug("[DMAC] %s Dn_CHCR write %08x", channel_name, data);
         channels[index].control = data;
         break;
     case 0x10:
-        // lower bits must be 0
-        log_warn("[DMAC %d] address write %08x", index, data);
-        if ((data & 0xF) != 0) {
-            log_warn("[DMAC] Lower 4 bits aren't 0");
-        }
-        
-        channels[index].address = data;
+        log_debug("[DMAC] %s Dn_MADR write %08x", channel_name, data);
+        channels[index].address = data & ~0xF;
         break;
     case 0x20:
         // In normal and interleaved mode, the transfer ends when QWC reaches zero. Chain mode behaves differently
-        log_warn("[DMAC %d] quadword count write %08x", index, data);
-        channels[index].quadword_count = data;
+        log_debug("[DMAC] %s Dn_QWC write %08x", channel_name, data);
+        channels[index].quadword_count = data & 0xFFFF;
         break;
     case 0x30:
-        // lower bits must be 0
-        log_warn("[DMAC %d] tag address write %08x", index, data);
-        if ((data & 0xF) != 0) {
-            log_warn("[DMAC] Lower 4 bits aren't 0");
-        }
-        channels[index].tag_address = data;
+        log_debug("[DMAC] %s Dn_TADR write %08x", channel_name, data);
+        channels[index].tag_address = data & ~0xF;
         break;
     case 0x40:
-        // lower bits must be 0
-        log_warn("[DMAC %d] saved tag address0 write %08x", index, data);
-        if ((data & 0xF) != 0) {
-            log_warn("[DMAC] Lower 4 bits aren't 0");
-        }
-        channels[index].saved_tag_address0 = data;
+        log_debug("[DMAC] %s Dn_ASR0 write %08x", channel_name, data);
+        channels[index].saved_tag_address0 = data & ~0xF;
         break;
     case 0x50:
-        // lower bits must be 0
-        log_warn("[DMAC %d] saved tag address1 write %08x", index, data);
-        if ((data & 0xF) != 0) {
-            log_warn("[DMAC] Lower 4 bits aren't 0");
-        }
-        channels[index].saved_tag_address1 = data;
+        log_debug("[DMAC] %s Dn_ASR1 write %08x", channel_name, data);
+        channels[index].saved_tag_address1 = data & ~0xF;
         break;
     case 0x80:
-        // lower bits must be 0
-        log_warn("[DMAC %d] scratchpad address write %08x", index, data);
-        if ((data & 0xF) != 0) {
-            log_warn("[DMAC] Lower 4 bits aren't 0");
-        }
-        channels[index].scratchpad_address = data;
+        log_debug("[DMAC] %s Dn_SADR write %08x", channel_name, data);
+        channels[index].scratchpad_address = data & ~0xF;
         break;
     default:
         log_fatal("[DMAC] Handle channel with identifier %02x and data %08x", addr & 0xFF, data);
@@ -145,46 +173,9 @@ int DMAC::GetChannelIndex(u32 addr) {
     return static_cast<int>(index);
 }
 
-void DMAC::WriteInterruptStatus(u32 data) {
-    log_warn("[DMAC] write interrupt status %08x", data);
-    // writing 1 to stat clears an interrupt
-    // writing 1 to mask reverses an interrupt
-    for (int i = 0; i < 10; i++) {
-        if (data & (1 << i)) {
-            // clear that bit in interrupt_status
-            interrupt_status &= ~(1 << i);
-        }
-
-        if (data & (1 << (16 + i))) {
-            // reverse that bit in interrupt_status
-            interrupt_status ^= (1 << (16 + i));
-            log_debug("interrupt status is now %08x", interrupt_status);
-        }
-    }
-
-    interrupt_status &= ~(data & (1 << 13));
-    interrupt_status &= ~(data & (1 << 14));
-    interrupt_status &= ~(data & (1 << 15));
-
-    if (data & (1 << 29)) {
-        interrupt_status ^= (1 << 29);
-    }
-
-    if (data & (1 << 30)) {
-        interrupt_status ^= (1 << 30);
-    }
-
-    CheckInterruptSignal();
-}
-
 u32 DMAC::ReadInterruptStatus() {
     log_warn("[DMAC] read interrupt status %08x", interrupt_status);
     return interrupt_status;
-}
-
-void DMAC::WriteControl(u32 data) {
-    log_warn("[DMAC] write control %08x", data);
-    control = data;
 }
 
 u32 DMAC::ReadControl() {
@@ -192,19 +183,9 @@ u32 DMAC::ReadControl() {
     return control;
 }
 
-void DMAC::WritePriorityControl(u32 data) {
-    log_warn("[DMAC] write priority control %08x", data);
-    priority_control = data;
-}
-
 u32 DMAC::ReadPriorityControl() {
     log_warn("[DMAC] read priority control %08x", priority_control);
     return priority_control;
-}
-
-void DMAC::WriteSkipQuadword(u32 data) {
-    log_warn("[DMAC] write skip quadword %08x", data);
-    skip_quadword = data;
 }
 
 u32 DMAC::ReadSkipQuadword() {
@@ -212,24 +193,17 @@ u32 DMAC::ReadSkipQuadword() {
     return skip_quadword;
 }
 
-void DMAC::WriteRingBufferSize(u32 data) {
-    log_warn("[DMAC] write ring buffer size %08x", data);
-    ringbuffer_size = data;
-}
-
-void DMAC::WriteRingBufferOffset(u32 data) {
-    log_warn("[DMAC] write ring buffer offset %08x", data);
-    ringbuffer_offset = data;
-}
-
 void DMAC::CheckInterruptSignal() {
-    // for each pair of bits if there is an irq and its enabled,
-    // then send an INT1 signal to the ee
+    bool irq = false;
+
     for (int i = 0; i < 10; i++) {
         if ((interrupt_status & (1 << i)) && (interrupt_status & (1 << (16 + i)))) {
-            log_fatal("[DMAC] Handle int1 signal!");
+            irq = true;
+            break;
         }
     }
+
+    system->ee_core.SendInterruptSignal(1, irq);
 }
 
 // note:
@@ -282,5 +256,8 @@ void DMAC::EndTransfer(int index) {
 
     // raise the stat flag in the stat register
     interrupt_status |= (1 << index);
+
+    fprintf(system->ee_core.fp, "interrupt status is now %08x\n", interrupt_status);
+
     CheckInterruptSignal();
 }

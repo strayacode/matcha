@@ -36,17 +36,15 @@ public:
     void Reset();
     void Run(int cycles);
 
+    void WriteRegister(u32 addr, u32 data);
+
     u32 ReadChannel(u32 addr);
     void WriteChannel(u32 addr, u32 data);
-    void WriteInterruptStatus(u32 data);
     u32 ReadInterruptStatus();
     void WriteControl(u32 data);
     u32 ReadControl();
-    void WritePriorityControl(u32 data);
     u32 ReadPriorityControl();
-    void WriteSkipQuadword(u32 data);
     u32 ReadSkipQuadword();
-    void WriteRingBufferSize(u32 data);
     void WriteRingBufferOffset(u32 data);
 
     void Transfer(int index);

@@ -277,10 +277,10 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
         return;
     }
 
-    if (in_range(0x10008000, 0x1000E000, addr)) {
-        system->dmac.WriteChannel(addr, data);
-        return;
-    }
+    if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
+        (addr >= EE_DMA_REGION2_START && addr < EE_DMA_REGION2_END)) {
+        return system->dmac.WriteRegister(addr, data);
+    } 
 
     switch (addr) {
     case 0x10002000:
@@ -306,24 +306,6 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
         break;
     case 0x10003C10:
         system->vif1.WriteFBRST(data);
-        break;
-    case 0x1000E000:
-        system->dmac.WriteControl(data);
-        break;
-    case 0x1000E010:
-        system->dmac.WriteInterruptStatus(data);
-        break;
-    case 0x1000E020:
-        system->dmac.WritePriorityControl(data);
-        break;
-    case 0x1000E030:
-        system->dmac.WriteSkipQuadword(data);
-        break;
-    case 0x1000E040:
-        system->dmac.WriteRingBufferSize(data);
-        break;
-    case 0x1000E050:
-        system->dmac.WriteRingBufferOffset(data);
         break;
     case 0x1000F000:
         system->ee_intc.WriteStat(data);
@@ -359,10 +341,7 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F490:
     case 0x1000F500:
     case 0x1000F510:
-        // some undocumented stuff
-        break;
-    case 0x1000F590:
-        system->dmac.disabled_status = data;
+        // undocumented
         break;
     case 0x1000F430:
         if ((((data >> 16) & 0xFFF) == 0x21) && (((data >> 6) & 0xF) == 1) && (((mch_drd >> 7) & 1) == 0)) {

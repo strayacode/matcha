@@ -19,7 +19,7 @@ void IOPDMAC::Reset() {
 }
 
 void IOPDMAC::Run(int cycles) {
-    for (int i = 0; i < 13; i++) {
+    for (int i = 7; i < 13; i++) {
         if (GetChannelEnable(i) && channels[i].control & (1 << 24)) {
             switch (i) {
             case 10:
@@ -108,14 +108,7 @@ int IOPDMAC::GetChannelIndex(u32 addr) {
 }
 
 bool IOPDMAC::GetChannelEnable(int index) {
-    if (index < 7) {
-        bool enable = (dpcr >> (3 + (index * 4))) & 0x1;
-        return enable;
-    } else {
-        index -= 7;
-        bool enable = (dpcr2 >> (3 + (index * 4))) & 0x1;
-        return enable;
-    }
+    return (dpcr2 >> (3 + ((index - 7) * 4))) & 0x1;
 }
 
 void IOPDMAC::WriteChannel(u32 addr, u32 data) {

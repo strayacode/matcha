@@ -32,6 +32,6 @@ void GIF::WriteCTRL(u8 data) {
 }
 
 void GIF::WriteFIFO(u128 data) {
-    log_warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
+    // log_warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
     fifo.push(data);
 }
