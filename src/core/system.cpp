@@ -48,37 +48,28 @@ void System::InitialiseIOPCore(CoreType core_type) {
 
 void System::RunFrame() {
     u64 end_timestamp = scheduler.GetCurrentTime() + CYCLES_PER_FRAME;
+    int cycles = 32;
     scheduler.Add(VBLANK_START_CYCLES, VBlankStartEvent);
     scheduler.Add(CYCLES_PER_FRAME, VBlankFinishEvent);
 
     while (scheduler.GetCurrentTime() < end_timestamp) {
-        int ee_cycles = scheduler.CalculateEECycles();
-        int bus_cycles = scheduler.CalculateBusCycles();
-        int iop_cycles = scheduler.CalculateIOPCycles();
+        ee_core.Run(cycles);
+        
+        // ee timers and dmac run at half the speed of the ee
+        timers.Run(cycles / 2);
+        dmac.Run(cycles / 2);
 
-        iop_core->Run(iop_cycles);
-        iop_dmac.Run(iop_cycles);
-        ee_core.Run(ee_cycles);
-        timers.Run(bus_cycles);
-        dmac.Run(bus_cycles);
-        scheduler.Tick(ee_cycles);
+        // iop runs at 1 / 8 speed of the ee
+        iop_core->Run(cycles / 8);
+        iop_dmac.Run(cycles / 8);
+        
+        scheduler.Tick(cycles);
         scheduler.RunEvents();
     }
 }
 
-void System::SingleStep() {
-    int ee_cycles = scheduler.CalculateEECycles();
-    int bus_cycles = scheduler.CalculateBusCycles();
-    int iop_cycles = scheduler.CalculateIOPCycles();
-
-    iop_core->Run(iop_cycles);
-    iop_dmac.Run(iop_cycles);
-    ee_core.Run(ee_cycles);
-    timers.Run(bus_cycles);
-    dmac.Run(bus_cycles);
-    scheduler.Tick(ee_cycles);
-    scheduler.RunEvents();
-}
+// implement later
+void System::SingleStep() {}
 
 void System::VBlankStart() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);

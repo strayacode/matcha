@@ -15,15 +15,15 @@ void Scheduler::ResetCurrentTime() {
     current_time = 0;
 }
 
-auto Scheduler::GetCurrentTime() -> u64 {
+u64 Scheduler::GetCurrentTime() {
     return current_time;
 }
 
-auto Scheduler::GetEventTime() -> u64 {
+u64 Scheduler::GetEventTime() {
     return events[0].start_time;
 }
 
-auto Scheduler::CalculateEventIndex(Event& new_event) -> int {
+int Scheduler::CalculateEventIndex(Event& new_event) {
     int lower_bound = 0;
     int upper_bound = events.size() - 1;
    
@@ -83,32 +83,4 @@ void Scheduler::SchedulerDebug() {
     for (Event event : events) {
         printf("start time: %ld, id: %d\n", event.start_time, event.id);
     }
-}
-
-int Scheduler::CalculateEECycles() {
-    // by default just do 1 cycle
-    // however later we can optimise this by running more cycles at once if there are no events queued
-    return 1;
-}
-
-int Scheduler::CalculateBusCycles() {
-    // return 1 if we are on an odd cycle (meaning 2 cycles of the ee have occured)
-    // other 0
-    return GetCurrentTime() & 0x1;
-}
-
-int Scheduler::CalculateIOPCycles() {
-    // the iop runs 1 cycle for each ee cycle
-    // TODO: make this more efficient
-    if ((GetCurrentTime() & 0x7) == 0 && GetCurrentTime()) {
-        return 1;
-    } else {
-        return 0;
-    }
-
-    // if ((GetCurrentTime() % 8) == 0 && GetCurrentTime()) {
-    //     return 1;
-    // } else {
-    //     return 0;
-    // }
 }
