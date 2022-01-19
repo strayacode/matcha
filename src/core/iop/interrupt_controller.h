@@ -2,8 +2,8 @@
 
 #include "common/types.h"
 
-enum class InterruptSource : u32 {
-    VBlank = 0,
+enum class IOPInterruptSource : u32 {
+    VBlankStart = 0,
     GPU = 1,
     CDVD = 2,
     DMA = 3,
@@ -14,7 +14,7 @@ enum class InterruptSource : u32 {
     SIO1 = 8,
     SPU2 = 9,
     PIO = 10,
-    VBlankEnd = 11,
+    VBlankFinish = 11,
     DVD = 12,
     PCMCIA = 13,
     Timer3 = 14,
@@ -34,7 +34,7 @@ public:
 
     u32 ReadRegister(int offset);
     void WriteRegister(int offset, u32 data);
-    void RequestInterrupt(InterruptSource source);
+    void RequestInterrupt(IOPInterruptSource source);
     void UpdateInterrupts();
 
 private:

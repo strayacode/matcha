@@ -607,6 +607,10 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F801450:
         // not sure what this is
         break;
+    // TODO: clean this
+    case 0x1F801070:
+        system->iop_core->interrupt_controller.WriteRegister(0, data);
+        break;
     case 0x1F801074:
         system->iop_core->interrupt_controller.WriteRegister(4, data);
         break;

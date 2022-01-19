@@ -45,7 +45,6 @@ public:
     u32 ReadControl();
     u32 ReadPriorityControl();
     u32 ReadSkipQuadword();
-    void WriteRingBufferOffset(u32 data);
 
     void Transfer(int index);
 
@@ -66,7 +65,6 @@ public:
     u32 ringbuffer_size;
     u32 ringbuffer_offset;
     u32 disabled_status;
-    u32 disable;
 
     System* system;
 };

@@ -62,6 +62,7 @@ void System::RunFrame() {
         timers.Run(bus_cycles);
         dmac.Run(bus_cycles);
         scheduler.Tick(ee_cycles);
+        scheduler.RunEvents();
     }
 }
 
@@ -76,14 +77,17 @@ void System::SingleStep() {
     timers.Run(bus_cycles);
     dmac.Run(bus_cycles);
     scheduler.Tick(ee_cycles);
+    scheduler.RunEvents();
 }
 
 void System::VBlankStart() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);
+    iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::VBlankStart);
 }
 
 void System::VBlankFinish() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankFinish);
+    iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::VBlankFinish);
 }
 
 void System::SetGamePath(std::string path) {

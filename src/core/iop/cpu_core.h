@@ -34,12 +34,29 @@ public:
     void WriteHalf(u32 addr, u16 data);
     void WriteWord(u32 addr, u32 data);
 
-    void EnableHardwareInterrupt();
-    void DisableHardwareInterrupt();
+    void SendInterruptSignal(bool value);
+    void CheckInterrupts();
+
+    enum class ExceptionType {
+        Interrupt = 0x00,
+        LoadError = 0x04,
+        StoreError = 0x05,
+        Syscall = 0x08,
+        Break = 0x09,
+        Reserved = 0x0A,
+        Overflow = 0x0C,
+    };
+
+    void DoException(ExceptionType exception);
 
     IOPRegs regs;
     IOPCOP0 cop0;
     System* system;
     IOPInterruptController interrupt_controller;
     // FILE* fp = fopen("../../log-stuff/iop1.log", "w");
+
+    
+
+    bool branch_delay;
+    bool branch;
 };

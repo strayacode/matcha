@@ -28,7 +28,6 @@ void DMAC::Reset() {
     ringbuffer_size = 0;
     ringbuffer_offset = 0;
     disabled_status = 0x1201;
-    disable = 0;
 }
 
 u32 DMAC::ReadChannel(u32 addr) {
@@ -210,7 +209,7 @@ void DMAC::CheckInterruptSignal() {
 // dmac can transfer one quadword (16 bytes / 128 bits) per bus cycle
 void DMAC::Run(int cycles) {
     // don't run anything if the dmac is not enabled
-    if (!(control & 0x1)) {
+    if (((control & 0x1) == false) || (disabled_status & (1 << 16))) {
         return;
     }
 

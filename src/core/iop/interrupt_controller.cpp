@@ -30,28 +30,29 @@ u32 IOPInterruptController::ReadRegister(int offset) {
 void IOPInterruptController::WriteRegister(int offset, u32 data) {
     switch (offset) {
     case 0x0:
+        log_debug("[IOP INTC] I_STAT write %08x", data);
         interrupt_status &= data & WRITE_MASK;
+        UpdateInterrupts();
         break;
     case 0x4:
+        log_debug("[IOP INTC] I_MASK write %08x", data);
         interrupt_mask = data & WRITE_MASK;
+        UpdateInterrupts();
         break;
     case 0x8:
         interrupt_control = data & 0x1;
+        UpdateInterrupts();
         break;
     default:
         log_fatal("InterruptController: handle write offset %02x", offset);
     }
 }
 
-void IOPInterruptController::RequestInterrupt(InterruptSource source) {
+void IOPInterruptController::RequestInterrupt(IOPInterruptSource source) {
     interrupt_status |= 1 << static_cast<u32>(source);
+    UpdateInterrupts();
 }
 
 void IOPInterruptController::UpdateInterrupts() {
-    if (interrupt_control && (interrupt_status & interrupt_mask)) {
-        log_fatal("handle enable");
-        // cpu.cpu_cpu.EnableHardwareInterrupt();
-    } else {
-        cpu.DisableHardwareInterrupt();
-    }
+    cpu.SendInterruptSignal(interrupt_control && (interrupt_status & interrupt_mask));
 }

@@ -19,15 +19,6 @@ public:
     void Reset() override;
     void Run(int cycles) override;
 
-    enum class ExceptionType {
-        LoadError = 0x04,
-        StoreError = 0x05,
-        Syscall = 0x08,
-        Break = 0x09,
-        Reserved = 0x0A,
-        Overflow = 0x0C,
-    };
-
 private:
     typedef void (IOPInterpreter::*InstructionHandler)();
     void RegisterOpcode(InstructionHandler handler, int index, InstructionTable table);
@@ -35,7 +26,6 @@ private:
     void UndefinedInstruction();
     void SecondaryInstruction();
     void COP0Instruction();
-    void DoException(ExceptionType exception);
 
     void mfc0();
     void sll();
@@ -93,7 +83,4 @@ private:
 
     std::array<InstructionHandler, 64> primary_table;
     std::array<InstructionHandler, 64> secondary_table;
-
-    bool branch_delay;
-    bool branch;
 };
