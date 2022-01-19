@@ -9,65 +9,76 @@ void Timers::Reset() {
         channels[i].control = 0;
         channels[i].compare = 0;
         channels[i].hold = 0;
-        channels[i].ticks = 0;
+        channels[i].cycles = 0;
+        channels[i].cycles_per_tick = 0;
     }
 }
 
 void Timers::Run(int cycles) {
-    // this is slow af
     while (cycles--) {
         for (int i = 0; i < 4; i++) {
-            u8 clock = channels[i].control & 0x3;
+            channels[i].cycles += cycles;
+
             if (channels[i].control & (1 << 7)) {
-                switch (clock) {
-                case 0:
-                    // since timers are ran at bus clock speed we can just increment by 1
-                    Tick(i, 1);
-                    break;
-                case 2:
-                    // bus speed / 16
-                    channels[i].ticks++;
-
-                    if (channels[i].ticks >= 16) {
-                        Tick(i, 1);
-                        channels[i].ticks = 0;
-                    }
-                    break;
-                case 3:
-                    channels[i].ticks++;
-
-                    if (channels[i].ticks >= 9371) {
-                        Tick(i, 1);
-                        channels[i].ticks = 0;
-                    }
-                    break;
-                default:
-                    log_fatal("handle different clock type %d", clock);
-                }
+                Increment(i);
             }
         }
     }
 }
 
-void Timers::WriteChannel(u32 addr, u32 data) {
-    int reg = (addr >> 4) & 0x3;
+void Timers::WriteRegister(u32 addr, u32 data) {
     int index = (addr >> 11) & 0x3;
 
-    switch (reg) {
-    case 0:
-        WriteCounter(index, data);
+    switch (addr & 0xFF) {
+    case 0x00:
+        log_debug("[Timer] T%d TN_COUNT write %04x", index, data);
+        channels[index].counter = data;
         break;
-    case 1:
-        WriteControl(index, data);
+    case 0x10:
+        log_debug("[Timer] T%d TN_MODE write %04x", index, data);
+        channels[index].control = data;
+
+        // writing 1 to bit 10 or 11 clears them
+        if (data & (1 << 10)) {
+            channels[index].control &= ~(1 << 10);
+        }
+
+        if (data & (1 << 11)) {
+            channels[index].control &= ~(1 << 11);
+        }
+
+        // update how many timer cycles are required to increment the corresponding channel
+        // counter by 1
+        switch (channels[index].control & 0x3) {
+        case 0:
+            // bus clock
+            channels[index].cycles_per_tick = 1;
+            break;
+        case 1:
+            // bus clock / 16
+            channels[index].cycles_per_tick = 16;
+            break;
+        case 2:
+            // bus block / 256
+            channels[index].cycles_per_tick = 256;
+            break;
+        case 3:
+            // hblank
+            channels[index].cycles_per_tick = 9370;
+            break;
+        }
+
         break;
-    case 2:
-        WriteCompare(index, data);
+    case 0x20:
+        log_debug("[Timer] T%d TN_COMP write %04x", index, data);
+        channels[index].compare = data;
         break;
-    case 3:
-        WriteHold(index, data);
+    case 0x30:
+        log_debug("[Timer] T%d TN_HOLD write %04x", index, data);
+        channels[index].hold = data;
         break;
     default:
-        log_fatal("handle reg %d", reg);
+        log_fatal("handle %08x", addr & 0xFF);
     }
 }
 
@@ -82,40 +93,19 @@ u32 Timers::ReadChannel(u32 addr) {
     return 0;
 }
 
-void Timers::WriteControl(int index, u16 data) {
-    log_warn("[Timer %d] control write %04x", index, data);
-    channels[index].control = data;
-
-    // writing 1 to bit 10 or 11 clears them
-    if (data & (1 << 10)) {
-        channels[index].control &= ~(1 << 10);
+void Timers::Increment(int index) {
+    // if enough ticks have passed then we can increment the timer counter by 1
+    if (channels[index].cycles >= channels[index].cycles_per_tick) {
+        channels[index].cycles -= channels[index].cycles_per_tick;
+    } else {
+        // don't do any further calculations as
+        // counter wouldn't have changed
+        return;
     }
 
-    if (data & (1 << 11)) {
-        channels[index].control &= ~(1 << 11);
-    }
-}
-
-void Timers::WriteCounter(int index, u16 data) {
-    log_warn("[Timer %d] counter write %04x", index, data);
-    channels[index].counter = data;
-}
-
-void Timers::WriteCompare(int index, u16 data) {
-    log_warn("[Timer %d] compare write %04x", index, data);
-    channels[index].compare = data;
-}
-
-void Timers::WriteHold(int index, u16 data) {
-    log_warn("[Timer %d] hold write %04x", index, data);
-    channels[index].hold = data;
-}
-
-void Timers::Tick(int index, int ticks) {
-    channels[index].counter += ticks;
+    channels[index].counter++;
 
     if (channels[index].counter == channels[index].compare) {
-        // reset counter when counter is same as compare
         if (channels[index].control & (1 << 6)) {
             channels[index].counter = 0;
         }
@@ -128,8 +118,11 @@ void Timers::Tick(int index, int ticks) {
     if (channels[index].counter > 0xFFFF) {
         channels[index].counter = 0;
 
-        if (channels[index].control & (1 << 9)) {
-            // set the overflow interrupt flag and request 
+        // timer interrupts are edge triggered,
+        // meaning they can only be requested
+        // if either interrupt bit goes from 0 to 1
+        if ((channels[index].control & (1 << 9)) && !(channels[index].control & (1 << 11))) {
+            // set the overflow interrupt flag and request a timer interrupt
             channels[index].control |= (1 << 11);
 
             switch (index) {

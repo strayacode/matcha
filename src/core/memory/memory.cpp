@@ -229,7 +229,6 @@ template void Memory::EEWrite(VAddr vaddr, u128 data);
 template <typename T>
 void Memory::EEWrite(VAddr vaddr, T data) {
     u32 addr = TranslateVirtualAddress(vaddr);
-
     u8* page = ee_table[PageIndex(addr)];
 
     if (page) {
@@ -273,14 +272,13 @@ void Memory::EEWriteHalf(u32 addr, u16 data) {
 }
 
 void Memory::EEWriteWord(u32 addr, u32 data) {
-    if (in_range(0x10000000, 0x10002000, addr)) {
-        system->timers.WriteChannel(addr, data);
+    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
+        system->timers.WriteRegister(addr, data);
         return;
-    }
-
-    if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
+    } else if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
         (addr >= EE_DMA_REGION2_START && addr < EE_DMA_REGION2_END)) {
-        return system->dmac.WriteRegister(addr, data);
+        system->dmac.WriteRegister(addr, data);
+        return;
     } 
 
     switch (addr) {
@@ -368,8 +366,8 @@ void Memory::EEWriteDouble(u32 addr, u64 data) {
         return;
     }
 
-    if (in_range(0x10000000, 0x10002000, addr)) {
-        system->timers.WriteChannel(addr, data);
+    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
+        system->timers.WriteRegister(addr, data);
         return;
     }
 
