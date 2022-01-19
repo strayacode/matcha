@@ -6,7 +6,7 @@ class System;
 
 class IOPDMAC {
 public:
-    IOPDMAC(System& system);
+    IOPDMAC(System* system);
 
     void Reset();
     void Run(int cycles);
@@ -42,5 +42,5 @@ public:
     bool global_dma_interrupt_control;
 
 private:
-    System& system;
+    System* system;
 };

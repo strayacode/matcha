@@ -82,20 +82,20 @@ public:
     void PrintRegs();
     std::string GetSyscallInfo(int index);
 
-    u8 gpr[32 * sizeof(u64) * 2];
-    u32 pc;
-    u32 next_pc;
-    u64 hi;
-    u64 lo;
-    u64 hi1;
-    u64 lo1;
-    u64 sa;
+    u8 gpr[32 * sizeof(u64) * 2] = {};
+    u32 pc = 0;
+    u32 next_pc = 0;
+    u64 hi = 0;
+    u64 lo = 0;
+    u64 hi1 = 0;
+    u64 lo1 = 0;
+    u64 sa = 0;
 
     System& system;
     EECOP0 cop0;
     EECOP1 cop1;
-    bool branch_delay;
-    bool branch;
+    bool branch_delay = false;
+    bool branch = false;
     CPUInstruction inst;
     InterpreterTable interpreter_table;
 

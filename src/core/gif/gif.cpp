@@ -1,9 +1,7 @@
-#include <core/gif/gif.h>
-#include <core/system.h>
+#include "core/gif/gif.h"
+#include "core/system.h"
 
-GIF::GIF(System* system) : system(system) {
-
-}
+GIF::GIF(System* system) : system(system) {}
 
 void GIF::Reset() {
     ctrl = 0;

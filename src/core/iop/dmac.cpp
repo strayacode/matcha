@@ -2,7 +2,7 @@
 #include "core/iop/dmac.h"
 #include "core/system.h"
 
-IOPDMAC::IOPDMAC(System& system) : system(system) {}
+IOPDMAC::IOPDMAC(System* system) : system(system) {}
 
 void IOPDMAC::Reset() {
     for (int i = 0; i < 13; i++) {
@@ -138,23 +138,22 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
 void IOPDMAC::DoSIF1Transfer() {
     Channel& channel = channels[10];
 
+    log_debug("do sif1 transfer");
+
     if (channel.block_count) {
         log_fatal("handle non zero sif1 transfer block count");
     } else if (channel.end_transfer) {
         log_fatal("handle end transfer");
     } else {
-        log_debug("ok");
-        log_debug("%d", system.sif.sif1_fifo.size());
-        log_debug("finish");
-        if (system.sif.sif1_fifo.size() >= 4) {
-            u32 data = system.sif.ReadSIF1FIFO();
+        if (system->sif.GetSIF1FIFOSize() >= 4) {
+            u32 data = system->sif.ReadSIF1FIFO();
 
             channel.address = data & 0xFFFFFF;
-            channel.block_count = system.sif.ReadSIF1FIFO();
+            channel.block_count = system->sif.ReadSIF1FIFO();
 
             // since the ee would've pushed quads one at a time we need to remove the upper 2 words
-            system.sif.ReadSIF1FIFO();
-            system.sif.ReadSIF1FIFO();
+            system->sif.ReadSIF1FIFO();
+            system->sif.ReadSIF1FIFO();
 
             if ((data & (1 << 30)) || (data & (1 << 31))) {
                 channel.end_transfer = true;

@@ -36,8 +36,10 @@ u32 DMAC::ReadChannel(u32 addr) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        log_debug("[DMAC %d] control read %08x", index, channels[index].control);
+        // log_debug("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;
+    case 0x10:
+        return channels[index].address;
     case 0x20:
         return channels[index].quadword_count;
     case 0x30:

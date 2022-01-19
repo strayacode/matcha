@@ -104,3 +104,7 @@ u32 SIF::ReadSIF1FIFO() {
 
     return data;
 }
+
+int SIF::GetSIF1FIFOSize() {
+    return sif1_fifo.size();
+}

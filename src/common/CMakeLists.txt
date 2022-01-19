@@ -3,7 +3,7 @@ add_library(common
     log.h memory_helpers.h
     emu_thread.h emu_thread.cpp
     arithmetic.h log_file.h
-    cpu_types.h
+    cpu_types.h ring_buffer.h
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
