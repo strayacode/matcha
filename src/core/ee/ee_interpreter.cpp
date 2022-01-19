@@ -534,6 +534,7 @@ void EEInterpreter::dsrl32(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     u8 opcode = cpu.ReadByte(cpu.pc - 4);
+    
     log_debug("[EE] executing syscall %s", cpu.GetSyscallInfo(opcode).c_str());
     cpu.DoException(0x80000180, ExceptionType::Syscall);
     cpu.print_regs = true;

@@ -25,6 +25,7 @@ struct DMAChannel {
     u32 saved_tag_address0;
     u32 saved_tag_address1;
     u32 scratchpad_address;
+    bool end_transfer;
 };
 
 class System;

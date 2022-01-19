@@ -37,10 +37,12 @@ u32 IOPDMAC::ReadRegister(u32 addr) {
     case 0x1F8010F0:
         return dpcr;
     case 0x1F8010F4:
+        log_debug("[IOPDMAC] dicr read %08x", dicr);
         return dicr;
     case 0x1F801570:
         return dpcr2;
     case 0x1F801574:
+        log_debug("[IOPDMAC] dicr2 read %08x", dicr2);
         return dicr2;
     case 0x1F801578:
         return global_dma_enable;
@@ -55,33 +57,24 @@ u32 IOPDMAC::ReadChannel(u32 addr) {
     int channel = GetChannelIndex(addr);
     int index = addr & 0xF;
 
-    switch (index) {
-    // case 0x0:
-    //     return channels[channel].address;
-    // case 0x4:
-    //     return (channels[channel].block_count << 16) | channels[channel].block_size;
-    // case 0x8:
-    //     return channels[channel].control;
-    // case 0xC:
-    //     return channels[channel].tag_address;
-    default:
-        log_fatal("handle %02x", index);
-    }
+    log_fatal("handle");
 }
 
 void IOPDMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1F8010F0:
-        log_warn("[IOPDMAC] dpcr write %08x", data);
+        log_debug("[IOPDMAC] dpcr write %08x", data);
         dpcr = data;
         break;
     case 0x1F8010F4:
+        log_debug("[IOPDMAC] dicr write %08x", data);
         dicr = data;
         break;
     case 0x1F801570:
         dpcr2 = data;
         break;
     case 0x1F801574:
+        log_debug("[IOPDMAC] dicr2 write %08x", data);
         dicr2 = data;
         break;
     case 0x1F801578:

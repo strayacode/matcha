@@ -74,6 +74,10 @@ void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
 
+        // if (pc == 0x82000) {
+        //     log_fatal("pk");
+        // }
+
         interpreter_table.Execute(*this, inst);
 
         pc += 4;

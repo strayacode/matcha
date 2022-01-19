@@ -19,6 +19,7 @@ void DMAC::Reset() {
         channels[i].saved_tag_address0 = 0;
         channels[i].saved_tag_address1 = 0;
         channels[i].scratchpad_address = 0;
+        channels[i].end_transfer = false;
     }
 
     control = 0;
@@ -53,7 +54,7 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
         control = data;
         break;
     case 0x1000E010:
-        log_debug("[DMAC] D_STAT write %08x", data);
+        fprintf(system->ee_core.fp, "[DMAC] D_STAT write %08x\n", data);
 
         // for bits (0..9) they get cleared if 1 is written
         interrupt_status &= ~(data & 0x3FF);
@@ -173,12 +174,12 @@ int DMAC::GetChannelIndex(u32 addr) {
 }
 
 u32 DMAC::ReadInterruptStatus() {
-    log_warn("[DMAC] read interrupt status %08x", interrupt_status);
+    fprintf(system->ee_core.fp, "[DMAC] D_STAT read %08x\n", interrupt_status);
     return interrupt_status;
 }
 
 u32 DMAC::ReadControl() {
-    log_warn("[DMAC] read control %08x", control);
+    log_debug("[DMAC] read control %08x\n", control);
     return control;
 }
 
@@ -236,13 +237,17 @@ void DMAC::Transfer(int index) {
 }
 
 void DMAC::DoSIF0Transfer() {
-    log_debug("do sif0 transfer");
+    // log_debug("do sif0 transfer");
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {
         log_fatal("handle");
+    } else if (channel.end_transfer) {
+        log_fatal("handle end transfer");
     } else {
-        EndTransfer(5);
+        if (system->sif.sif0_fifo.size() >= 4) {
+            log_fatal("[DMAC] SIF0 read in the DMATag");
+        }
     }
 }
 
@@ -255,8 +260,6 @@ void DMAC::EndTransfer(int index) {
 
     // raise the stat flag in the stat register
     interrupt_status |= (1 << index);
-
-    fprintf(system->ee_core.fp, "interrupt status is now %08x\n", interrupt_status);
 
     CheckInterruptSignal();
 }

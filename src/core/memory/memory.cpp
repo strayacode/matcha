@@ -252,7 +252,7 @@ void Memory::EEWriteByte(u32 addr, u8 data) {
     switch (addr) {
     case 0x1000F180:
         // kputchar
-        printf("%c", data);
+        fprintf(system->ee_core.fp, "%c", data);
         break;
     default:
         log_fatal("handle ee slow byte write %08x = %02x", addr, data);
