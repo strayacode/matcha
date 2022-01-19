@@ -47,7 +47,5 @@ void IOPCOP0::SetReg(int reg, u32 data) {
     case 12: case 13: case 14:
         gpr[reg] = data;
         break;
-    default:
-        printf("[IOPCOP0] handle cop0 write %d = %08x\n", reg, data);
     }
 }

@@ -252,7 +252,8 @@ void Memory::EEWrite(VAddr vaddr, T data) {
 void Memory::EEWriteByte(u32 addr, u8 data) {
     switch (addr) {
     case 0x1000F180:
-        // some undocumented stuff
+        // kputchar
+        printf("%c", data);
         break;
     default:
         log_fatal("handle ee slow byte write %08x = %02x", addr, data);
