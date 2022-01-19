@@ -57,6 +57,8 @@ public:
     int GetChannelIndex(u32 addr);
     void CheckInterruptSignal();
 
+    void DoSourceChain(int index);
+
     DMAChannel channels[10];
 
     u32 control;

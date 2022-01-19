@@ -2,8 +2,12 @@
 
 #include "common/types.h"
 
+class System;
+
 class IOPDMAC {
 public:
+    IOPDMAC(System& system);
+
     void Reset();
     void Run(int cycles);
     u32 ReadRegister(u32 addr);
@@ -31,11 +35,12 @@ public:
         u16 block_count;
         u32 control;
         u32 tag_address;
+        bool end_transfer;
     } channels[13];
 
     bool global_dma_enable;
     bool global_dma_interrupt_control;
 
 private:
-
+    System& system;
 };

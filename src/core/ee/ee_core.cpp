@@ -113,6 +113,14 @@ u64 EECore::ReadDouble(u32 addr) {
     return system.memory.EERead<u64>(addr);
 }
 
+u128 EECore::ReadQuad(u32 addr) {
+    u128 data;
+    data.i.lo = system.memory.EERead<u64>(addr);
+    data.i.hi = system.memory.EERead<u64>(addr + 8);
+
+    return data;
+}
+
 void EECore::WriteByte(u32 addr, u8 data) {
     system.memory.EEWrite<u8>(addr, data);
 }

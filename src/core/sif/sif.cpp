@@ -89,3 +89,18 @@ u32 SIF::ReadSMCOM() {
 u32 SIF::ReadControl() {
     return control;
 }
+
+void SIF::WriteSIF1FIFO(u128 data) {
+    for (int i = 0; i < 4; i++) {
+        sif1_fifo.push(data.uw[i]);
+        log_debug("[SIF1] push %08x", data.uw[i]);
+    }
+}
+
+u32 SIF::ReadSIF1FIFO() {
+    u32 data = sif1_fifo.front();
+
+    log_debug("[SIF1] pop %08x", data);
+
+    return data;
+}

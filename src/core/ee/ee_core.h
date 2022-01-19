@@ -67,6 +67,7 @@ public:
     u16 ReadHalf(u32 addr);
     u32 ReadWord(u32 addr);
     u64 ReadDouble(u32 addr);
+    u128 ReadQuad(u32 addr);
 
     void WriteByte(u32 addr, u8 data);
     void WriteHalf(u32 addr, u16 data);

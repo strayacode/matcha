@@ -36,7 +36,7 @@ u32 DMAC::ReadChannel(u32 addr) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        log_warn("[DMAC %d] control read %08x", index, channels[index].control);
+        log_debug("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;
     case 0x20:
         return channels[index].quadword_count;
@@ -54,7 +54,7 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
         control = data;
         break;
     case 0x1000E010:
-        fprintf(system->ee_core.fp, "[DMAC] D_STAT write %08x\n", data);
+        log_debug("[DMAC] D_STAT write %08x", data);
 
         // for bits (0..9) they get cleared if 1 is written
         interrupt_status &= ~(data & 0x3FF);
@@ -79,6 +79,10 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
     case 0x1000E050:
         log_debug("[DMAC] D_RBOR write %08x", data);
         ringbuffer_offset = data;
+        break;
+    case 0x1000F590:
+        log_debug("[DMAC] D_ENABLE write %08x", data);
+        disabled_status = data;
         break;
     default:
         if (addr >= 0x1000E000) {
@@ -174,12 +178,12 @@ int DMAC::GetChannelIndex(u32 addr) {
 }
 
 u32 DMAC::ReadInterruptStatus() {
-    fprintf(system->ee_core.fp, "[DMAC] D_STAT read %08x\n", interrupt_status);
+    log_debug("[DMAC] D_STAT read %08x", interrupt_status);
     return interrupt_status;
 }
 
 u32 DMAC::ReadControl() {
-    log_debug("[DMAC] read control %08x\n", control);
+    log_debug("[DMAC] read control %08x", control);
     return control;
 }
 
@@ -231,13 +235,15 @@ void DMAC::Transfer(int index) {
     case DMAChannelType::SIF0:
         DoSIF0Transfer();
         break;
+    case DMAChannelType::SIF1:
+        DoSIF1Transfer();
+        break;
     default:
         log_fatal("handle %d", index);
     }
 }
 
 void DMAC::DoSIF0Transfer() {
-    // log_debug("do sif0 transfer");
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {
@@ -252,14 +258,55 @@ void DMAC::DoSIF0Transfer() {
 }
 
 void DMAC::DoSIF1Transfer() {
+    DMAChannel& channel = channels[6];
 
+    if (channel.quadword_count) {
+        // push data to the sif1 fifo
+        system->sif.WriteSIF1FIFO(system->ee_core.ReadQuad(channel.tag_address));
+
+        // madr and qwc must be updated as the transfer proceeds
+        channel.address += 16;
+        channel.quadword_count--;
+    } else if (channel.end_transfer) {
+        EndTransfer(6);
+    } else {
+        DoSourceChain(6);
+    }
 }
 
 void DMAC::EndTransfer(int index) {
+    channels[index].end_transfer = false;
     channels[index].control &= ~(1 << 8);
 
     // raise the stat flag in the stat register
     interrupt_status |= (1 << index);
 
     CheckInterruptSignal();
+}
+
+void DMAC::DoSourceChain(int index) {
+    DMAChannel& channel = channels[index];
+    u128 data = system->ee_core.ReadQuad(channel.tag_address);
+    u64 dma_tag = data.i.lo;
+
+    channel.quadword_count = dma_tag & 0xFFFF;
+    channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
+
+    u8 id = (dma_tag >> 28) & 0x7;
+
+    // lower 4 bits must be 0
+    u32 addr = (dma_tag >> 32) & 0xFFFFFFF0;
+
+    switch (id) {
+    case 0:
+        // MADR=DMAtag.ADDR
+        // TADR+=16
+        // tag_end=true
+        channel.address = addr;
+        channel.tag_address += 16;
+        channel.end_transfer = true;
+        break;
+    default:
+        log_fatal("[DMAC] %s handle DMATag id %d", channel_names[index], id);
+    }
 }

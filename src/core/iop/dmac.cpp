@@ -1,5 +1,8 @@
 #include "common/log.h"
 #include "core/iop/dmac.h"
+#include "core/system.h"
+
+IOPDMAC::IOPDMAC(System& system) : system(system) {}
 
 void IOPDMAC::Reset() {
     for (int i = 0; i < 13; i++) {
@@ -8,6 +11,7 @@ void IOPDMAC::Reset() {
         channels[i].block_count = 0;
         channels[i].control = 0;
         channels[i].tag_address = 0;
+        channels[i].end_transfer = false;
     }
 
     dpcr = 0x07777777;
@@ -20,7 +24,7 @@ void IOPDMAC::Reset() {
 
 void IOPDMAC::Run(int cycles) {
     for (int i = 7; i < 13; i++) {
-        if (GetChannelEnable(i) && channels[i].control & (1 << 24)) {
+        if (GetChannelEnable(i) && (channels[i].control & (1 << 24))) {
             switch (i) {
             case 10:
                 DoSIF1Transfer();
@@ -134,9 +138,27 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
 void IOPDMAC::DoSIF1Transfer() {
     Channel& channel = channels[10];
 
-    // if (channel.block_count) {
-    //     log_fatal("handle non zero sif1 transfer block count");
-    // } else {
-    //     log_fatal("handle zero sif1 transfer block count");
-    // }
+    if (channel.block_count) {
+        log_fatal("handle non zero sif1 transfer block count");
+    } else if (channel.end_transfer) {
+        log_fatal("handle end transfer");
+    } else {
+        log_debug("ok");
+        log_debug("%d", system.sif.sif1_fifo.size());
+        log_debug("finish");
+        if (system.sif.sif1_fifo.size() >= 4) {
+            u32 data = system.sif.ReadSIF1FIFO();
+
+            channel.address = data & 0xFFFFFF;
+            channel.block_count = system.sif.ReadSIF1FIFO();
+
+            // since the ee would've pushed quads one at a time we need to remove the upper 2 words
+            system.sif.ReadSIF1FIFO();
+            system.sif.ReadSIF1FIFO();
+
+            if ((data & (1 << 30)) || (data & (1 << 31))) {
+                channel.end_transfer = true;
+            }
+        }
+    }
 }

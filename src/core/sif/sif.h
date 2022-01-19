@@ -3,6 +3,7 @@
 #include <queue>
 #include "common/types.h"
 #include "common/log.h"
+#include "common/int128.h"
 
 class SIF {
 public:
@@ -39,4 +40,7 @@ public:
     // TODO: do more research into sif dmas and sif fifo
     std::queue<u32> sif0_fifo;
     std::queue<u32> sif1_fifo;
+
+    u32 ReadSIF1FIFO();
+    void WriteSIF1FIFO(u128 data);
 };

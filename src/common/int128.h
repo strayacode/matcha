@@ -9,6 +9,7 @@ union u128 {
     } i;
 
     u64 ud[2];
+    u32 uw[4];
 
     u128 inline operator |(u128 value) {
         u128 data;
