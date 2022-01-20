@@ -26,8 +26,32 @@ public:
     // used for the remaining channels
     u32 dpcr2;
 
-    u32 dicr;
-    u32 dicr2;
+    union DICR {
+        struct {
+            u8 completion: 7;
+            u32 : 8;
+            bool force_irq : 1;
+            u8 masks : 7;
+            bool master_interrupt_enable : 1;
+            u8 flags : 7;
+            bool master_interrupt_flag : 1;
+        };
+
+        u32 data;
+    } dicr;
+
+    union DICR2 {
+        struct {
+            u16 tag_interrupt : 13;
+            u8 : 3;
+            u8 masks : 6;
+            u8 : 2;
+            u8 flags : 6;
+            u8 : 2;
+        };
+
+        u32 data;
+    } dicr2;
 
     struct Channel {
         u32 address;

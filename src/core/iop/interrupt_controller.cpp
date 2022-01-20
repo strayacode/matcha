@@ -30,12 +30,12 @@ u32 IOPInterruptController::ReadRegister(int offset) {
 void IOPInterruptController::WriteRegister(int offset, u32 data) {
     switch (offset) {
     case 0x0:
-        log_debug("[IOP INTC] I_STAT write %08x", data);
+        // log_debug("[IOP INTC] I_STAT write %08x", data);
         interrupt_status &= data & WRITE_MASK;
         UpdateInterrupts();
         break;
     case 0x4:
-        log_debug("[IOP INTC] I_MASK write %08x", data);
+        // log_debug("[IOP INTC] I_MASK write %08x", data);
         interrupt_mask = data & WRITE_MASK;
         UpdateInterrupts();
         break;

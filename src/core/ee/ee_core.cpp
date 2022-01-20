@@ -115,6 +115,8 @@ u64 EECore::ReadDouble(u32 addr) {
 
 u128 EECore::ReadQuad(u32 addr) {
     u128 data;
+    // log_debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
+    // log_debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
     data.i.lo = system.memory.EERead<u64>(addr);
     data.i.hi = system.memory.EERead<u64>(addr + 8);
 

@@ -253,7 +253,7 @@ void DMAC::DoSIF0Transfer() {
     } else if (channel.end_transfer) {
         log_fatal("handle end transfer");
     } else {
-        if (system->sif.sif0_fifo.size() >= 4) {
+        if (system->sif.GetSIF0FIFOSize() >= 4) {
             log_fatal("[DMAC] SIF0 read in the DMATag");
         }
     }
@@ -290,6 +290,8 @@ void DMAC::DoSourceChain(int index) {
     DMAChannel& channel = channels[index];
     u128 data = system->ee_core.ReadQuad(channel.tag_address);
     u64 dma_tag = data.i.lo;
+
+    log_debug("[DMAC] %s read dmatag %016lx from tag address %08x", channel_names[index], dma_tag, channel.tag_address);
 
     channel.quadword_count = dma_tag & 0xFFFF;
     channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);

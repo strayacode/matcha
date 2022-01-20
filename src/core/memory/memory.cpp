@@ -478,7 +478,8 @@ u16 Memory::IOPReadHalf(u32 addr) {
 
 u32 Memory::IOPReadWord(u32 addr) {
     if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
-        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END) ||
+        (addr >= IOP_DMA_REGION3_START && addr < IOP_DMA_REGION3_END)) {
         return system->iop_dmac.ReadRegister(addr);
     } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
         (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
@@ -549,7 +550,8 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
 
 void Memory::IOPWriteHalf(u32 addr, u16 data) {
     if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
-        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END) ||
+        (addr >= IOP_DMA_REGION3_START && addr < IOP_DMA_REGION3_END)) {
         system->iop_dmac.WriteRegister(addr, data);
         return;
     } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
@@ -566,7 +568,8 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
 
 void Memory::IOPWriteWord(u32 addr, u32 data) {
     if ((addr >= IOP_DMA_REGION1_START && addr < IOP_DMA_REGION1_END) ||
-        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END)) {
+        (addr >= IOP_DMA_REGION2_START && addr < IOP_DMA_REGION2_END) ||
+        (addr >= IOP_DMA_REGION3_START && addr < IOP_DMA_REGION3_END)) {
         system->iop_dmac.WriteRegister(addr, data);
         return;
     } else if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
@@ -604,7 +607,10 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F802070:
     case 0x1F801060:
     case 0x1F801450:
-        // not sure what this is
+    case 0x1F801560:
+    case 0x1F801564:
+    case 0x1F801568:
+        // undocumented
         break;
     // TODO: clean this
     case 0x1F801070:

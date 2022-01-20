@@ -99,10 +99,15 @@ void SIF::WriteSIF1FIFO(u128 data) {
 
 u32 SIF::ReadSIF1FIFO() {
     u32 data = sif1_fifo.front();
+    sif1_fifo.pop();
 
     log_debug("[SIF1] pop %08x", data);
 
     return data;
+}
+
+int SIF::GetSIF0FIFOSize() {
+    return sif0_fifo.size();
 }
 
 int SIF::GetSIF1FIFOSize() {
