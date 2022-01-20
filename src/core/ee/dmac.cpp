@@ -249,12 +249,32 @@ void DMAC::DoSIF0Transfer() {
     DMAChannel& channel = channels[5];
 
     if (channel.quadword_count) {
-        log_fatal("handle");
-    } else if (channel.end_transfer) {
-        log_fatal("handle end transfer");
-    } else {
+        // dmac can only transfer a quadword at a time
         if (system->sif.GetSIF0FIFOSize() >= 4) {
-            log_fatal("[DMAC] SIF0 read in the DMATag");
+            for (int i = 0; i < 4; i++) {
+                system->ee_core.WriteWord(channel.address, system->sif.ReadSIF0FIFO());
+                channel.address += 4;
+            }
+
+            channel.quadword_count--;
+        }
+    } else if (channel.end_transfer) {
+        EndTransfer(5);
+    } else {
+        if (system->sif.GetSIF0FIFOSize() >= 2) {
+            // form a dmatag
+            u64 dma_tag = 0;
+
+            dma_tag |= system->sif.ReadSIF0FIFO();
+            dma_tag |= (u64)system->sif.ReadSIF0FIFO() << 32;
+            channel.quadword_count = dma_tag & 0xFFFF;
+            channel.address = (dma_tag >> 32) & 0xFFFFFFF0;
+            channel.tag_address += 16;
+            channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
+
+            if (((dma_tag & (1 << 31)) && (channel.control & (1 << 7)))) {
+                channel.end_transfer = true;
+            }
         }
     }
 }
@@ -264,7 +284,7 @@ void DMAC::DoSIF1Transfer() {
 
     if (channel.quadword_count) {
         // push data to the sif1 fifo
-        system->sif.WriteSIF1FIFO(system->ee_core.ReadQuad(channel.tag_address));
+        system->sif.WriteSIF1FIFO(system->ee_core.ReadQuad(channel.address));
 
         // madr and qwc must be updated as the transfer proceeds
         channel.address += 16;
@@ -291,7 +311,7 @@ void DMAC::DoSourceChain(int index) {
     u128 data = system->ee_core.ReadQuad(channel.tag_address);
     u64 dma_tag = data.i.lo;
 
-    log_debug("[DMAC] %s read dmatag %016lx from tag address %08x", channel_names[index], dma_tag, channel.tag_address);
+    // log_debug("[DMAC] %s read dmatag %016lx from tag address %08x", channel_names[index], dma_tag, channel.tag_address);
 
     channel.quadword_count = dma_tag & 0xFFFF;
     channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
@@ -312,5 +332,9 @@ void DMAC::DoSourceChain(int index) {
         break;
     default:
         log_fatal("[DMAC] %s handle DMATag id %d", channel_names[index], id);
+    }
+
+    if (((dma_tag & (1 << 31)) && (channel.control & (1 << 7)))) {
+        channel.end_transfer = true;
     }
 }

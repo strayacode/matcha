@@ -582,6 +582,9 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1D000010:
         system->sif.WriteSMCOM(data);
         break;
+    case 0x1D000020:
+        system->sif.ResetMSFLAG(data);
+        break;
     case 0x1D000030:
         system->sif.SetSMFLAG(data);
         break;

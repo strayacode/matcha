@@ -17,6 +17,7 @@ public:
     void WriteSMCOM(u32 data);
     void SetMSFLAG(u32 data);
     void SetSMFLAG(u32 data);
+    void ResetMSFLAG(u32 data);
     void ResetSMFLAG(u32 data);
 
     u32 ReadMSFLAG();
@@ -42,7 +43,9 @@ public:
     std::queue<u32> sif0_fifo;
     std::queue<u32> sif1_fifo;
 
+    u32 ReadSIF0FIFO();
     u32 ReadSIF1FIFO();
+    void WriteSIF0FIFO(u32 data);
     void WriteSIF1FIFO(u128 data);
     int GetSIF0FIFOSize();
     int GetSIF1FIFOSize();

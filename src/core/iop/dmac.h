@@ -16,7 +16,10 @@ public:
     void WriteChannel(u32 addr, u32 data);
     int GetChannelIndex(u32 addr);
     bool GetChannelEnable(int index);
+    void DoSIF0Transfer();
     void DoSIF1Transfer();
+    void EndTransfer(int index);
+    void CheckInterruptSignal();
 
     // dma priority/enable
     // used for the first 7 channels
