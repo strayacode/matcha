@@ -1,3 +1,4 @@
+#include "common/log_file.h"
 #include "core/iop/cpu_core.h"
 #include "core/system.h"
 
@@ -48,6 +49,8 @@ void IOPCore::CheckInterrupts() {
 }
 
 void IOPCore::DoException(ExceptionType exception) {
+    LogFile::Get().Log("[IOP] trigger exception with type %02x\n", static_cast<int>(exception));
+
     // store the address where the exception took place
     // in cop0 epc
     // if we are currently in a branch delay slot with a syscall

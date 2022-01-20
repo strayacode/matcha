@@ -6,7 +6,7 @@ class System;
 
 class IOPDMAC {
 public:
-    IOPDMAC(System* system);
+    IOPDMAC(System& system);
 
     void Reset();
     void Run(int cycles);
@@ -19,7 +19,6 @@ public:
     void DoSIF0Transfer();
     void DoSIF1Transfer();
     void EndTransfer(int index);
-    void CheckInterruptSignal();
 
     // dma priority/enable
     // used for the first 7 channels
@@ -69,5 +68,5 @@ public:
     bool global_dma_interrupt_control;
 
 private:
-    System* system;
+    System& system;
 };

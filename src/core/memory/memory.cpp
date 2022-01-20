@@ -469,6 +469,11 @@ u8 Memory::IOPReadByte(u32 addr) {
 }
 
 u16 Memory::IOPReadHalf(u32 addr) {
+    if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
+        (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
+        return system->iop_timers.ReadRegister(addr);
+    }
+
     switch (addr) {
     default:
         log_fatal("handle slow half read %08x", addr);

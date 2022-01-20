@@ -1,3 +1,4 @@
+#include "common/log_file.h"
 #include "core/ee/dmac.h"
 #include "core/system.h"
 
@@ -267,6 +268,9 @@ void DMAC::DoSIF0Transfer() {
 
             dma_tag |= system->sif.ReadSIF0FIFO();
             dma_tag |= (u64)system->sif.ReadSIF0FIFO() << 32;
+
+            LogFile::Get().Log("[DMAC] SIF0 read DMATag %016lx\n", dma_tag);
+
             channel.quadword_count = dma_tag & 0xFFFF;
             channel.address = (dma_tag >> 32) & 0xFFFFFFF0;
             channel.tag_address += 16;
@@ -284,7 +288,11 @@ void DMAC::DoSIF1Transfer() {
 
     if (channel.quadword_count) {
         // push data to the sif1 fifo
-        system->sif.WriteSIF1FIFO(system->ee_core.ReadQuad(channel.address));
+        u128 data = system->ee_core.ReadQuad(channel.address);
+
+        LogFile::Get().Log("[DMAC] SIF1 Fifo write %016lx%016lx\n", data.i.hi, data.i.lo);
+
+        system->sif.WriteSIF1FIFO(data);
 
         // madr and qwc must be updated as the transfer proceeds
         channel.address += 16;
@@ -311,7 +319,7 @@ void DMAC::DoSourceChain(int index) {
     u128 data = system->ee_core.ReadQuad(channel.tag_address);
     u64 dma_tag = data.i.lo;
 
-    // log_debug("[DMAC] %s read dmatag %016lx from tag address %08x", channel_names[index], dma_tag, channel.tag_address);
+    LogFile::Get().Log("[DMAC] %s read DMATag %016lx\n", channel_names[index], dma_tag);
 
     channel.quadword_count = dma_tag & 0xFFFF;
     channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
