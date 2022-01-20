@@ -49,6 +49,7 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::sdl, 44, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::sdr, 45, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::cache, 47, InstructionTable::Primary);
+    RegisterOpcode(&EEInterpreter::lwc1, 49, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::ld, 55, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::swc1, 57, InstructionTable::Primary);
     RegisterOpcode(&EEInterpreter::sd, 63, InstructionTable::Primary);
@@ -110,6 +111,7 @@ void InterpreterTable::Generate() {
 
     // fpu_s instructions
     RegisterOpcode(&EEInterpreter::adda_s, 24, InstructionTable::FPUS);
+    RegisterOpcode(&EEInterpreter::madd_s, 28, InstructionTable::FPUS);
 
     // cop2 instructions
     RegisterOpcode(&EEInterpreter::cfc2, 2, InstructionTable::COP2);

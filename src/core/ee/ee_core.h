@@ -81,7 +81,7 @@ public:
     bool InterruptsEnabled();
     void PrintState();
     std::string GetSyscallInfo(int index);
-    void LogInstruction(CPUInstruction inst);
+    void LogInstruction();
 
     u8 gpr[32 * sizeof(u64) * 2] = {};
     u32 pc = 0;

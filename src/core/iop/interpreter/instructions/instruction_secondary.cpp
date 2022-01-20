@@ -114,3 +114,24 @@ void IOPInterpreter::srlv() {
 void IOPInterpreter::add() {
     SetReg(inst.rd, GetReg(inst.rs) + GetReg(inst.rt));
 }
+
+void IOPInterpreter::div() {
+    s32 rs = (s32)GetReg(inst.rs);
+    s32 rt = (s32)GetReg(inst.rt);
+
+    if (rt == 0) {
+        if (rs < 0) {
+            regs.lo = 1;
+        } else {
+            regs.lo = 0xFFFFFFFF;
+        }
+
+        regs.hi = rs;
+    } else if ((u32)rs == 0x80000000 && (u32)rt == 0xFFFFFFFF) {
+        regs.lo = 0x80000000;
+        regs.hi = 0;
+    } else {
+        regs.lo = rs / rt;
+        regs.hi = rs % rt;
+    }
+}

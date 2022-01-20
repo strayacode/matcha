@@ -50,6 +50,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::mtlo, 19, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::mult, 24, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::multu, 25, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::div, 26, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::divu, 27, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::add, 32, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::addu, 33, InstructionTable::Secondary);

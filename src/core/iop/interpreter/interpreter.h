@@ -76,6 +76,7 @@ private:
     void nor();
     void srlv();
     void add();
+    void div();
 
     void IOPPuts();
 

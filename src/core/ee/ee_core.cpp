@@ -69,8 +69,6 @@ void EECore::Reset() {
     interpreter_table.Generate();
 }
 
-bool disassemble = false;
-
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
@@ -141,8 +139,8 @@ void EECore::WriteQuad(u32 addr, u128 data) {
 }
 
 void EECore::DoException(u32 target, ExceptionType exception) {
-    LogFile::Get().Log("[EE] trigger exception with type %02x\n", static_cast<int>(exception));
-    
+    LogFile::Get().Log("[EE] trigger exception with type %02x at pc = %08x\n", static_cast<int>(exception), pc);
+
     bool level2_exception = static_cast<int>(exception) >= 14;
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
 
@@ -156,6 +154,9 @@ void EECore::DoException(u32 target, ExceptionType exception) {
 
         pc = target - 4;
     }
+
+    branch_delay = false;
+    branch = false;
 }
 
 void EECore::SendInterruptSignal(int signal, bool value) {
@@ -183,7 +184,7 @@ void EECore::CheckInterrupts() {
         bool int1_enable = (cop0.gpr[12] >> 11) & 0x1;
         
         if (int1_enable && cop0.cause.int1_pending) {
-            LogFile::Get().Log("[EE] do int1 interrupt %08x\n", cop0.cause.data);
+            LogFile::Get().Log("[EE] do int1 interrupt\n");
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
@@ -222,6 +223,6 @@ std::string EECore::GetSyscallInfo(int index) {
     return syscall_info[index];
 }
 
-void EECore::LogInstruction(CPUInstruction inst) {
+void EECore::LogInstruction() {
     LogFile::Get().Log("[EE] %08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
 }

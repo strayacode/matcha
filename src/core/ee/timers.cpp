@@ -1,3 +1,4 @@
+#include "common/log_file.h"
 #include "core/ee/timers.h"
 #include "core/system.h"
 
@@ -124,6 +125,8 @@ void Timers::Increment(int index) {
         if ((channels[index].control & (1 << 9)) && !(channels[index].control & (1 << 11))) {
             // set the overflow interrupt flag and request a timer interrupt
             channels[index].control |= (1 << 11);
+            
+            LogFile::Get().Log("[Timer] T%d request overflow interrupt\n", index);
 
             switch (index) {
             case 0:

@@ -15,6 +15,7 @@ void EEInterpreter::mtc0(EECore& cpu, CPUInstruction inst) {
 }
 
 // COP1 instructions
+// TODO: do instruction execution in the cop1
 void EEInterpreter::swc1(EECore& cpu, CPUInstruction inst) {
     cpu.WriteWord(cpu.GetReg<u32>(inst.rs) + inst.simm, cpu.cop1.GetReg(inst.rt));
 }
@@ -42,6 +43,26 @@ void EEInterpreter::cfc1(EECore& cpu, CPUInstruction inst) {
     default:
         log_fatal("[EEInterpreter] operation where fs != 0 or fs != 31 is undefined");
     }
+}
+
+void EEInterpreter::madd_s(EECore& cpu, CPUInstruction inst) {
+    float fs = cpu.cop1.AsFloat(cpu.cop1.GetReg(inst.rd));
+    float ft = cpu.cop1.AsFloat(cpu.cop1.GetReg(inst.rt));
+    float acc = cpu.cop1.AsFloat(cpu.cop1.accumulator.u);
+
+    cpu.cop1.SetReg(inst.imm5, acc + (fs * ft));
+
+    // TODO: handle overflows and underflows
+}
+
+void EEInterpreter::lwc1(EECore& cpu, CPUInstruction inst) {
+    u32 addr = cpu.GetReg<u32>(inst.rs) + inst.simm;
+
+    if (addr & 0x3) {
+        log_fatal("[EEInterpreter] handle address exception");
+    }
+
+    cpu.cop1.SetReg(inst.rt, cpu.ReadWord(addr));
 }
 
 // COP2 instructions
