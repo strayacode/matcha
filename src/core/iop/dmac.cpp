@@ -166,7 +166,7 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
 }
 
 void IOPDMAC::DoSIF0Transfer() {
-    Channel& channel = channels[10];
+    Channel& channel = channels[9];
 
     if (channel.block_count) {
         // read data from iop ram and push to the sif0 fifo
@@ -175,26 +175,21 @@ void IOPDMAC::DoSIF0Transfer() {
         channel.address += 4;
         channel.block_count--;
     } else if (channel.end_transfer) {
-        log_fatal("handle end of transfer");
+        EndTransfer(9);
     } else {
         u32 data = system->iop_core->ReadWord(channel.tag_address);
         u32 block_count = system->iop_core->ReadWord(channel.tag_address + 4);
 
-        log_debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
+        system->sif.WriteSIF0FIFO(system->iop_core->ReadWord(channel.tag_address + 8));
+        system->sif.WriteSIF0FIFO(system->iop_core->ReadWord(channel.tag_address + 12));
+
+        // log_debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
         // round to the nearest 4
         channel.block_count = (block_count + 3) & 0xFFFFFFFC;
         channel.address = data & 0xFFFFFF;
 
-        channel.tag_address += 8;
-
-        // check channel control bit 8
-        // for chain mode it means the dmatag is transferred before the data
-        if (channel.control & (1 << 8)) {
-            system->sif.WriteSIF0FIFO(system->iop_core->ReadWord(channel.tag_address));
-            system->sif.WriteSIF0FIFO(system->iop_core->ReadWord(channel.tag_address + 4));
-            channel.tag_address += 8;
-        }
+        channel.tag_address += 16;
 
         if ((data & (1 << 30)) || (data & (1 << 31))) {
             channel.end_transfer = true;

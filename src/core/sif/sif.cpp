@@ -101,7 +101,6 @@ void SIF::WriteSIF0FIFO(u32 data) {
 void SIF::WriteSIF1FIFO(u128 data) {
     for (int i = 0; i < 4; i++) {
         sif1_fifo.push(data.uw[i]);
-        log_debug("[SIF1] push %08x", data.uw[i]);
     }
 }
 
@@ -109,16 +108,12 @@ u32 SIF::ReadSIF0FIFO() {
     u32 data = sif0_fifo.front();
     sif0_fifo.pop();
 
-    log_debug("[SIF0] pop %08x", data);
-
     return data;
 }
 
 u32 SIF::ReadSIF1FIFO() {
     u32 data = sif1_fifo.front();
     sif1_fifo.pop();
-
-    log_debug("[SIF1] pop %08x", data);
 
     return data;
 }

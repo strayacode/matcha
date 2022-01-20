@@ -60,8 +60,8 @@ void IOPCore::DoException(ExceptionType exception) {
     }
 
     // record the cause of the exception (in this case a syscall)
-    cop0.SetReg(13, static_cast<u8>(exception) << 2);
-
+    cop0.gpr[13] = static_cast<u8>(exception) << 2;
+    
     u32 exception_base = 0;
 
     if (cop0.GetReg(12) & (1 << 22)) {

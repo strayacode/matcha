@@ -58,11 +58,11 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
     case 0x1000E010:
         log_debug("[DMAC] D_STAT write %08x", data);
 
-        // for bits (0..9) they get cleared if 1 is written
-        interrupt_status &= ~(data & 0x3FF);
+        // for bits (0..15) they get cleared if 1 is written
+        interrupt_status &= ~(data & 0xFFFF);
 
-        // for bits (16..25) they get reversed if 1 is written
-        interrupt_status ^= (data & 0x3FF0000);
+        // for bits (16..31) they get reversed if 1 is written
+        interrupt_status ^= (data & 0xFFFF0000);
 
         CheckInterruptSignal();
         break;

@@ -1,4 +1,4 @@
-#include <core/iop/cop0.h>
+#include "core/iop/cop0.h"
 
 enum COP0Regs {
     Index = 0,
@@ -44,7 +44,7 @@ u32 IOPCOP0::GetReg(int reg) {
 
 void IOPCOP0::SetReg(int reg, u32 data) {
     switch (reg) {
-    case 12: case 13: case 14:
+    case 12: case 14:
         gpr[reg] = data;
         break;
     }
