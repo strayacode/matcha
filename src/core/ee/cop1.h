@@ -15,7 +15,9 @@ public:
 
     u32 GetReg(int reg);
     void SetReg(int reg, u32 data);
+    u32 GetControlReg(int reg);
     void SetControlReg(int reg, u32 data);
+    
     f32 AsFloat(u32 value);
 
     FPURegister fpr[32];

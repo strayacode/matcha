@@ -178,7 +178,10 @@ static std::map<int, DisassemblyInfo> tlb_table = {
 
 static std::map<int, DisassemblyInfo> mmi_table = {
     {4, DisassemblyInfo{"plzcw $rd, $rs", InstructionType::Register}},
+    {16, DisassemblyInfo{"mfhi1 $rd", InstructionType::Register}},
+    {17, DisassemblyInfo{"mthi1 $rs", InstructionType::Register}},
     {18, DisassemblyInfo{"mflo1 $rd", InstructionType::Register}},
+    {19, DisassemblyInfo{"mtlo1 $rs", InstructionType::Register}},
     {24, DisassemblyInfo{"mult1 $rd, $rs, $rt", InstructionType::Register}},
     {27, DisassemblyInfo{"divu1 $rs, $rt", InstructionType::Register}},
 };

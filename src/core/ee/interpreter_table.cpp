@@ -68,7 +68,9 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::break_exception, 13, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::sync, 15, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::mfhi, 16, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mthi, 17, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::mflo, 18, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mtlo, 19, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::dsllv, 20, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::dsrav, 23, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::mult, 24, InstructionTable::Secondary);
@@ -79,6 +81,8 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::andd, 36, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::orr, 37, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::nor, 39, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mfsa, 40, InstructionTable::Secondary);
+    RegisterOpcode(&EEInterpreter::mtsa, 41, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::slt, 42, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::sltu, 43, InstructionTable::Secondary);
     RegisterOpcode(&EEInterpreter::daddu, 45, InstructionTable::Secondary);
@@ -100,6 +104,7 @@ void InterpreterTable::Generate() {
     RegisterOpcode(&EEInterpreter::mtc0, 4, InstructionTable::COP0);
 
     // cop1 instructions
+    RegisterOpcode(&EEInterpreter::cfc1, 2, InstructionTable::COP1);
     RegisterOpcode(&EEInterpreter::mtc1, 4, InstructionTable::COP1);
     RegisterOpcode(&EEInterpreter::ctc1, 6, InstructionTable::COP1);
 
@@ -118,7 +123,10 @@ void InterpreterTable::Generate() {
 
     // mmi instructions
     RegisterOpcode(&EEInterpreter::plzcw, 4, InstructionTable::MMI);
+    RegisterOpcode(&EEInterpreter::mfhi1, 16, InstructionTable::MMI);
+    RegisterOpcode(&EEInterpreter::mthi1, 17, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::mflo1, 18, InstructionTable::MMI);
+    RegisterOpcode(&EEInterpreter::mtlo1, 19, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::mult1, 24, InstructionTable::MMI);
     RegisterOpcode(&EEInterpreter::divu1, 27, InstructionTable::MMI);
 

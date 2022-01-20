@@ -17,6 +17,10 @@ void EECOP1::SetReg(int reg, u32 data) {
     fpr[reg].u = data;
 }
 
+u32 EECOP1::GetControlReg(int reg) {
+    return control[reg];
+}
+
 void EECOP1::SetControlReg(int reg, u32 data) {
     control[reg] = data;
 }

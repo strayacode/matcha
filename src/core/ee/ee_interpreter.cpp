@@ -33,6 +33,17 @@ void EEInterpreter::ctc1(EECore& cpu, CPUInstruction inst) {
     cpu.cop1.SetControlReg(inst.rd, cpu.GetReg<u32>(inst.rt));
 }
 
+void EEInterpreter::cfc1(EECore& cpu, CPUInstruction inst) {
+    switch (inst.rd) {
+    case 0:
+    case 31:
+        cpu.SetReg<u64>(inst.rt, static_cast<s32>(cpu.cop1.GetControlReg(inst.rd)));
+        break;
+    default:
+        log_fatal("[EEInterpreter] operation where fs != 0 or fs != 31 is undefined");
+    }
+}
+
 // COP2 instructions
 void EEInterpreter::cfc2(EECore& cpu, CPUInstruction inst) {
     // handle vu stuff
@@ -80,11 +91,23 @@ void EEInterpreter::padduw(EECore& cpu, CPUInstruction inst) {
     }
 }
 
+void EEInterpreter::mfhi1(EECore& cpu, CPUInstruction inst) {
+    cpu.SetReg<u64>(inst.rd, cpu.hi1);
+}
+
 void EEInterpreter::plzcw(EECore& cpu, CPUInstruction inst) {
     for (int i = 0; i < 2; i++) {
         u32 data = cpu.GetReg<u32>(inst.rs, i);
         cpu.SetReg<u32>(inst.rd, CountLeadingSignBits(data) - 1, i);
     }
+}
+
+void EEInterpreter::mthi1(EECore& cpu, CPUInstruction inst) {
+    cpu.hi1 = cpu.GetReg<u64>(inst.rs);
+}
+
+void EEInterpreter::mtlo1(EECore& cpu, CPUInstruction inst) {
+    cpu.lo1 = cpu.GetReg<u64>(inst.rs);
 }
 
 // primary instructions
@@ -530,6 +553,22 @@ void EEInterpreter::dsubu(EECore& cpu, CPUInstruction inst) {
     cpu.SetReg<u64>(inst.rd, cpu.GetReg<s64>(inst.rs) - cpu.GetReg<s64>(inst.rt));
 }
 
+void EEInterpreter::mfsa(EECore& cpu, CPUInstruction inst) {
+    cpu.SetReg<u64>(inst.rd, cpu.sa);
+}
+
+void EEInterpreter::mthi(EECore& cpu, CPUInstruction inst) {
+    cpu.hi = cpu.GetReg<u64>(inst.rs);
+}
+
+void EEInterpreter::mtlo(EECore& cpu, CPUInstruction inst) {
+    cpu.lo = cpu.GetReg<u64>(inst.rs);
+}
+
+void EEInterpreter::mtsa(EECore& cpu, CPUInstruction inst) {
+    cpu.sa = cpu.GetReg<u64>(inst.rs);
+}
+
 // tlb instructions
 void EEInterpreter::tlbwi(EECore& cpu, CPUInstruction inst) {
     // when we handle mmu emulation the tlb will be used
@@ -575,7 +614,7 @@ void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
-    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, fmt = %d, imm5 = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
+    log_fatal("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {

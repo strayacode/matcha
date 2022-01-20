@@ -93,6 +93,14 @@ namespace EEInterpreter {
     void mtc1(EECore& cpu, CPUInstruction inst);
     void adda_s(EECore& cpu, CPUInstruction inst);
     void ctc1(EECore& cpu, CPUInstruction inst);
+    void mfhi1(EECore& cpu, CPUInstruction inst);
+    void mfsa(EECore& cpu, CPUInstruction inst);
+    void mthi(EECore& cpu, CPUInstruction inst);
+    void mthi1(EECore& cpu, CPUInstruction inst);
+    void mtlo(EECore& cpu, CPUInstruction inst);
+    void mtlo1(EECore& cpu, CPUInstruction inst);
+    void mtsa(EECore& cpu, CPUInstruction inst);
+    void cfc1(EECore& cpu, CPUInstruction inst);
     void unknown_instruction(EECore& cpu, CPUInstruction inst);
     void stub_instruction(EECore& cpu, CPUInstruction inst);
 }
