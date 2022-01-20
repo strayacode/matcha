@@ -57,7 +57,7 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
         control = data;
         break;
     case 0x1000E010:
-        log_debug("[DMAC] D_STAT write %08x", data);
+        LogFile::Get().Log("[DMAC] D_STAT write %08x\n", data);
 
         // for bits (0..15) they get cleared if 1 is written
         interrupt_status &= ~(data & 0xFFFF);
@@ -181,7 +181,7 @@ int DMAC::GetChannelIndex(u32 addr) {
 }
 
 u32 DMAC::ReadInterruptStatus() {
-    log_debug("[DMAC] D_STAT read %08x", interrupt_status);
+    LogFile::Get().Log("[DMAC] D_STAT read %08x\n", interrupt_status);
     return interrupt_status;
 }
 
@@ -205,6 +205,7 @@ void DMAC::CheckInterruptSignal() {
 
     for (int i = 0; i < 10; i++) {
         if ((interrupt_status & (1 << i)) && (interrupt_status & (1 << (16 + i)))) {
+            LogFile::Get().Log("[DMAC] %s interrupt sent\n", channel_names[i]);
             irq = true;
             break;
         }
@@ -253,7 +254,11 @@ void DMAC::DoSIF0Transfer() {
         // dmac can only transfer a quadword at a time
         if (system->sif.GetSIF0FIFOSize() >= 4) {
             for (int i = 0; i < 4; i++) {
-                system->ee_core.WriteWord(channel.address, system->sif.ReadSIF0FIFO());
+                u32 data = system->sif.ReadSIF0FIFO();
+
+                LogFile::Get().Log("[DMAC] SIF0 reading data from fifo %08x\n", data);
+
+                system->ee_core.WriteWord(channel.address, data);
                 channel.address += 4;
             }
 
@@ -305,6 +310,8 @@ void DMAC::DoSIF1Transfer() {
 }
 
 void DMAC::EndTransfer(int index) {
+    LogFile::Get().Log("[DMAC] %s end transfer\n", channel_names[index]);
+
     channels[index].end_transfer = false;
     channels[index].control &= ~(1 << 8);
 

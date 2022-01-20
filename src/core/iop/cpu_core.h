@@ -53,8 +53,7 @@ public:
     IOPCOP0 cop0;
     System* system;
     IOPInterruptController interrupt_controller;
-    // FILE* fp = fopen("../../log-stuff/iop1.log", "w");
-
+    
     bool branch_delay;
     bool branch;
 };

@@ -51,6 +51,10 @@ void IOPCore::CheckInterrupts() {
 void IOPCore::DoException(ExceptionType exception) {
     LogFile::Get().Log("[IOP] trigger exception with type %02x\n", static_cast<int>(exception));
 
+    // record the cause of the exception
+    cop0.gpr[13] &= ~0x7C;
+    cop0.gpr[13] |= (static_cast<u8>(exception) << 2);
+
     // store the address where the exception took place
     // in cop0 epc
     // if we are currently in a branch delay slot with a syscall
@@ -58,13 +62,12 @@ void IOPCore::DoException(ExceptionType exception) {
     // (pc - 4)
     if (branch_delay) {
         cop0.SetReg(14, regs.pc - 4);
+        cop0.gpr[13] |= (1 << 31);
     } else {
         cop0.SetReg(14, regs.pc);
+        cop0.gpr[13] &= ~(1 << 31);
     }
 
-    // record the cause of the exception (in this case a syscall)
-    cop0.gpr[13] = static_cast<u8>(exception) << 2;
-    
     u32 exception_base = 0;
 
     if (cop0.GetReg(12) & (1 << 22)) {

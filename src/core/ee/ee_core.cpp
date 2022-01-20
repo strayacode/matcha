@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <array>
+#include "common/log_file.h"
 #include "core/ee/ee_core.h"
 #include "core/system.h"
 #include "core/ee/disassembler.h"
@@ -144,22 +145,25 @@ void EECore::WriteQuad(u32 addr, u128 data) {
 }
 
 void EECore::DoException(u32 target, ExceptionType exception) {
-    u32 status = cop0.GetReg(12);
-    u32 cause = cop0.GetReg(13);
+    LogFile::Get().Log("[EE] trigger exception with type %02x\n", static_cast<int>(exception));
 
+    u32 status = cop0.GetReg(12);
+    
     bool level2_exception = static_cast<int>(exception) >= 14;
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
 
     if (level2_exception) {
         log_fatal("handle level 2 exception");
     } else {
-        cause |= (code << 2);
+        cop0.gpr[13] &= ~0x7C;
+        cop0.gpr[13] |= (code << 2);
+
+        cop0.gpr[14] = pc - 4 * branch_delay;
+
         if (branch_delay) {
-            cop0.SetReg(14, pc - 4);
-            cause |= (1 << 31);
+            cop0.gpr[13] |= (1 << 31);
         } else {
-            cop0.SetReg(14, pc);
-            cause &= ~(1 << 31);
+            cop0.gpr[13] &= ~(1 << 31);
         }
 
         status |= (1 << 1);
@@ -167,7 +171,6 @@ void EECore::DoException(u32 target, ExceptionType exception) {
     }
 
     cop0.SetReg(12, status);
-    cop0.gpr[13] = cause;
 }
 
 void EECore::SendInterruptSignal(int signal, bool value) {
@@ -187,6 +190,7 @@ void EECore::CheckInterrupts() {
         assert(timer_enable == false);
         
         if (int0_enable && int0_pending) {
+            LogFile::Get().Log("[EE] do int0 interrupt\n");
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
@@ -195,6 +199,7 @@ void EECore::CheckInterrupts() {
         bool int1_pending = (cop0.gpr[13] >> 11) & 0x1;
 
         if (int1_enable && int1_pending) {
+            LogFile::Get().Log("[EE] do int1 interrupt %08x\n", cop0.gpr[13]);
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
