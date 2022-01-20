@@ -1,6 +1,7 @@
-#include <core/iop/interpreter/interpreter.h>
-#include <core/iop/disassembler.h>
-#include <core/system.h>
+#include "common/log_file.h"
+#include "core/iop/interpreter/interpreter.h"
+#include "core/iop/disassembler.h"
+#include "core/system.h"
 
 IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     for (int i = 0; i < 64; i++) {
@@ -143,7 +144,7 @@ void IOPInterpreter::IOPPuts() {
     u32 length = GetReg(6);
     
     for (int i = 0; i < length; i++) {
-        fprintf(system->ee_core.fp, "%c", system->memory.iop_ram[address & 0x1FFFFF]);
+        LogFile::Get().Log("%c", system->memory.iop_ram[address & 0x1FFFFF]);
         address++;
     }
 }

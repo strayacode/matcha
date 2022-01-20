@@ -4,6 +4,7 @@ add_library(common
     emu_thread.h emu_thread.cpp
     arithmetic.h log_file.h
     cpu_types.h ring_buffer.h
+    log_file.h log_file.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

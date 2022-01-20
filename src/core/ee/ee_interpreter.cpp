@@ -1,4 +1,5 @@
 #include "common/types.h"
+#include "common/log_file.h"
 #include "common/arithmetic.h"
 #include "core/ee/ee_interpreter.h"
 #include "core/ee/disassembler.h"
@@ -534,10 +535,9 @@ void EEInterpreter::dsrl32(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     u8 opcode = cpu.ReadByte(cpu.pc - 4);
-    
-    fprintf(cpu.fp, "[EE] executing syscall %s\n", cpu.GetSyscallInfo(opcode).c_str());
+
+    LogFile::Get().Log("[EE] executing syscall %s\n", cpu.GetSyscallInfo(opcode).c_str());
     cpu.DoException(0x80000180, ExceptionType::Syscall);
-    cpu.print_regs = true;
 }
 
 void EEInterpreter::dsubu(EECore& cpu, CPUInstruction inst) {

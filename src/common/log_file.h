@@ -2,20 +2,17 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "log.h"
 
 class LogFile {
 public:
+    LogFile(const LogFile& log_file) = delete;
+
     ~LogFile() {
         fclose(fp);
     }
 
-    void SetPath(const char *path) {
-        fp = fopen(path, "w");
-
-        if (fp == NULL) {
-            log_fatal("[LogFile] Path %s doesn't exist yet", path);
-        }
+    static LogFile& Get() {
+        return instance;
     }
 
     void Log(const char *format, ...) {
@@ -27,5 +24,8 @@ public:
     }
 
 private:
-    FILE* fp;
+    LogFile() {};
+
+    FILE* fp = fopen("../../log-stuff/otterstation.log", "w");
+    static LogFile instance;
 };

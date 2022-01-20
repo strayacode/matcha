@@ -40,8 +40,8 @@ static std::array<std::string, 256> syscall_info = {
     "iFlushCache", "RFU105", "iCpuConfig", "sceSifStopDma",
     "SetCPUTimerHandler", "SetCPUTimer", "SetOsdConfigParam2", "SetOsdConfigParam2",
     "GsGetIMR_iGsGetIMR", "GsGetIMR_iGsPutIMR", "SetPgifHandler", "SetVSyncFlag",
-    "RFU116", "print", "sceSifDmaStat_isceSifDmaStat", "sceSifSetDma_isceSifSetDma",
-    "sceSifSetDChain_isceSifSetDChain", "sceSifSetReg", "sceSifGetReg", "ExecOSD",
+    "RFU116", "print", "sceSifDmaStat", "sceSifSetDma",
+    "sceSifSetDChain", "sceSifSetReg", "sceSifGetReg", "ExecOSD",
     "Deci2Call", "PSMode", "MachineType", "GetMemorySize",
 };
 
@@ -214,7 +214,7 @@ bool EECore::InterruptsEnabled() {
 
 void EECore::PrintRegs() {
     for (int i = 0; i < 32; i++) {
-        fprintf(fp, "%s: %016lx%016lx\n", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
+        log_debug("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
     }
 }
 

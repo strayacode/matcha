@@ -1,3 +1,4 @@
+#include "common/log_file.h"
 #include "core/memory/memory.h"
 #include "core/memory/memory_constants.h"
 #include "core/system.h"
@@ -252,7 +253,7 @@ void Memory::EEWriteByte(u32 addr, u8 data) {
     switch (addr) {
     case 0x1000F180:
         // kputchar
-        fprintf(system->ee_core.fp, "%c", data);
+        LogFile::Get().Log("%c", data);
         break;
     default:
         log_fatal("handle ee slow byte write %08x = %02x", addr, data);
