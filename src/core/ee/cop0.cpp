@@ -30,12 +30,15 @@ void EECOP0::Reset() {
         gpr[i] = 0;
     }
 
+    cause.data = 0;
     gpr[PRId] = 0x2E20;
 }
 
 u32 EECOP0::GetReg(int reg) {
     switch (reg) {
-    case 9: case 12: case 13: case 14: case 15: case 30:
+    case 13:
+        return cause.data;
+    case 9: case 12: case 14: case 15: case 30:
         return gpr[reg];
     default:
         log_fatal("handle cop0 read %d", reg);
@@ -57,7 +60,7 @@ void EECOP0::SetReg(int reg, u32 data) {
     case 11:
         // writing to compare clears timer interrupt pending bit
         // in cause
-        gpr[Cause] &= ~(1 << 15);
+        cause.timer_pending = false;
         gpr[reg] = data;
         break;
     case 14:
@@ -73,6 +76,6 @@ void EECOP0::CountUp() {
     gpr[Count]++;
 
     if (gpr[Count] == gpr[Compare]) {
-        gpr[Cause] |= (1 << 15);
+        cause.timer_pending = true;
     }
 }

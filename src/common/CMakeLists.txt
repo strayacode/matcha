@@ -2,7 +2,8 @@ add_library(common
     types.h int128.h
     log.h memory_helpers.h
     emu_thread.h emu_thread.cpp
-    arithmetic.h log_file.h
+    arithmetic.h arithmetic.cpp
+    log_file.h
     cpu_types.h ring_buffer.h
     log_file.h log_file.cpp
 )

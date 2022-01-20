@@ -79,8 +79,9 @@ public:
     void SendInterruptSignal(int signal, bool value);
     void CheckInterrupts();
     bool InterruptsEnabled();
-    void PrintRegs();
+    void PrintState();
     std::string GetSyscallInfo(int index);
+    void LogInstruction(CPUInstruction inst);
 
     u8 gpr[32 * sizeof(u64) * 2] = {};
     u32 pc = 0;
@@ -98,4 +99,5 @@ public:
     bool branch = false;
     CPUInstruction inst;
     InterpreterTable interpreter_table;
+    bool debug = false;
 };

@@ -81,23 +81,9 @@ void EEInterpreter::padduw(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::plzcw(EECore& cpu, CPUInstruction inst) {
-    u32 words[2];
-    u32 results[2];
-    words[0] = cpu.GetReg<u32>(inst.rs, 0);
-    words[1] = cpu.GetReg<u32>(inst.rs, 1);
-
     for (int i = 0; i < 2; i++) {
-        bool leading_bit = (words[i] >> 31) & 0x1;
-        
-        for (int bit = 30; bit >= 0; bit--) {
-            if (((words[i] >> bit) & 0x1) == leading_bit) {
-                results[i]++;
-            } else {
-                break;
-            }
-        }
-
-        cpu.SetReg<u32>(inst.rd, words[i], i);
+        u32 data = cpu.GetReg<u32>(inst.rs, i);
+        cpu.SetReg<u32>(inst.rd, CountLeadingSignBits(data) - 1, i);
     }
 }
 

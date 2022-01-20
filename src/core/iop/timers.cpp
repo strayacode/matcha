@@ -25,7 +25,7 @@ void IOPTimers::Run(int cycles) {
         channel.mode |= (1 << 11);
 
         if ((channel.mode & (1 << 4)) && (channel.mode & (1 << 10))) {
-            // LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
+            LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
             system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {
@@ -43,7 +43,7 @@ void IOPTimers::Run(int cycles) {
         channel.mode |= (1 << 12);
 
         if ((channel.mode & (1 << 5)) && (channel.mode & (1 << 10))) {
-            // LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
+            LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
             system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {

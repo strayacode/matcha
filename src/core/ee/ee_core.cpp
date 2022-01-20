@@ -75,10 +75,6 @@ void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
 
-        // if (pc == 0x82000) {
-        //     log_fatal("pk");
-        // }
-
         interpreter_table.Execute(*this, inst);
 
         pc += 4;
@@ -146,8 +142,6 @@ void EECore::WriteQuad(u32 addr, u128 data) {
 
 void EECore::DoException(u32 target, ExceptionType exception) {
     LogFile::Get().Log("[EE] trigger exception with type %02x\n", static_cast<int>(exception));
-
-    u32 status = cop0.GetReg(12);
     
     bool level2_exception = static_cast<int>(exception) >= 14;
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
@@ -155,51 +149,41 @@ void EECore::DoException(u32 target, ExceptionType exception) {
     if (level2_exception) {
         log_fatal("handle level 2 exception");
     } else {
-        cop0.gpr[13] &= ~0x7C;
-        cop0.gpr[13] |= (code << 2);
-
+        cop0.cause.exception = code;
         cop0.gpr[14] = pc - 4 * branch_delay;
+        cop0.cause.bd = branch_delay;
+        cop0.gpr[12] |= (1 << 1);
 
-        if (branch_delay) {
-            cop0.gpr[13] |= (1 << 31);
-        } else {
-            cop0.gpr[13] &= ~(1 << 31);
-        }
-
-        status |= (1 << 1);
         pc = target - 4;
     }
-
-    cop0.SetReg(12, status);
 }
 
 void EECore::SendInterruptSignal(int signal, bool value) {
-    if (value) {
-        cop0.gpr[13] |= (1 << (10 + signal));
+    if (signal == 0) {
+        cop0.cause.int0_pending = value;
     } else {
-        cop0.gpr[13] &= ~(1 << (10 + signal));
+        // int1 signal
+        cop0.cause.int1_pending = value;
     }
 }
 
 void EECore::CheckInterrupts() {
     if (InterruptsEnabled()) {
         bool int0_enable = (cop0.gpr[12] >> 10) & 0x1;
-        bool int0_pending = (cop0.gpr[13] >> 10) & 0x1;
         bool timer_enable = (cop0.gpr[12] >> 15) & 0x1;
 
         assert(timer_enable == false);
         
-        if (int0_enable && int0_pending) {
+        if (int0_enable && cop0.cause.int0_pending) {
             LogFile::Get().Log("[EE] do int0 interrupt\n");
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
 
         bool int1_enable = (cop0.gpr[12] >> 11) & 0x1;
-        bool int1_pending = (cop0.gpr[13] >> 11) & 0x1;
-
-        if (int1_enable && int1_pending) {
-            LogFile::Get().Log("[EE] do int1 interrupt %08x\n", cop0.gpr[13]);
+        
+        if (int1_enable && cop0.cause.int1_pending) {
+            LogFile::Get().Log("[EE] do int1 interrupt %08x\n", cop0.cause.data);
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
@@ -217,10 +201,15 @@ bool EECore::InterruptsEnabled() {
     return ie && eie && !exl && !erl;
 }
 
-void EECore::PrintRegs() {
+void EECore::PrintState() {
+    LogFile::Get().Log("[EE State]\n");
     for (int i = 0; i < 32; i++) {
-        log_debug("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
+        LogFile::Get().Log("%s: %016lx%016lx\n", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
     }
+
+    LogFile::Get().Log("pc: %08x npc: %08x\n", pc, next_pc);
+    LogFile::Get().Log("branch: %d branch delay: %d\n", branch, branch_delay);
+    LogFile::Get().Log("%s\n", EEDisassembleInstruction(inst, pc).c_str());
 }
 
 std::string EECore::GetSyscallInfo(int index) {
@@ -231,4 +220,8 @@ std::string EECore::GetSyscallInfo(int index) {
     }
 
     return syscall_info[index];
+}
+
+void EECore::LogInstruction(CPUInstruction inst) {
+    LogFile::Get().Log("[EE] %08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
 }
