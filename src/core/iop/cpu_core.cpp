@@ -87,4 +87,7 @@ void IOPCore::DoException(ExceptionType exception) {
     // since we increment by 4 after each instruction we need to account for that
     // so that we can execute at the exception base on the next instruction
     regs.pc = exception_base - 4;
+
+    branch_delay = false;
+    branch = false;
 }

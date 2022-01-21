@@ -198,7 +198,10 @@ void IOPDMAC::DoSIF0Transfer() {
 
         channel.tag_address += 16;
 
-        if ((data & (1 << 30)) || (data & (1 << 31))) {
+        bool irq = (data >> 30) & 0x1;
+        bool end_transfer = (data >> 31) & 0x1;
+
+        if (irq || end_transfer) {
             channel.end_transfer = true;
         }
     }
@@ -234,7 +237,10 @@ void IOPDMAC::DoSIF1Transfer() {
             system.sif.ReadSIF1FIFO();
             system.sif.ReadSIF1FIFO();
 
-            if ((dma_tag & (1 << 30)) || (dma_tag & (1 << 31))) {
+            bool irq = (dma_tag >> 30) & 0x1;
+            bool end_transfer = (dma_tag >> 31) & 0x1;
+
+            if (irq || end_transfer) {
                 channel.end_transfer = true;
             }
         }

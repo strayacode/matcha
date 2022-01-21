@@ -281,7 +281,10 @@ void DMAC::DoSIF0Transfer() {
             channel.tag_address += 16;
             channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
 
-            if (((dma_tag & (1 << 31)) && (channel.control & (1 << 7)))) {
+            bool irq = (dma_tag >> 31) & 0x1;
+            bool tie = (channel.control >> 7) & 0x1;
+
+            if (irq && tie) {
                 channel.end_transfer = true;
             }
         }
@@ -295,7 +298,7 @@ void DMAC::DoSIF1Transfer() {
         // push data to the sif1 fifo
         u128 data = system->ee_core.ReadQuad(channel.address);
 
-        LogFile::Get().Log("[DMAC] SIF1 Fifo write %016lx%016lx\n", data.i.hi, data.i.lo);
+        LogFile::Get().Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x\n", data.i.hi, data.i.lo, interrupt_status);
 
         system->sif.WriteSIF1FIFO(data);
 
@@ -326,7 +329,7 @@ void DMAC::DoSourceChain(int index) {
     u128 data = system->ee_core.ReadQuad(channel.tag_address);
     u64 dma_tag = data.i.lo;
 
-    LogFile::Get().Log("[DMAC] %s read DMATag %016lx\n", channel_names[index], dma_tag);
+    LogFile::Get().Log("[DMAC] %s read DMATag %016lx d stat %08x\n", channel_names[index], dma_tag, interrupt_status);
 
     channel.quadword_count = dma_tag & 0xFFFF;
     channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
@@ -345,11 +348,20 @@ void DMAC::DoSourceChain(int index) {
         channel.tag_address += 16;
         channel.end_transfer = true;
         break;
+    case 3:
+        // MADR=DMAtag.ADDR
+        // TADR+=16
+        channel.address = addr;
+        channel.tag_address += 16;
+        break;
     default:
         log_fatal("[DMAC] %s handle DMATag id %d", channel_names[index], id);
     }
 
-    if (((dma_tag & (1 << 31)) && (channel.control & (1 << 7)))) {
+    bool irq = (dma_tag >> 31) & 0x1;
+    bool tie = (channel.control >> 7) & 0x1;
+
+    if (irq && tie) {
         channel.end_transfer = true;
     }
 }

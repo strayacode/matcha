@@ -69,6 +69,8 @@ void EECore::Reset() {
     interpreter_table.Generate();
 }
 
+bool in_loop = false;
+
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
