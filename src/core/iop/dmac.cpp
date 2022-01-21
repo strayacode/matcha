@@ -27,6 +27,9 @@ void IOPDMAC::Run(int cycles) {
     for (int i = 7; i < 13; i++) {
         if (GetChannelEnable(i) && (channels[i].control & (1 << 24))) {
             switch (i) {
+            case 7:
+                DoSPU2Transfer();
+                break;
             case 9:
                 DoSIF0Transfer();
                 break;
@@ -152,6 +155,10 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
         channels[channel].block_size = data & 0xFFFF;
         channels[channel].block_count = (data >> 16) & 0xFFFF;
         break;
+    case 0x6:
+        LogFile::Get().Log("[IOPDMAC %d] block count write %08x\n", channel, data);
+        channels[channel].block_count = data & 0xFFFF;
+        break;
     case 0x8:
         LogFile::Get().Log("[IOPDMAC %d] control write %08x\n", channel, data);
         channels[channel].control = data;
@@ -247,8 +254,25 @@ void IOPDMAC::DoSIF1Transfer() {
     }
 }
 
+// TODO: handle spu2 chain mode
+void IOPDMAC::DoSPU2Transfer() {
+    Channel& channel = channels[7];
+
+    if (channel.block_count) {
+        // ignore the spu2 for now
+        channel.block_count--;
+    } else {
+        EndTransfer(7);
+    }
+}
+
 void IOPDMAC::EndTransfer(int index) {
     LogFile::Get().Log("[IOPDMAC %d] end transfer\n", index);
+
+    // hack for now for spu2 status register to be updated
+    if (index == 7) {
+        system.spu2.RequestInterrupt();
+    }
 
     channels[index].end_transfer = false;
     channels[index].control &= ~(1 << 24);

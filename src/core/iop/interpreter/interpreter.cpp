@@ -28,12 +28,16 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::COP0Instruction, 16, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lb, 32, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lh, 33, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::lwl, 34, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lw, 35, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lbu, 36, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::lhu, 37, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::lwr, 38, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sb, 40, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sh, 41, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::swl, 42, InstructionTable::Primary);
     RegisterOpcode(&IOPInterpreter::sw, 43, InstructionTable::Primary);
+    RegisterOpcode(&IOPInterpreter::swr, 46, InstructionTable::Primary);
 
     // secondary instructions
     RegisterOpcode(&IOPInterpreter::sll, 0, InstructionTable::Secondary);

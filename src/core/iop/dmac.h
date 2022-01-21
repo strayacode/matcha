@@ -18,6 +18,7 @@ public:
     bool GetChannelEnable(int index);
     void DoSIF0Transfer();
     void DoSIF1Transfer();
+    void DoSPU2Transfer();
     void EndTransfer(int index);
 
     // dma priority/enable

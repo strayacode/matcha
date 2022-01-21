@@ -36,6 +36,8 @@ void System::Reset() {
     vif1.Reset();
     ipu.Reset();
     sif.Reset();
+    spu.Reset();
+    spu2.Reset();
 }
 
 void System::InitialiseIOPCore(CoreType core_type) {

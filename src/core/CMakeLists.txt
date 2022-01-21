@@ -42,6 +42,8 @@ add_library(core
     sif/sif.h sif/sif.cpp
 
     elf_loader.h elf_loader.cpp
+
+    spu/spu.h spu/spu.cpp
 )
 
 include_directories(core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")

@@ -472,11 +472,13 @@ u16 Memory::IOPReadHalf(u32 addr) {
     if ((addr >= IOP_TIMERS_REGION1_START && addr < IOP_TIMERS_REGION1_END) ||
         (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
         return system->iop_timers.ReadRegister(addr);
-    }
-
-    switch (addr) {
-    default:
-        log_fatal("handle slow half read %08x", addr);
+    } else if ((addr >= SPU_REGION1_START && addr < SPU_REGION1_END) ||
+        (addr >= SPU_REGION2_START && addr < SPU_REGION2_END)) {
+        return 0;
+    } else if (addr >= SPU2_REGION_START && addr < SPU2_REGION_END) {
+        return system->spu2.ReadRegister(addr);
+    } else {
+        LogFile::Get().Log("[Memory] handle iop half read %08x\n", addr);
     }
 
     return 0;
@@ -564,11 +566,15 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
         (addr >= IOP_TIMERS_REGION2_START && addr < IOP_TIMERS_REGION2_END)) {
         system->iop_timers.WriteRegister(addr, data);
         return;
-    }
-
-    switch (addr) {
-    default:
-        log_fatal("handle slow half write %08x = %04x", addr, data);
+    } else if ((addr >= SPU_REGION1_START && addr < SPU_REGION1_END) ||
+        (addr >= SPU_REGION2_START && addr < SPU_REGION2_END)) {
+        system->spu.WriteRegister(addr, data);
+        return;
+    } else if (addr >= SPU2_REGION_START && addr < SPU2_REGION_END) {
+        system->spu2.WriteRegister(addr, data);
+        return;
+    } else {
+        LogFile::Get().Log("[Memory] handle iop half write %08x = %04x\n", addr, data);
     }
 }
 

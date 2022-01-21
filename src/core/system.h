@@ -18,6 +18,7 @@
 #include "core/iop/dmac.h"
 #include "core/iop/timers.h"
 #include "core/elf_loader.h"
+#include "core/spu/spu.h"
 #include <memory>
 
 enum class CoreType {
@@ -55,6 +56,10 @@ public:
     IPU ipu;
     SIF sif;
     ELFLoader elf_loader;
+
+    // 2 spu cores
+    SPU spu;
+    SPU spu2;
 
     std::function<void()> VBlankStartEvent;
     std::function<void()> VBlankFinishEvent;

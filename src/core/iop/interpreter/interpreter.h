@@ -77,6 +77,10 @@ private:
     void srlv();
     void add();
     void div();
+    void lwl();
+    void lwr();
+    void swl();
+    void swr();
 
     void IOPPuts();
 

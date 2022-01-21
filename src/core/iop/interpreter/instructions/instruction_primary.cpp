@@ -140,3 +140,41 @@ void IOPInterpreter::bcondz() {
         SetReg(31, regs.pc + 8);
     }
 }
+
+void IOPInterpreter::lwl() {
+    u32 addr = GetReg(inst.rs) + inst.simm;
+    u32 aligned_data = ReadWord(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xFFFFFF >> shift;
+    
+    SetReg(inst.rt, (GetReg(inst.rt) & mask) | (aligned_data << (24 - shift)));
+}
+
+void IOPInterpreter::lwr() {
+    u32 addr = GetReg(inst.rs) + inst.simm;
+    u32 aligned_data = ReadWord(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xFFFFFF00 << (24 - shift);
+    
+    SetReg(inst.rt, (GetReg(inst.rt) & mask) | (aligned_data >> shift));
+}
+
+void IOPInterpreter::swl() {
+    u32 addr = GetReg(inst.rs) + inst.simm;
+    u32 aligned_data = ReadWord(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xFFFFFF00 << shift;
+    u32 updated_data = (aligned_data & mask) | (GetReg(inst.rt) >> (24 - shift));
+
+    WriteWord(addr & ~0x3, updated_data);
+}
+
+void IOPInterpreter::swr() {
+    u32 addr = GetReg(inst.rs) + inst.simm;
+    u32 aligned_data = ReadWord(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xFFFFFF >> (24 - shift);
+    u32 updated_data = (aligned_data & mask) | (GetReg(inst.rt) << shift);
+
+    WriteWord(addr & ~0x3, updated_data);
+}
