@@ -614,12 +614,20 @@ void EEInterpreter::eret(EECore& cpu, CPUInstruction inst) {
     u32 epc = cpu.cop0.GetReg(14);
 
     if (erl) {
-        cpu.pc = errorepc - 4;
+        cpu.pc = errorepc;
         cpu.cop0.SetReg(12, status & ~(1 << 2));
     } else {
-        cpu.pc = epc - 4;
+        cpu.pc = epc;
         cpu.cop0.SetReg(12, status & ~(1 << 1));
     }
+
+    if (cpu.pc == 0x82000) {
+        cpu.system.elf_loader.Load();
+    }
+
+    // this is to account for the increment by 4 that
+    // happens after each instruction is executed
+    cpu.pc -= 4;
 }
 
 void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
-#include <common/int128.h>
+#include "common/types.h"
+#include "common/log.h"
+#include "common/int128.h"
 #include <queue>
 
 class System;
@@ -16,7 +16,7 @@ class System;
 // PATH3: data is transferred using the ee via dmac
 class GIF {
 public:
-    GIF(System* system);
+    GIF(System& system);
 
     void Reset();
     void SystemReset();
@@ -25,11 +25,27 @@ public:
 
     void WriteCTRL(u8 data);
     void WriteFIFO(u128 data);
+
+    void SendPath3(u128 data);
+    void ProcessPacked(u128 data);
+
 private:
     u8 ctrl;
     u32 stat;
 
     std::queue<u128> fifo;
 
-    System* system;
+    struct GIFTag {
+        u32 nloop;
+        bool eop;
+        bool prim;
+        u32 prim_data;
+        u32 format;
+        u32 nregs;
+        u64 reglist;
+        u32 reglist_offset;
+        int transfers_left;
+    } current_tag;
+
+    System& system;
 };

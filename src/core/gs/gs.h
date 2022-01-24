@@ -1,7 +1,6 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include "common/types.h"
 
 class System;
 
@@ -9,27 +8,30 @@ class GS {
 public:
     GS(System* system);
 
+    u32 ReadRegisterPrivileged(u32 addr);
+    void WriteRegisterPrivileged(u32 addr, u32 data);
+    void WriteRegister(u32 addr, u64 data);
+
     void Reset();
     void SystemReset();
 
-    void WriteCSR(u32 data);
-    void WriteSMODE1(u64 data);
-    void WriteSYNCH1(u64 data);
-    void WriteSYNCH2(u64 data);
-    void WriteSYNCV(u64 data);
-    void WriteSMODE2(u8 data);
-    void WriteSRFSH(u64 data);
 private:
     u32 csr;
 
-    // this register seems to be undocumented
+    // these registers seem to be undocumented
     u64 smode1;
     u64 synch1;
     u64 synch2;
     u64 syncv;
     u64 srfsh;
+    u32 imr;
 
     u8 smode2;
+    u32 pmode;
+    u64 dispfb2;
+    u64 display2;
+    u32 bgcolour;
+    u32 prim;
 
     System* system;
 };

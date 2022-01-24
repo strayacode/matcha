@@ -106,6 +106,8 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
     case 0x00:
         log_debug("[DMAC] %s Dn_CHCR write %08x", channel_name, data);
         channels[index].control = data;
+
+        StartTransfer(index);
         break;
     case 0x10:
         log_debug("[DMAC] %s Dn_MADR write %08x", channel_name, data);
@@ -236,6 +238,9 @@ void DMAC::Run(int cycles) {
 
 void DMAC::Transfer(int index) {
     switch (static_cast<DMAChannelType>(index)) {
+    case DMAChannelType::GIF:
+        DoGIFTransfer();
+        break;
     case DMAChannelType::SIF0:
         DoSIF0Transfer();
         break;
@@ -244,6 +249,20 @@ void DMAC::Transfer(int index) {
         break;
     default:
         log_fatal("handle %d", index);
+    }
+}
+
+void DMAC::DoGIFTransfer() {
+    DMAChannel& channel = channels[2];
+
+    if (channel.quadword_count) {
+        u128 data = system->ee_core.ReadQuad(channel.address);
+
+        system->gif.SendPath3(data);
+        channel.address += 16;
+        channel.quadword_count--;        
+    } else {
+        EndTransfer(2);
     }
 }
 
@@ -312,6 +331,14 @@ void DMAC::DoSIF1Transfer() {
     }
 }
 
+void DMAC::StartTransfer(int index) {
+    LogFile::Get().Log("[DMAC] %s start transfer\n", channel_names[index]);
+
+    // in normal mode we shouldn't worry about dmatag reading
+    u8 mode = (channels[index].control >> 2) & 0x3;
+    channels[index].end_transfer = mode == 0;
+}
+
 void DMAC::EndTransfer(int index) {
     LogFile::Get().Log("[DMAC] %s end transfer\n", channel_names[index]);
 
@@ -347,6 +374,12 @@ void DMAC::DoSourceChain(int index) {
         channel.address = addr;
         channel.tag_address += 16;
         channel.end_transfer = true;
+        break;
+    case 2:
+        // MADR=TADR+16
+        // TADR=DMAtag.ADDR
+        channel.address = channel.tag_address + 16;
+        channel.tag_address = addr;
         break;
     case 3:
         // MADR=DMAtag.ADDR

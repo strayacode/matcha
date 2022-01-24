@@ -6,6 +6,7 @@ add_library(common
     log_file.h
     cpu_types.h ring_buffer.h
     log_file.h log_file.cpp
+    memory_map.h memory_map.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

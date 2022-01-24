@@ -36,6 +36,29 @@ void Memory::Reset() {
     RegisterRegion(0x1FC00000, 0x20000000, 0x3FFFFF, bios, RegionType::IOP);
     RegisterRegion(0x0000000, 0x200000, 0x1FFFFF, iop_ram, RegionType::IOP);
 
+    ee_map.RegisterReadMemory(0x00000000, 0x02000000, rdram);
+    ee_map.RegisterWriteMemory(0x00000000, 0x02000000, rdram);
+
+    ee_map.RegisterReadHandler(0x10000000, 0x10010000, [this](u32 addr) {
+        return EEReadIO(addr);
+    });
+
+    ee_map.RegisterReadHandler(0x12000000, 0x12002000, [this](u32 addr) {
+        return EEReadIO(addr);
+    });
+
+    ee_map.RegisterWriteHandler(0x10000000, 0x10010000, [this](u32 addr, u32 data) {
+        EEWriteIO(addr, data);
+    });
+
+    ee_map.RegisterWriteHandler(0x12000000, 0x12002000, [this](u32 addr, u32 data) {
+        EEWriteIO(addr, data);
+    });
+
+    ee_map.RegisterReadMemory(0x1FC00000, 0x20000000, bios);
+    ee_map.RegisterReadMemory(0x70000000, 0x70004000, scratchpad);
+    ee_map.RegisterWriteMemory(0x70000000, 0x70004000, scratchpad);
+    
     mch_drd = 0;
     rdram_sdevid = 0;
     mch_ricm = 0;
@@ -112,49 +135,56 @@ int Memory::PageOffset(VAddr vaddr) {
     return vaddr & 0xFFF;
 }
 
-template u8 Memory::EERead(VAddr vaddr);
-template u16 Memory::EERead(VAddr vaddr);
-template u32 Memory::EERead(VAddr vaddr);
-template u64 Memory::EERead(VAddr vaddr);
-template <typename T>
-T Memory::EERead(VAddr vaddr) {
-    T return_value = 0;
-
-    u32 addr = TranslateVirtualAddress(vaddr);
-
-    u8* page = ee_table[PageIndex(addr)];
-
-    if (page) {
-        memcpy(&return_value, page + PageOffset(vaddr), sizeof(T));
-    } else {
-        if constexpr (sizeof(T) == 1) {
-            return EEReadByte(addr);
-        } else if constexpr (sizeof(T) == 2) {
-            return EEReadHalf(addr);
-        } else {
-            return EEReadWord(addr);
-        }
-    }
-
-    return return_value;
-}
-
 u8 Memory::EEReadByte(u32 addr) {
-    log_fatal("handle ee slow read %08x", addr);
-    return 0;
+    addr = TranslateVirtualAddress(addr);
+
+    return ee_map.ReadByte(addr);
 }
 
 u16 Memory::EEReadHalf(u32 addr) {
-    switch (addr) {
-    case 0x1F803800:
-        return 0;
-    default:
-        log_fatal("handle ee slow half read %08x", addr);
-    }
+    addr = TranslateVirtualAddress(addr);
+
+    return ee_map.ReadHalf(addr);
 }
 
 u32 Memory::EEReadWord(u32 addr) {
-    if (in_range(0x10008000, 0x1000E000, addr)) {
+    addr = TranslateVirtualAddress(addr);
+
+    return ee_map.ReadWord(addr);
+}
+
+u64 Memory::EEReadDouble(u32 addr) {
+    addr = TranslateVirtualAddress(addr);
+    u64 data = 0;
+
+    data |= ee_map.ReadWord(addr);
+    data |= static_cast<u64>(ee_map.ReadWord(addr + 4)) << 32;
+
+    return data;
+}
+
+void Memory::EEWriteByte(u32 addr, u8 data) {
+    addr = TranslateVirtualAddress(addr);
+
+    ee_map.WriteByte(addr, data);
+}
+
+void Memory::EEWriteHalf(u32 addr, u16 data) {
+    addr = TranslateVirtualAddress(addr);
+
+    ee_map.WriteHalf(addr, data);
+}
+
+void Memory::EEWriteWord(u32 addr, u32 data) {
+    addr = TranslateVirtualAddress(addr);
+
+    ee_map.WriteWord(addr, data);
+}
+
+u32 Memory::EEReadIO(u32 addr) {
+    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
+        return system->timers.ReadRegister(addr);
+    } else if (in_range(0x10008000, 0x1000E000, addr)) {
         return system->dmac.ReadChannel(addr);
     }
 
@@ -185,12 +215,6 @@ u32 Memory::EEReadWord(u32 addr) {
         return system->sif.ReadMSFLAG();
     case 0x1000F230:
         return system->sif.ReadSMFLAG();
-    case 0x1000F400:
-    case 0x1000F410:
-        return 0;
-    case 0x1000F430:
-        // mch_ricm
-        return 0;
     case 0x1000F440:
         if (!((mch_ricm >> 6) & 0xF)) {
             switch ((mch_ricm >> 16) & 0xFFF) {
@@ -212,69 +236,19 @@ u32 Memory::EEReadWord(u32 addr) {
         break;
     case 0x1000F520:
         return system->dmac.disabled_status;
-    case 0x1F80141C:
-        // what is this
-        return 0;
     default:
-        log_fatal("handle ee slow word read %08x", addr);
+        LogFile::Get().Log("[Memory] undefined ee read %08x\n", addr);
     }
     
     return 0;
 }
 
-template void Memory::EEWrite(VAddr vaddr, u8 data);
-template void Memory::EEWrite(VAddr vaddr, u16 data);
-template void Memory::EEWrite(VAddr vaddr, u32 data);
-template void Memory::EEWrite(VAddr vaddr, u64 data);
-template void Memory::EEWrite(VAddr vaddr, u128 data);
-template <typename T>
-void Memory::EEWrite(VAddr vaddr, T data) {
-    u32 addr = TranslateVirtualAddress(vaddr);
-    u8* page = ee_table[PageIndex(addr)];
-
-    if (page) {
-        memcpy(page + PageOffset(vaddr), &data, sizeof(T));
-    } else {
-        if constexpr (sizeof(T) == 1) {
-            EEWriteByte(addr, data);
-        } else if constexpr (sizeof(T) == 2) {
-            EEWriteHalf(addr, data);
-        } else if constexpr (sizeof(T) == 4) {
-            EEWriteWord(addr, data);
-        } else if constexpr (sizeof(T) == 8) {
-            EEWriteDouble(addr, data);
-        } else {
-            EEWriteQuad(addr, data);
-        }
-    }
-}
-
-void Memory::EEWriteByte(u32 addr, u8 data) {
-    switch (addr) {
-    case 0x1000F180:
-        // kputchar
-        LogFile::Get().Log("%c", data);
-        break;
-    default:
-        log_fatal("handle ee slow byte write %08x = %02x", addr, data);
-    }
-}
-
-void Memory::EEWriteHalf(u32 addr, u16 data) {
-    switch (addr) {
-    case 0x1A000008:
-    case 0x1F801470:
-    case 0x1F801472:
-        // what is this
-        break;
-    default:
-        log_fatal("handle ee slow half write %08x = %04x", addr, data);
-    }
-}
-
-void Memory::EEWriteWord(u32 addr, u32 data) {
+void Memory::EEWriteIO(u32 addr, u32 data) {
     if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
         system->timers.WriteRegister(addr, data);
+        return;
+    } if (addr >= GS_PRIVILEGED_REGION_START && addr < GS_PRIVILEGED_REGION_END) {
+        system->gs.WriteRegisterPrivileged(addr, data);
         return;
     } else if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
         (addr >= EE_DMA_REGION2_START && addr < EE_DMA_REGION2_END)) {
@@ -313,6 +287,10 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F010:
         system->ee_intc.WriteMask(data);
         break;
+    case 0x1000F180:
+        // kputchar
+        LogFile::Get().Log("%c", data);
+        break;
     case 0x1000F200:
         system->sif.WriteMSCOM(data);
         break;
@@ -328,21 +306,6 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F260:
         system->sif.WriteBD6(data);
         break;
-    case 0x1000F100: 
-    case 0x1000F120: 
-    case 0x1000F140:
-    case 0x1000F150:
-    case 0x1000F400:
-    case 0x1000F410:
-    case 0x1000F420:
-    case 0x1000F450:
-    case 0x1000F460:
-    case 0x1000F480:
-    case 0x1000F490:
-    case 0x1000F500:
-    case 0x1000F510:
-        // undocumented
-        break;
     case 0x1000F430:
         if ((((data >> 16) & 0xFFF) == 0x21) && (((data >> 6) & 0xF) == 1) && (((mch_drd >> 7) & 1) == 0)) {
             rdram_sdevid = 0;
@@ -353,84 +316,25 @@ void Memory::EEWriteWord(u32 addr, u32 data) {
     case 0x1000F440:
         mch_drd = data;
         break;
-    case 0x1F80141C:
-        // what is this
-        break;
     default:
-        log_fatal("handle ee slow word write %08x = %08x", addr, data);
+        LogFile::Get().Log("[Memory] undefined ee write %08x = %08x\n", addr, data);
     }
 }
 
 void Memory::EEWriteDouble(u32 addr, u64 data) {
-    if (in_range(0x11008000, 0x1100C000, addr)) {
-        system->vu1.WriteCodeMemory<u64>(addr, data);
-        return;
-    }
+    addr = TranslateVirtualAddress(addr);
 
-    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
-        system->timers.WriteRegister(addr, data);
-        return;
-    }
-
-    switch (addr) {
-    case 0x12000010:
-        system->gs.WriteSMODE1(data);
-        break;
-    case 0x12000020:
-        system->gs.WriteSMODE2(data);
-        break;
-    case 0x12000030:
-        system->gs.WriteSRFSH(data);
-        break;
-    case 0x12000040:
-        system->gs.WriteSYNCH1(data);
-        break;
-    case 0x12000050:
-        system->gs.WriteSYNCH2(data);
-        break;
-    case 0x12000060:
-        system->gs.WriteSYNCV(data);
-        break;
-    case 0x12001000:
-        system->gs.WriteCSR(data);
-        break;
-    default:
-        log_fatal("handle ee slow double write %08x = %016lx", addr, data);
-    }
+    ee_map.WriteWord(addr, data & 0xFFFFFFFF);
+    ee_map.WriteWord(addr + 4, data >> 32);
 }
 
 void Memory::EEWriteQuad(u32 addr, u128 data) {
-    if (in_range(0x11000000, 0x11001000, addr)) {
-        system->vu0.WriteCodeMemory<u128>(addr & 0xFFF, data);
-        return;
-    }
+    addr = TranslateVirtualAddress(addr);
 
-    if (in_range(0x11004000, 0x11005000, addr)) {
-        system->vu0.WriteDataMemory<u128>(addr & 0xFFF, data);
-        return;
-    }
-
-    if (in_range(0x1100C000, 0x11010000, addr)) {
-        system->vu1.WriteDataMemory<u128>(addr, data);
-        return;
-    }
-
-    switch (addr) {
-    case 0x10004000:
-    case 0x10005000:
-        // handle vif stuff later
-        break;
-    case 0x10006000:
-        system->gif.WriteFIFO(data);
-        break;
-    case 0x10007010:
-        // handle ipu fifo later
-        break;
-    default:
-        log_fatal("handle ee slow quad write %08x = %016lx%016lx", addr, data.i.hi, data.i.lo);
+    for (int i = 0; i < 4; i++) {
+        ee_map.WriteWord(addr + 4 * i, data.uw[i]);
     }
 }
-
 
 template u8 Memory::IOPRead(VAddr vaddr);
 template u16 Memory::IOPRead(VAddr vaddr);
@@ -462,7 +366,7 @@ u8 Memory::IOPReadByte(u32 addr) {
         // cdvd n command status
         return 0;
     default:
-        log_fatal("handle slow byte read %08x", addr);
+        LogFile::Get().Log("[Memory] handle iop byte read %08x\n", addr);
     }
 
     return 0;
@@ -519,7 +423,7 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801078:
         return system->iop_core->interrupt_controller.ReadRegister(8);
     default:
-        log_fatal("[Memory] unhandled iop word read %08x", addr);
+        LogFile::Get().Log("[Memory] handle iop word read %08x\n", addr);
     }
 
     return 0;
@@ -551,7 +455,7 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
     case 0x1F802070:
         return;
     default:
-        log_fatal("[Memory] unhandled iop byte write %08x = %02x", addr, data);
+        LogFile::Get().Log("[Memory] handle iop byte write %08x = %02x\n", addr, data);
         break;
     }
 }
@@ -640,6 +544,6 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F8015F0:
         break;
     default:
-        log_fatal("[Memory] unhandled iop word write %08x = %08x", addr, data);
+        LogFile::Get().Log("[Memory] handle iop word write %08x = %08x\n", addr, data);
     }
 }

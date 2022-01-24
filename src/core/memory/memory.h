@@ -1,9 +1,10 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
-#include <common/memory_helpers.h>
-#include <common/int128.h>
+#include "common/types.h"
+#include "common/log.h"
+#include "common/memory_helpers.h"
+#include "common/memory_map.h"
+#include "common/int128.h"
 #include <memory>
 #include <fstream>
 #include <string.h>
@@ -31,21 +32,19 @@ public:
     int PageIndex(VAddr vaddr);
     int PageOffset(VAddr vaddr);
 
-    template <typename T>
-    T EERead(VAddr vaddr);
-
     u8 EEReadByte(u32 addr);
     u16 EEReadHalf(u32 addr);
     u32 EEReadWord(u32 addr);
-
-    template <typename T>
-    void EEWrite(VAddr vaddr, T data);
+    u64 EEReadDouble(u32 addr);
 
     void EEWriteByte(u32 addr, u8 data);
     void EEWriteHalf(u32 addr, u16 data);
     void EEWriteWord(u32 addr, u32 data);
     void EEWriteDouble(u32 addr, u64 data);
     void EEWriteQuad(u32 addr, u128 data);
+
+    u32 EEReadIO(u32 addr);
+    void EEWriteIO(u32 addr, u32 data);
 
     template <typename T>
     T IOPRead(VAddr vaddr);
@@ -89,4 +88,6 @@ public:
     u32 mch_ricm;
 
     System* system;
+
+    MemoryMap ee_map;
 };

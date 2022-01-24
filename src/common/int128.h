@@ -18,6 +18,12 @@ union u128 {
 
         return data;
     }
+
+    u128& operator=(const int value) {
+        uw[0] = value;
+
+        return *this;
+    }
 };
 
 union s128 {

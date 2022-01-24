@@ -27,6 +27,19 @@ void Timers::Run(int cycles) {
     }
 }
 
+u32 Timers::ReadRegister(u32 addr) {
+    int index = (addr >> 11) & 0x3;
+
+    switch (addr & 0xFF) {
+    case 0x10:
+        return channels[index].control;
+    case 0x14:
+        return 0;
+    default:
+        log_fatal("[Timers] handle %02x", addr & 0xFF);
+    }
+}
+
 void Timers::WriteRegister(u32 addr, u32 data) {
     int index = (addr >> 11) & 0x3;
 
@@ -34,6 +47,8 @@ void Timers::WriteRegister(u32 addr, u32 data) {
     case 0x00:
         log_debug("[Timer] T%d TN_COUNT write %04x", index, data);
         channels[index].counter = data;
+        break;
+    case 0x4:
         break;
     case 0x10:
         log_debug("[Timer] T%d TN_MODE write %04x", index, data);
@@ -70,6 +85,8 @@ void Timers::WriteRegister(u32 addr, u32 data) {
         }
 
         break;
+    case 0x14:
+        break;
     case 0x20:
         log_debug("[Timer] T%d TN_COMP write %04x", index, data);
         channels[index].compare = data;
@@ -79,7 +96,7 @@ void Timers::WriteRegister(u32 addr, u32 data) {
         channels[index].hold = data;
         break;
     default:
-        log_fatal("handle %08x", addr & 0xFF);
+        log_fatal("[Timer] handle address %08x", addr);
     }
 }
 
