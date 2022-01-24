@@ -43,7 +43,15 @@ void Memory::Reset() {
         return EEReadIO(addr);
     });
 
+    ee_map.RegisterReadHandler(0x12000000, 0x12002000, [this](u32 addr) {
+        return EEReadIO(addr);
+    });
+
     ee_map.RegisterWriteHandler(0x10000000, 0x10010000, [this](u32 addr, u32 data) {
+        EEWriteIO(addr, data);
+    });
+
+    ee_map.RegisterWriteHandler(0x12000000, 0x12002000, [this](u32 addr, u32 data) {
         EEWriteIO(addr, data);
     });
 
@@ -238,6 +246,9 @@ u32 Memory::EEReadIO(u32 addr) {
 void Memory::EEWriteIO(u32 addr, u32 data) {
     if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
         system->timers.WriteRegister(addr, data);
+        return;
+    } if (addr >= GS_PRIVILEGED_REGION_START && addr < GS_PRIVILEGED_REGION_END) {
+        system->gs.WriteRegisterPrivileged(addr, data);
         return;
     } else if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
         (addr >= EE_DMA_REGION2_START && addr < EE_DMA_REGION2_END)) {

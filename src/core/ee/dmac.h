@@ -49,9 +49,11 @@ public:
 
     void Transfer(int index);
 
+    void DoGIFTransfer();
     void DoSIF0Transfer();
     void DoSIF1Transfer();
 
+    void StartTransfer(int index);
     void EndTransfer(int index);
     
     int GetChannelIndex(u32 addr);
