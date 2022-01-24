@@ -69,8 +69,6 @@ void EECore::Reset() {
     interpreter_table.Generate();
 }
 
-bool in_loop = false;
-
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
@@ -95,49 +93,49 @@ void EECore::Run(int cycles) {
 }
 
 u8 EECore::ReadByte(u32 addr) {
-    return system.memory.EERead<u8>(addr);
+    return system.memory.EEReadByte(addr);
 }
 
 u16 EECore::ReadHalf(u32 addr) {
-    return system.memory.EERead<u16>(addr);
+    return system.memory.EEReadHalf(addr);
 }
 
 u32 EECore::ReadWord(u32 addr) {
-    return system.memory.EERead<u32>(addr);
+    return system.memory.EEReadWord(addr);
 }
 
 u64 EECore::ReadDouble(u32 addr) {
-    return system.memory.EERead<u64>(addr);
+    return system.memory.EEReadDouble(addr);
 }
 
 u128 EECore::ReadQuad(u32 addr) {
     u128 data;
     // log_debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
     // log_debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
-    data.i.lo = system.memory.EERead<u64>(addr);
-    data.i.hi = system.memory.EERead<u64>(addr + 8);
+    data.i.lo = system.memory.EEReadDouble(addr);
+    data.i.hi = system.memory.EEReadDouble(addr + 8);
 
     return data;
 }
 
 void EECore::WriteByte(u32 addr, u8 data) {
-    system.memory.EEWrite<u8>(addr, data);
+    system.memory.EEWriteByte(addr, data);
 }
 
 void EECore::WriteHalf(u32 addr, u16 data) {
-    system.memory.EEWrite<u16>(addr, data);
+    system.memory.EEWriteHalf(addr, data);
 }
 
 void EECore::WriteWord(u32 addr, u32 data) {
-    system.memory.EEWrite<u32>(addr, data);
+    system.memory.EEWriteWord(addr, data);
 }
 
 void EECore::WriteDouble(u32 addr, u64 data) {
-    system.memory.EEWrite<u64>(addr, data);
+    system.memory.EEWriteDouble(addr, data);
 }
 
 void EECore::WriteQuad(u32 addr, u128 data) {
-    system.memory.EEWrite<u128>(addr, data);
+    system.memory.EEWriteQuad(addr, data);
 }
 
 void EECore::DoException(u32 target, ExceptionType exception) {

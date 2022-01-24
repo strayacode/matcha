@@ -81,6 +81,7 @@ private:
     void lwr();
     void swl();
     void swr();
+    void srav();
 
     void IOPPuts();
 

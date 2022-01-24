@@ -19,6 +19,7 @@ public:
     Timers(System& system);
 
     void Reset();
+    u32 ReadRegister(u32 addr);
     void WriteRegister(u32 addr, u32 data);
     
     u32 ReadChannel(u32 addr);

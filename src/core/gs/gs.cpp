@@ -1,4 +1,5 @@
-#include <core/gs/gs.h>
+#include "common/log.h"
+#include "core/gs/gs.h"
 
 GS::GS(System* system) : system(system) {
 
@@ -16,6 +17,15 @@ void GS::Reset() {
 
 void GS::SystemReset() {
     log_warn("[GS] system reset");
+}
+
+u32 GS::ReadRegisterPrivileged(u32 addr) {
+    switch (addr) {
+    case 0x12001000:
+        return csr;
+    default:
+        log_fatal("[GS] handle privileged read %08x", addr);
+    }
 }
 
 void GS::WriteCSR(u32 data) {

@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#define USE_LOGGING
+
 class LogFile {
 public:
     LogFile(const LogFile& log_file) = delete;
@@ -16,11 +18,15 @@ public:
     }
 
     void Log(const char *format, ...) {
+        #ifdef USE_LOGGING
+
         va_list args;
 
         va_start(args, format);
         vfprintf(fp, format, args);
         va_end(args);
+
+        #endif
     }
 
 private:

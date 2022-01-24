@@ -348,6 +348,12 @@ void DMAC::DoSourceChain(int index) {
         channel.tag_address += 16;
         channel.end_transfer = true;
         break;
+    case 2:
+        // MADR=TADR+16
+        // TADR=DMAtag.ADDR
+        channel.address = channel.tag_address + 16;
+        channel.tag_address = addr;
+        break;
     case 3:
         // MADR=DMAtag.ADDR
         // TADR+=16

@@ -45,6 +45,7 @@ IOPInterpreter::IOPInterpreter(System* system) : IOPCore(system) {
     RegisterOpcode(&IOPInterpreter::sra, 3, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::sllv, 4, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::srlv, 6, InstructionTable::Secondary);
+    RegisterOpcode(&IOPInterpreter::srav, 7, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jr, 8, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::jalr, 9, InstructionTable::Secondary);
     RegisterOpcode(&IOPInterpreter::syscall_exception, 12, InstructionTable::Secondary);

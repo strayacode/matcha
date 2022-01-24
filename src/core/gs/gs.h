@@ -1,13 +1,14 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include "common/types.h"
 
 class System;
 
 class GS {
 public:
     GS(System* system);
+
+    u32 ReadRegisterPrivileged(u32 addr);
 
     void Reset();
     void SystemReset();

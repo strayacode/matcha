@@ -135,3 +135,9 @@ void IOPInterpreter::div() {
         regs.hi = rs % rt;
     }
 }
+
+void IOPInterpreter::srav() {
+    u8 shift_amount = GetReg(inst.rs) & 0x1F;
+
+    SetReg(inst.rd, (s32)GetReg(inst.rt) >> shift_amount);
+}
