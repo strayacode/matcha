@@ -105,3 +105,7 @@ void GIF::ProcessPacked(u128 data) {
         current_tag.reglist_offset = 0;
     }
 }
+
+void GIF::ProcessImage(u128 data) {
+
+}

@@ -76,6 +76,8 @@ u8 MemoryMap::ReadByte(u32 addr) {
     case MemoryType::Slow:
         return read_element->handler(addr);
     }
+
+    return 0;
 }
 
 u16 MemoryMap::ReadHalf(u32 addr) {
@@ -92,6 +94,8 @@ u16 MemoryMap::ReadHalf(u32 addr) {
     case MemoryType::Slow:
         return read_element->handler(addr);
     }
+
+    return 0;
 }
 
 u32 MemoryMap::ReadWord(u32 addr) {
@@ -108,6 +112,8 @@ u32 MemoryMap::ReadWord(u32 addr) {
     case MemoryType::Slow:
         return read_element->handler(addr);
     }
+
+    return 0;
 }
 
 void MemoryMap::WriteByte(u32 addr, u8 data) {

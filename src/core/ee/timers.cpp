@@ -16,13 +16,10 @@ void Timers::Reset() {
 }
 
 void Timers::Run(int cycles) {
-    while (cycles--) {
-        for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
+        if (channels[i].control & (1 << 7)) {
             channels[i].cycles += cycles;
-
-            if (channels[i].control & (1 << 7)) {
-                Increment(i);
-            }
+            Increment(i);
         }
     }
 }

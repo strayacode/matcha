@@ -28,6 +28,7 @@ public:
 
     void SendPath3(u128 data);
     void ProcessPacked(u128 data);
+    void ProcessImage(u128 data);
 
 private:
     u8 ctrl;

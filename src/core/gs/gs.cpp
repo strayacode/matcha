@@ -20,6 +20,15 @@ void GS::Reset() {
     display2 = 0;
     bgcolour = 0;
     prim = 0;
+    frame1 = 0;
+    xyoffset1 = 0;
+    scissor1 = 0;
+    rgbaq = 0;
+    xyz2 = 0;
+    bitbltbuf = 0;
+    trxpos = 0;
+    trxreg = 0;
+    trxdir = 0;
 }
 
 void GS::SystemReset() {
@@ -119,7 +128,34 @@ void GS::WriteRegister(u32 addr, u64 data) {
     case 0x00:
         prim = data;
         break;
+    case 0x01:
+        rgbaq = data;
+        break;
+    case 0x05:
+        xyz2 = data;
+        break;
+    case 0x18:
+        xyoffset1 = data;
+        break;
+    case 0x40:
+        scissor1 = data;
+        break;
+    case 0x4C:
+        frame1 = data;
+        break;
+    case 0x50:
+        bitbltbuf = data;
+        break;
+    case 0x51:
+        trxpos = data;
+        break;
+    case 0x52:
+        trxreg = data;
+        break;
+    case 0x53:
+        trxdir = data;
+        break;
     default:
-        log_fatal("[GS] handle write %08x = %08x", addr, data);
+        log_fatal("[GS] handle write %08x = %016lx", addr, data);
     }
 }

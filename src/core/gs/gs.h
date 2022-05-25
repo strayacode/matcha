@@ -32,6 +32,15 @@ private:
     u64 display2;
     u32 bgcolour;
     u32 prim;
+    u64 frame1;
+    u64 xyoffset1;
+    u64 scissor1;
+    u64 rgbaq;
+    u64 xyz2;
+    u64 bitbltbuf;
+    u64 trxpos;
+    u64 trxreg;
+    u8 trxdir;
 
     System* system;
 };
