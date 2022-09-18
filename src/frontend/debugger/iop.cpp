@@ -1,4 +1,4 @@
-#include "otterstation-imgui/debugger/iop.h"
+#include "frontend/debugger/iop.h"
 #include "core/iop/disassembler.h"
 
 void IOPDebugger::RegistersWindow(IOPCore& iop_core) {

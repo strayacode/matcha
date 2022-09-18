@@ -1,13 +1,14 @@
 #pragma once
 
+#include <string.h>
+#include <array>
+#include <memory>
+#include <fstream>
 #include "common/types.h"
 #include "common/log.h"
 #include "common/memory_helpers.h"
 #include "common/memory_map.h"
 #include "common/int128.h"
-#include <memory>
-#include <fstream>
-#include <string.h>
 
 class System;
 

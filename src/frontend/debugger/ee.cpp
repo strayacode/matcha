@@ -1,4 +1,4 @@
-#include "otterstation-imgui/debugger/ee.h"
+#include "frontend/debugger/ee.h"
 #include "core/ee/disassembler.h"
 
 void EEDebugger::RegistersWindow(EECore& ee_core) {

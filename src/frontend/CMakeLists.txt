@@ -21,7 +21,7 @@ set(SOURCES
     debugger/iop.cpp
 )
 
-add_executable(otterstation ${SOURCES})
+add_executable(matcha ${SOURCES})
 
 find_package(SDL2 REQUIRED)
 
@@ -34,12 +34,15 @@ add_definitions(${OpenGL_DEFINITIONS})
 if(NOT OPENGL_FOUND)
     message(ERROR " OPENGL not found!")
 endif(NOT OPENGL_FOUND)
-target_link_libraries(otterstation ${OPENGL_LIBRARIES})
+target_link_libraries(matcha ${OPENGL_LIBRARIES})
 
 include_directories(imgui ${SDL2_INCLUDE_DIRS})
-target_link_libraries(otterstation core common ${SDL2_LIBRARIES})
+target_link_libraries(matcha core common ${SDL2_LIBRARIES})
 
 find_package(Threads REQUIRED)
-find_package(X11 REQUIRED)
 
-target_link_libraries(otterstation ${CMAKE_THREAD_LIBS_INIT} ${X11_LIBRARIES} ${CMAKE_DL_LIBS})
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    find_package(X11 REQUIRED)
+endif()
+
+target_link_libraries(matcha ${CMAKE_THREAD_LIBS_INIT} ${X11_LIBRARIES} ${CMAKE_DL_LIBS})

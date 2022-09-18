@@ -1,6 +1,6 @@
 #pragma once
 
-#include "otterstation-imgui/imgui/imgui.h"
+#include "frontend/imgui/imgui.h"
 #include "core/core.h"
 
 class IOPDebugger {

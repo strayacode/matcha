@@ -11,8 +11,8 @@
 #include "imgui/imfilebrowser.h"
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include "otterstation-imgui/debugger/ee.h"
-#include "otterstation-imgui/debugger/iop.h"
+#include "frontend/debugger/ee.h"
+#include "frontend/debugger/iop.h"
 
 class HostInterface {
 public:
@@ -30,7 +30,7 @@ private:
     void HandleInput();
     void RenderMenubar();
     
-    const char* glsl_version = "#version 130";
+    const char* glsl_version = "#version 330";
 
     SDL_Window* window;
     SDL_GLContext gl_context;

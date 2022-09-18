@@ -1,4 +1,4 @@
-#include "otterstation-imgui/host_interface.h"
+#include "frontend/host_interface.h"
 
 HostInterface::HostInterface() :
     core([this](float fps) {
