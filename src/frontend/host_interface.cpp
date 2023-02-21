@@ -9,7 +9,7 @@ HostInterface::HostInterface() :
 bool HostInterface::Initialise() {
     // initialise sdl
     if (SDL_Init(SDL_INIT_VIDEO) > 0) {
-        common::warn("error initialising SDL");
+        common::Warn("error initialising SDL");
         return false;
     }
 

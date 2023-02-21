@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <array>
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/ee/ee_core.h"
 #include "core/system.h"
 #include "core/ee/disassembler.h"
@@ -72,8 +72,6 @@ void EECore::Reset() {
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
-        common::debug("run instruction %08x", inst.data);
-
         interpreter_table.Execute(*this, inst);
 
         pc += 4;
@@ -111,8 +109,8 @@ u64 EECore::ReadDouble(u32 addr) {
 
 u128 EECore::ReadQuad(u32 addr) {
     u128 data;
-    // common::debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
-    // common::debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
+    // common::Debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
+    // common::Debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
     data.i.lo = system.memory.EEReadDouble(addr);
     data.i.hi = system.memory.EEReadDouble(addr + 8);
 
@@ -140,13 +138,13 @@ void EECore::WriteQuad(u32 addr, u128 data) {
 }
 
 void EECore::DoException(u32 target, ExceptionType exception) {
-    LogFile::Get().Log("[EE] trigger exception with type %02x at pc = %08x\n", static_cast<int>(exception), pc);
+    common::Log("[EE] trigger exception with type %02x at pc = %08x\n", static_cast<int>(exception), pc);
 
     bool level2_exception = static_cast<int>(exception) >= 14;
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
 
     if (level2_exception) {
-        common::error("handle level 2 exception");
+        common::Error("handle level 2 exception");
     } else {
         cop0.cause.exception = code;
         cop0.gpr[14] = pc - 4 * branch_delay;
@@ -177,7 +175,7 @@ void EECore::CheckInterrupts() {
         assert(timer_enable == false);
         
         if (int0_enable && cop0.cause.int0_pending) {
-            LogFile::Get().Log("[EE] do int0 interrupt\n");
+            common::Log("[EE] do int0 interrupt");
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
@@ -185,7 +183,7 @@ void EECore::CheckInterrupts() {
         bool int1_enable = (cop0.gpr[12] >> 11) & 0x1;
         
         if (int1_enable && cop0.cause.int1_pending) {
-            LogFile::Get().Log("[EE] do int1 interrupt\n");
+            common::Log("[EE] do int1 interrupt");
             DoException(0x80000200, ExceptionType::Interrupt);
             return;
         }
@@ -204,14 +202,14 @@ bool EECore::InterruptsEnabled() {
 }
 
 void EECore::PrintState() {
-    LogFile::Get().Log("[EE State]\n");
+    common::Log("[EE State]");
     for (int i = 0; i < 32; i++) {
-        LogFile::Get().Log("%s: %016lx%016lx\n", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
+        common::Log("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
     }
 
-    LogFile::Get().Log("pc: %08x npc: %08x\n", pc, next_pc);
-    LogFile::Get().Log("branch: %d branch delay: %d\n", branch, branch_delay);
-    LogFile::Get().Log("%s\n", EEDisassembleInstruction(inst, pc).c_str());
+    common::Log("pc: %08x npc: %08x", pc, next_pc);
+    common::Log("branch: %d branch delay: %d", branch, branch_delay);
+    common::Log("%s", EEDisassembleInstruction(inst, pc).c_str());
 }
 
 std::string EECore::GetSyscallInfo(int index) {
@@ -225,5 +223,5 @@ std::string EECore::GetSyscallInfo(int index) {
 }
 
 void EECore::LogInstruction() {
-    LogFile::Get().Log("[EE] %08x %08x %s\n", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
+    common::Log("[EE] %08x %08x %s", pc, inst.data, EEDisassembleInstruction(inst, pc).c_str());
 }

@@ -1,10 +1,8 @@
-#include <core/core.h>
+#include "core/core.h"
 
 Core::Core(UpdateFunction update_fps) : emu_thread([this]() {
-        RunFrame();
-    }, update_fps) {
-
-}
+    RunFrame();
+}, update_fps) {}
 
 void Core::Reset() {
     system.Reset();

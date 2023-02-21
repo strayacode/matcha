@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/iop/cpu_core.h"
 #include "core/system.h"
 
@@ -49,7 +49,7 @@ void IOPCore::CheckInterrupts() {
 }
 
 void IOPCore::DoException(ExceptionType exception) {
-    LogFile::Get().Log("[IOP] trigger exception with type %02x\n", static_cast<int>(exception));
+    common::Log("[IOP] trigger exception with type %02x", static_cast<int>(exception));
 
     // record the cause of the exception
     cop0.gpr[13] &= ~0x7C;

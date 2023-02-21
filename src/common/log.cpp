@@ -11,8 +11,10 @@ constexpr static bool debug = true;
 #define BLUE "\x1B[34m"
 #define RESET "\x1B[0m"
 
+FILE* fp = fopen("matcha.log", "w");
+
 namespace common {
-    void info(const char* format, ...) {
+    void Info(const char* format, ...) {
         std::va_list args;
         va_start(args, format);
         std::printf("[" GREEN "INFO" RESET "] ");
@@ -22,7 +24,7 @@ namespace common {
         va_end(args);
     }
 
-    void debug(const char* format, ...) {
+    void Debug(const char* format, ...) {
         std::va_list args;
         va_start(args, format);
         std::printf("[" BLUE "DEBUG" RESET "] ");
@@ -32,7 +34,7 @@ namespace common {
         va_end(args);
     }
 
-    void warn(const char* format, ...) {
+    void Warn(const char* format, ...) {
         std::va_list args;
         va_start(args, format);
         std::printf("[" YELLOW "WARN" RESET "] ");
@@ -42,14 +44,29 @@ namespace common {
         va_end(args);
     }
 
-    void error(const char* format, ...) {
+    void Error(const char* format, ...) {
         std::va_list args;
         va_start(args, format);
-        std::printf("[" RED "ERROR" RESET "] ");
+        std::fprintf(stderr, "[" RED "ERROR" RESET "] ");
         std::vfprintf(stderr, format, args);
-        std::printf("\n");
+        std::fprintf(stderr, "\n");
         std::fflush(stderr);
         va_end(args);
         std::exit(0);
+    }
+
+    void Log(const char* format, ...) {
+        std::va_list args;
+        va_start(args, format);
+        std::vfprintf(fp, format, args);
+        std::fprintf(fp, "\n");
+        va_end(args);
+    }
+
+    void LogNoNewline(const char* format, ...) {
+        std::va_list args;
+        va_start(args, format);
+        std::vfprintf(fp, format, args);
+        va_end(args);
     }
 }

@@ -14,7 +14,7 @@ void ELFLoader::Load() {
     std::ifstream file(path, std::ios::binary);
 
     if (!file) {
-        common::error("[ELFLoader] elf with path %s does not exist!", path.c_str());
+        common::Error("[ELFLoader] elf with path %s does not exist!", path.c_str());
     }
 
     file.unsetf(std::ios::skipws);
@@ -25,8 +25,8 @@ void ELFLoader::Load() {
     file.read(reinterpret_cast<char*>(elf), size);
     file.close();
 
-    common::debug("[ELFLoader] ELF was successfully loaded!");
-    common::debug("[ELFLoader] Size: %08x", size);
+    common::Debug("[ELFLoader] ELF was successfully loaded!");
+    common::Debug("[ELFLoader] Size: %08x", size);
 
     LoadHeader();
 }
@@ -34,7 +34,7 @@ void ELFLoader::Load() {
 void ELFLoader::LoadHeader() {
     // check if the elf has at least the first 4 magic bytes
     if (elf[0] != 0x7F || elf[1] != 'E' || elf[2] != 'L' || elf[3] != 'F') {
-        common::error("[ELFLoader] invalid ELF! %s", path.c_str());
+        common::Error("[ELFLoader] invalid ELF! %s", path.c_str());
     }
 
     memcpy(&header, &elf[0x10], sizeof(ELFHeader));
@@ -54,7 +54,7 @@ void ELFLoader::LoadHeader() {
         }
     }
 
-    common::debug("[ELFLoader] entrypoint: %08x", header.entry);
+    common::Debug("[ELFLoader] entrypoint: %08x", header.entry);
     
     system.ee_core.pc = header.entry;
 }

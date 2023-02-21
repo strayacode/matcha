@@ -1,6 +1,8 @@
 namespace common {
-    void info(const char* format, ...);
-    void debug(const char* format, ...);
-    void warn(const char* format, ...);
-    void error(const char* format, ...);
+    void Info(const char* format, ...);
+    void Debug(const char* format, ...);
+    void Warn(const char* format, ...);
+    void Error(const char* format, ...);
+    void Log(const char* format, ...);
+    void LogNoNewline(const char* format, ...);
 }

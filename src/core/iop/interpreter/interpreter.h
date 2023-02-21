@@ -2,7 +2,7 @@
 
 #include <common/types.h>
 #include <common/log.h>
-#include <common/log_file.h>
+#include <common/log.h>
 #include <common/arithmetic.h>
 #include <core/iop/cpu_core.h>
 #include <common/cpu_types.h>

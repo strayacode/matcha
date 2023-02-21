@@ -41,7 +41,7 @@ u32 EECOP0::GetReg(int reg) {
     case 9: case 12: case 14: case 15: case 30:
         return gpr[reg];
     default:
-        common::error("handle cop0 read %d", reg);
+        common::Error("handle cop0 read %d", reg);
     }
 }
 
@@ -64,11 +64,11 @@ void EECOP0::SetReg(int reg, u32 data) {
         gpr[reg] = data;
         break;
     case 14:
-        // common::warn("[COP0] write EPC %08x", data);
+        // common::Warn("[COP0] write EPC %08x", data);
         gpr[EPC] = data;
         break;
     default:
-        common::error("handle cop0 write %d = %08x", reg, data);
+        common::Error("handle cop0 write %d = %08x", reg, data);
     }
 }
 

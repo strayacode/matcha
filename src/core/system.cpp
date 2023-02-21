@@ -44,7 +44,7 @@ void System::InitialiseIOPCore(CoreType core_type) {
     if (core_type == CoreType::Interpreter) {
         iop_core = std::make_unique<IOPInterpreter>(this);
     } else {
-        common::error("[System] Unknown core type");
+        common::Error("[System] Unknown core type");
     }
 }
 

@@ -1,5 +1,5 @@
 #include "common/log.h"
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/iop/timers.h"
 #include "core/system.h"
 
@@ -25,7 +25,7 @@ void IOPTimers::Run(int cycles) {
         channel.mode |= (1 << 11);
 
         if ((channel.mode & (1 << 4)) && (channel.mode & (1 << 10))) {
-            LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
+            common::Log("[IOP Timers] channel 5 send timer interrupt");
             system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {
@@ -43,7 +43,7 @@ void IOPTimers::Run(int cycles) {
         channel.mode |= (1 << 12);
 
         if ((channel.mode & (1 << 5)) && (channel.mode & (1 << 10))) {
-            LogFile::Get().Log("[IOP Timers] channel 5 send timer interrupt\n");
+            common::Log("[IOP Timers] channel 5 send timer interrupt");
             system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {
@@ -72,8 +72,10 @@ u32 IOPTimers::ReadRegister(u32 addr) {
     case 0x8:
         return channels[channel].target;
     default:
-        common::error("handle %02x", index);
+        common::Error("handle %02x", index);
     }
+
+    return 0;
 }
 
 void IOPTimers::WriteRegister(u32 addr, u32 data) {
@@ -103,7 +105,7 @@ void IOPTimers::WriteRegister(u32 addr, u32 data) {
 
         break;
     default:
-        common::error("handle %02x", index);
+        common::Error("handle %02x", index);
     }
 }
 

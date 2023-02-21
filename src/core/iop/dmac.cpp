@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "common/log.h"
 #include "core/iop/dmac.h"
 #include "core/system.h"
@@ -37,7 +37,7 @@ void IOPDMAC::Run(int cycles) {
                 DoSIF1Transfer();
                 break;
             default:
-                common::error("[IOPDMAC] handle transfer for channel %d", i);
+                common::Error("[IOPDMAC] handle transfer for channel %d", i);
             }
         }
     }
@@ -48,12 +48,12 @@ u32 IOPDMAC::ReadRegister(u32 addr) {
     case 0x1F8010F0:
         return dpcr;
     case 0x1F8010F4:
-        LogFile::Get().Log("[IOPDMAC] dicr read %08x\n", dicr.data);
+        common::Log("[IOPDMAC] dicr read %08x", dicr.data);
         return dicr.data;
     case 0x1F801570:
         return dpcr2;
     case 0x1F801574:
-        LogFile::Get().Log("[IOPDMAC] dicr2 read %08x\n", dicr2.data);
+        common::Log("[IOPDMAC] dicr2 read %08x", dicr2.data);
         return dicr2.data;
     case 0x1F801578:
         return global_dma_enable;
@@ -70,30 +70,30 @@ u32 IOPDMAC::ReadChannel(u32 addr) {
 
     switch (index) {
     case 0x0:
-        common::debug("[IOPDMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
+        common::Debug("[IOPDMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
         return channels[channel].address;
     case 0x4:
-        common::debug("[IOPDMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
+        common::Debug("[IOPDMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
         return (channels[channel].block_count << 16) | (channels[channel].block_size);
     case 0x8:
-        common::debug("[IOPDMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
+        common::Debug("[IOPDMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
         return channels[channel].control;
     case 0xC:
-        common::debug("[IOPDMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
+        common::Debug("[IOPDMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
         return channels[channel].tag_address;
     default:
-        common::error("[IOPDMAC] %08x", index);
+        common::Error("[IOPDMAC] %08x", index);
     }
 }
 
 void IOPDMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1F8010F0:
-        common::debug("[IOPDMAC] dpcr write %08x", data);
+        common::Debug("[IOPDMAC] dpcr write %08x", data);
         dpcr = data;
         break;
     case 0x1F8010F4:
-        LogFile::Get().Log("[IOPDMAC] dicr write %08x\n", data);
+        common::Log("[IOPDMAC] dicr write %08x", data);
         dicr.data = data;
 
         // writing 1 to the flag bits clears them
@@ -106,7 +106,7 @@ void IOPDMAC::WriteRegister(u32 addr, u32 data) {
         dpcr2 = data;
         break;
     case 0x1F801574:
-        LogFile::Get().Log("[IOPDMAC] dicr2 write %08x\n", data);
+        common::Log("[IOPDMAC] dicr2 write %08x", data);
         dicr2.data = data;
 
         // writing 1 to the flag bits clears them
@@ -147,33 +147,33 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
 
     switch (index) {
     case 0x0:
-        LogFile::Get().Log("[IOPDMAC %d] address write %08x\n", channel, data);
+        common::Log("[IOPDMAC %d] address write %08x", channel, data);
         channels[channel].address = data & 0xFFFFFF;
         break;
     case 0x4:
-        LogFile::Get().Log("[IOPDMAC %d] block size and count write %08x\n", channel, data);
+        common::Log("[IOPDMAC %d] block size and count write %08x", channel, data);
         channels[channel].block_size = data & 0xFFFF;
         channels[channel].block_count = (data >> 16) & 0xFFFF;
         break;
     case 0x6:
-        LogFile::Get().Log("[IOPDMAC %d] block count write %08x\n", channel, data);
+        common::Log("[IOPDMAC %d] block count write %08x", channel, data);
         channels[channel].block_count = data & 0xFFFF;
         break;
     case 0x8:
-        LogFile::Get().Log("[IOPDMAC %d] control write %08x\n", channel, data);
+        common::Log("[IOPDMAC %d] control write %08x", channel, data);
         channels[channel].control = data;
 
         if (data & (1 << 24)) {
-            LogFile::Get().Log("[IOPDMAC %d] transfer started\n", channel);
+            common::Log("[IOPDMAC %d] transfer started", channel);
         }
 
         break;
     case 0xC:
-        LogFile::Get().Log("[IOPDMAC %d] tag address %08x\n", channel, data);
+        common::Log("[IOPDMAC %d] tag address %08x", channel, data);
         channels[channel].tag_address = data;
         break;
     default:
-        common::error("handle %02x", index);
+        common::Error("handle %02x", index);
     }
 }
 
@@ -192,12 +192,12 @@ void IOPDMAC::DoSIF0Transfer() {
         u32 data = system.iop_core->ReadWord(channel.tag_address);
         u32 block_count = system.iop_core->ReadWord(channel.tag_address + 4);
 
-        LogFile::Get().Log("[IOPDMAC] SIF0 read DMATag %016lx\n", ((u64)block_count << 32) | data);
+        common::Log("[IOPDMAC] SIF0 read DMATag %016lx", ((u64)block_count << 32) | data);
 
         system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 8));
         system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 12));
 
-        // common::debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
+        // common::Debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
         // round to the nearest 4
         channel.block_count = (block_count + 3) & 0xFFFFFFFC;
@@ -235,7 +235,7 @@ void IOPDMAC::DoSIF1Transfer() {
             dma_tag |= system.sif.ReadSIF1FIFO();
             dma_tag |= (u64)system.sif.ReadSIF1FIFO() << 32;
 
-            LogFile::Get().Log("[IOPDMAC] SIF1 read DMATag %016lx\n", dma_tag);
+            common::Log("[IOPDMAC] SIF1 read DMATag %016lx", dma_tag);
 
             channel.address = dma_tag & 0xFFFFFF;
             channel.block_count = dma_tag >> 32;
@@ -267,7 +267,7 @@ void IOPDMAC::DoSPU2Transfer() {
 }
 
 void IOPDMAC::EndTransfer(int index) {
-    LogFile::Get().Log("[IOPDMAC %d] end transfer\n", index);
+    common::Log("[IOPDMAC %d] end transfer", index);
 
     // hack for now for spu2 status register to be updated
     if (index == 7) {
@@ -281,7 +281,7 @@ void IOPDMAC::EndTransfer(int index) {
     dicr2.flags |= (1 << (index - 7));
 
     if (dicr2.flags & dicr2.masks) {
-        LogFile::Get().Log("[IOPDMAC %d] interrupt was requested\n", index);
+        common::Log("[IOPDMAC %d] interrupt was requested", index);
         system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::DMA);
     }
 }

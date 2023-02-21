@@ -32,7 +32,7 @@ void GS::Reset() {
 }
 
 void GS::SystemReset() {
-    common::warn("[GS] system reset");
+    common::Warn("[GS] system reset");
 }
 
 u32 GS::ReadRegisterPrivileged(u32 addr) {
@@ -40,7 +40,7 @@ u32 GS::ReadRegisterPrivileged(u32 addr) {
     case 0x12001000:
         return csr;
     default:
-        common::error("[GS] handle privileged read %08x", addr);
+        common::Error("[GS] handle privileged read %08x", addr);
     }
 }
 
@@ -119,7 +119,7 @@ void GS::WriteRegisterPrivileged(u32 addr, u32 data) {
     case 0x12001014:
         break;
     default:
-        common::error("[GS] handle privileged write %08x = %08x", addr, data);
+        common::Error("[GS] handle privileged write %08x = %08x", addr, data);
     }
 }
 
@@ -156,6 +156,6 @@ void GS::WriteRegister(u32 addr, u64 data) {
         trxdir = data;
         break;
     default:
-        common::error("[GS] handle write %08x = %016lx", addr, data);
+        common::Error("[GS] handle write %08x = %016lx", addr, data);
     }
 }

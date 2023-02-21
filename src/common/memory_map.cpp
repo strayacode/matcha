@@ -1,6 +1,6 @@
 #include <assert.h>
 #include "common/memory_map.h"
-#include "common/log_file.h"
+#include "common/log.h"
 
 void MemoryMap::RegisterReadMemory(u32 start, u32 end, u8* pointer) {
     MemoryReadElement read_element;
@@ -66,7 +66,7 @@ u8 MemoryMap::ReadByte(u32 addr) {
     MemoryReadElement* read_element = GetReadMap(addr);
 
     if (!read_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return 0;
     }
 
@@ -84,7 +84,7 @@ u16 MemoryMap::ReadHalf(u32 addr) {
     MemoryReadElement* read_element = GetReadMap(addr);
 
     if (!read_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return 0;
     }
 
@@ -102,7 +102,7 @@ u32 MemoryMap::ReadWord(u32 addr) {
     MemoryReadElement* read_element = GetReadMap(addr);
 
     if (!read_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return 0;
     }
 
@@ -120,7 +120,7 @@ void MemoryMap::WriteByte(u32 addr, u8 data) {
     MemoryWriteElement* write_element = GetWriteMap(addr);
 
     if (!write_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return;
     }
 
@@ -138,7 +138,7 @@ void MemoryMap::WriteHalf(u32 addr, u16 data) {
     MemoryWriteElement* write_element = GetWriteMap(addr);
 
     if (!write_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return;
     }
 
@@ -156,7 +156,7 @@ void MemoryMap::WriteWord(u32 addr, u32 data) {
     MemoryWriteElement* write_element = GetWriteMap(addr);
 
     if (!write_element) {
-        LogFile::Get().Log("[MemoryMap] %08x is not mapped\n", addr);
+        common::Log("[MemoryMap] %08x is not mapped", addr);
         return;
     }
 

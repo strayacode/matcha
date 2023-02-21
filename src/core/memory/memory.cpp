@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/memory/memory.h"
 #include "core/memory/memory_constants.h"
 #include "core/system.h"
@@ -26,8 +26,6 @@ Memory::~Memory() {
 void Memory::Reset() {
     ee_table.fill(nullptr);
     iop_table.fill(nullptr);
-
-    common::info("a");
 
     InitialiseMemory();
     LoadBIOS();
@@ -95,17 +93,17 @@ void Memory::InitialiseMemory() {
 void Memory::LoadBIOS() {
     std::ifstream file("../bios/bios.bin", std::fstream::in | std::fstream::binary);
 
-    common::info("a");
+    common::Info("a");
 
     if (!file) {
-        common::error("[Memory] bios does not exist!");
+        common::Error("[Memory] bios does not exist!");
     }
 
     file.unsetf(std::ios::skipws);
     file.read(reinterpret_cast<char*>(bios), 0x400000);
     file.close();
 
-    common::info("[Memory] bios was successfully loaded!");
+    common::Info("[Memory] bios was successfully loaded!");
 }
 
 u32 Memory::TranslateVirtualAddress(VAddr vaddr) {
@@ -241,7 +239,7 @@ u32 Memory::EEReadIO(u32 addr) {
     case 0x1000F520:
         return system->dmac.disabled_status;
     default:
-        LogFile::Get().Log("[Memory] undefined ee read %08x\n", addr);
+        common::Log("[Memory] undefined ee read %08x", addr);
     }
     
     return 0;
@@ -293,7 +291,7 @@ void Memory::EEWriteIO(u32 addr, u32 data) {
         break;
     case 0x1000F180:
         // kputchar
-        LogFile::Get().Log("%c", data);
+        common::LogNoNewline("%c", data);
         break;
     case 0x1000F200:
         system->sif.WriteMSCOM(data);
@@ -321,7 +319,7 @@ void Memory::EEWriteIO(u32 addr, u32 data) {
         mch_drd = data;
         break;
     default:
-        LogFile::Get().Log("[Memory] undefined ee write %08x = %08x\n", addr, data);
+        common::Log("[Memory] undefined ee write %08x = %08x", addr, data);
     }
 }
 
@@ -370,7 +368,7 @@ u8 Memory::IOPReadByte(u32 addr) {
         // cdvd n command status
         return 0;
     default:
-        LogFile::Get().Log("[Memory] handle iop byte read %08x\n", addr);
+        common::Log("[Memory] handle iop byte read %08x", addr);
     }
 
     return 0;
@@ -386,7 +384,7 @@ u16 Memory::IOPReadHalf(u32 addr) {
     } else if (addr >= SPU2_REGION_START && addr < SPU2_REGION_END) {
         return system->spu2.ReadRegister(addr);
     } else {
-        LogFile::Get().Log("[Memory] handle iop half read %08x\n", addr);
+        common::Log("[Memory] handle iop half read %08x", addr);
     }
 
     return 0;
@@ -427,7 +425,7 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801078:
         return system->iop_core->interrupt_controller.ReadRegister(8);
     default:
-        LogFile::Get().Log("[Memory] handle iop word read %08x\n", addr);
+        common::Log("[Memory] handle iop word read %08x", addr);
     }
 
     return 0;
@@ -459,7 +457,7 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
     case 0x1F802070:
         return;
     default:
-        LogFile::Get().Log("[Memory] handle iop byte write %08x = %02x\n", addr, data);
+        common::Log("[Memory] handle iop byte write %08x = %02x", addr, data);
         break;
     }
 }
@@ -482,7 +480,7 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
         system->spu2.WriteRegister(addr, data);
         return;
     } else {
-        LogFile::Get().Log("[Memory] handle iop half write %08x = %04x\n", addr, data);
+        common::Log("[Memory] handle iop half write %08x = %04x", addr, data);
     }
 }
 
@@ -548,6 +546,6 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F8015F0:
         break;
     default:
-        LogFile::Get().Log("[Memory] handle iop word write %08x = %08x\n", addr, data);
+        common::Log("[Memory] handle iop word write %08x = %08x", addr, data);
     }
 }

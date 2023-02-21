@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/ee/timers.h"
 #include "core/system.h"
 
@@ -33,7 +33,7 @@ u32 Timers::ReadRegister(u32 addr) {
     case 0x14:
         return 0;
     default:
-        common::error("[Timers] handle %02x", addr & 0xFF);
+        common::Error("[Timers] handle %02x", addr & 0xFF);
     }
 }
 
@@ -42,13 +42,13 @@ void Timers::WriteRegister(u32 addr, u32 data) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        common::debug("[Timer] T%d TN_COUNT write %04x", index, data);
+        common::Debug("[Timer] T%d TN_COUNT write %04x", index, data);
         channels[index].counter = data;
         break;
     case 0x4:
         break;
     case 0x10:
-        common::debug("[Timer] T%d TN_MODE write %04x", index, data);
+        common::Debug("[Timer] T%d TN_MODE write %04x", index, data);
         channels[index].control = data;
 
         // writing 1 to bit 10 or 11 clears them
@@ -85,15 +85,15 @@ void Timers::WriteRegister(u32 addr, u32 data) {
     case 0x14:
         break;
     case 0x20:
-        common::debug("[Timer] T%d TN_COMP write %04x", index, data);
+        common::Debug("[Timer] T%d TN_COMP write %04x", index, data);
         channels[index].compare = data;
         break;
     case 0x30:
-        common::debug("[Timer] T%d TN_HOLD write %04x", index, data);
+        common::Debug("[Timer] T%d TN_HOLD write %04x", index, data);
         channels[index].hold = data;
         break;
     default:
-        common::error("[Timer] handle address %08x", addr);
+        common::Error("[Timer] handle address %08x", addr);
     }
 }
 
@@ -102,7 +102,7 @@ u32 Timers::ReadChannel(u32 addr) {
 
     switch (reg) {
     default:
-        common::error("handle reg %d", reg);
+        common::Error("handle reg %d", reg);
     }
 
     return 0;
@@ -126,7 +126,7 @@ void Timers::Increment(int index) {
         }
 
         if (channels[index].control & (1 << 8)) {
-            common::error("handle timer interrupt with compare");
+            common::Error("handle timer interrupt with compare");
         }
     }
 
@@ -140,7 +140,7 @@ void Timers::Increment(int index) {
             // set the overflow interrupt flag and request a timer interrupt
             channels[index].control |= (1 << 11);
             
-            LogFile::Get().Log("[Timer] T%d request overflow interrupt\n", index);
+            common::Log("[Timer] T%d request overflow interrupt", index);
 
             switch (index) {
             case 0:

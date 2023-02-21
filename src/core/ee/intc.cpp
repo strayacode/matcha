@@ -11,21 +11,21 @@ void EEINTC::Reset() {
 }
 
 u16 EEINTC::ReadMask() {
-    common::warn("[INTC] read mask %04x", mask);
+    common::Warn("[INTC] read mask %04x", mask);
     return mask;
 }
 
 // a bit set to 1 in stat means
 // an irq was raised
 u16 EEINTC::ReadStat() {
-    common::warn("[INTC] read stat %04x", stat);
+    common::Warn("[INTC] read stat %04x", stat);
     return stat;
 }
 
 // writing 1 to mask reverses a bit
 // while writing 0 has no effect
 void EEINTC::WriteMask(u16 data) {
-    common::warn("[INTC] write mask %04x", data);
+    common::Warn("[INTC] write mask %04x", data);
     mask ^= (data & 0x7FFF);
     CheckInterruptSignal();
 }
@@ -33,7 +33,7 @@ void EEINTC::WriteMask(u16 data) {
 // writing the bit 1 to stat clears an interrupt
 // while writing 0 has no effect
 void EEINTC::WriteStat(u16 data) {
-    common::warn("[INTC] write stat %04x", data);
+    common::Warn("[INTC] write stat %04x", data);
     stat &= ~(data & 0x7FFF);
     CheckInterruptSignal();
 }

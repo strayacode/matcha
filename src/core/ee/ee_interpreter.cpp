@@ -1,5 +1,5 @@
 #include "common/types.h"
-#include "common/log_file.h"
+#include "common/log.h"
 #include "common/arithmetic.h"
 #include "core/ee/ee_interpreter.h"
 #include "core/ee/disassembler.h"
@@ -41,7 +41,7 @@ void EEInterpreter::cfc1(EECore& cpu, CPUInstruction inst) {
         cpu.SetReg<u64>(inst.rt, static_cast<s32>(cpu.cop1.GetControlReg(inst.rd)));
         break;
     default:
-        common::error("[EEInterpreter] operation where fs != 0 or fs != 31 is undefined");
+        common::Error("[EEInterpreter] operation where fs != 0 or fs != 31 is undefined");
     }
 }
 
@@ -59,7 +59,7 @@ void EEInterpreter::lwc1(EECore& cpu, CPUInstruction inst) {
     u32 addr = cpu.GetReg<u32>(inst.rs) + inst.simm;
 
     if (addr & 0x3) {
-        common::error("[EEInterpreter] handle address exception");
+        common::Error("[EEInterpreter] handle address exception");
     }
 
     cpu.cop1.SetReg(inst.rt, cpu.ReadWord(addr));
@@ -499,7 +499,7 @@ void EEInterpreter::div(EECore& cpu, CPUInstruction inst) {
         cpu.lo = 0x80000000;
         cpu.hi = 0;
     } else if (cpu.GetReg<s32>(inst.rt) == 0) {
-        common::error("can't divide by 0");
+        common::Error("can't divide by 0");
     } else {
         cpu.lo = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.rs) / cpu.GetReg<s32>(inst.rt));
         cpu.hi = sign_extend<s64, 32>(cpu.GetReg<s32>(inst.rs) % cpu.GetReg<s32>(inst.rt));
@@ -566,7 +566,7 @@ void EEInterpreter::dsrl32(EECore& cpu, CPUInstruction inst) {
 void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     u8 opcode = cpu.ReadByte(cpu.pc - 4);
 
-    LogFile::Get().Log("[EE] executing syscall %s\n", cpu.GetSyscallInfo(opcode).c_str());
+    common::Log("[EE] executing syscall %s", cpu.GetSyscallInfo(opcode).c_str());
     cpu.DoException(0x80000180, ExceptionType::Syscall);
 }
 
@@ -643,9 +643,9 @@ void EEInterpreter::ei(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
-    common::error("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
+    common::Error("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
-    // common::warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
+    // common::Warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
 }

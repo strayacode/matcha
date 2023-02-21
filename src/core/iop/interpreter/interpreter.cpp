@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/iop/interpreter/interpreter.h"
 #include "core/iop/disassembler.h"
 #include "core/system.h"
@@ -120,7 +120,7 @@ void IOPInterpreter::RegisterOpcode(InstructionHandler handler, int index, Instr
 }
 
 void IOPInterpreter::UndefinedInstruction() {
-    common::error("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.opcode, inst.func, inst.rt);
+    common::Error("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.opcode, inst.func, inst.rt);
 }
 
 void IOPInterpreter::SecondaryInstruction() {
@@ -141,7 +141,7 @@ void IOPInterpreter::COP0Instruction() {
         rfe();
         break;
     default:
-        common::error("handle %d", format);
+        common::Error("handle %d", format);
     }
 }
 
@@ -150,7 +150,7 @@ void IOPInterpreter::IOPPuts() {
     u32 length = GetReg(6);
     
     for (int i = 0; i < length; i++) {
-        LogFile::Get().Log("%c", system->memory.iop_ram[address & 0x1FFFFF]);
+        common::LogNoNewline("%c", system->memory.iop_ram[address & 0x1fffff]);
         address++;
     }
 }

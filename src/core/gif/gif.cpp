@@ -1,4 +1,4 @@
-#include "common/log_file.h"
+#include "common/log.h"
 #include "core/gif/gif.h"
 #include "core/system.h"
 
@@ -21,17 +21,17 @@ void GIF::Reset() {
 }
 
 void GIF::SystemReset() {
-    common::warn("[GIF] reset gif state");
+    common::Warn("[GIF] reset gif state");
 }
 
 u32 GIF::ReadStat() {
-    common::warn("[GIF] read stat %08x", stat);
+    common::Warn("[GIF] read stat %08x", stat);
 
     return stat;
 }
 
 void GIF::WriteCTRL(u8 data) {
-    common::warn("[GIF] write ctrl %02x", data);
+    common::Warn("[GIF] write ctrl %02x", data);
 
     if (data & 0x1) {
         SystemReset();
@@ -41,7 +41,7 @@ void GIF::WriteCTRL(u8 data) {
 }
 
 void GIF::WriteFIFO(u128 data) {
-    // common::warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
+    // common::Warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
     fifo.push(data);
 }
 
@@ -57,7 +57,7 @@ void GIF::SendPath3(u128 data) {
         current_tag.reglist = data.ud[1];
         current_tag.reglist_offset = 0;
 
-        LogFile::Get().Log("[GIF] receive giftag %016lx%016lx format %d\n", data.ud[1], data.ud[0], current_tag.format);
+        common::Log("[GIF] receive giftag %016lx%016lx format %d", data.ud[1], data.ud[0], current_tag.format);
 
         if (!current_tag.nregs) {
             current_tag.nregs = 16;
@@ -70,7 +70,7 @@ void GIF::SendPath3(u128 data) {
             current_tag.transfers_left = current_tag.nloop * current_tag.nregs;
             break;
         default:
-            common::error("[GIF] handle GIFTag format %d", current_tag.format);
+            common::Error("[GIF] handle GIFTag format %d", current_tag.format);
         }
     } else {
         switch (current_tag.format) {
@@ -78,7 +78,7 @@ void GIF::SendPath3(u128 data) {
             ProcessPacked(data);
             break;
         default:
-            common::error("[GIF] handle GIFTag format %d", current_tag.format);
+            common::Error("[GIF] handle GIFTag format %d", current_tag.format);
         }
 
         current_tag.transfers_left--;
@@ -96,7 +96,7 @@ void GIF::ProcessPacked(u128 data) {
         system.gs.WriteRegister(data.ud[1] & 0xFF, data.ud[0]);
         break;
     default:
-        common::error("[GIF] handle register %02x", reg);
+        common::Error("[GIF] handle register %02x", reg);
     }
 
     current_tag.reglist_offset++;

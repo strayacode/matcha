@@ -5,7 +5,6 @@ add_library(common
     emu_thread.h emu_thread.cpp
     arithmetic.h arithmetic.cpp
     cpu_types.h ring_buffer.h
-    log_file.h log_file.cpp
     memory_map.h memory_map.cpp
 )
 
