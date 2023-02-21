@@ -7,9 +7,7 @@ static const char* channel_names[10] = {
     "SIF0", "SIF1", "SIF2", "SPR_FROM", "SPR_TO",
 };
 
-DMAC::DMAC(System* system) : system(system) {
-
-}
+DMAC::DMAC(System* system) : system(system) {}
 
 void DMAC::Reset() {
     for (int i = 0; i < 10; i++) {
@@ -35,7 +33,7 @@ void DMAC::Reset() {
 u32 DMAC::ReadChannel(u32 addr) {
     int index = GetChannelIndex(addr);
 
-    switch (addr & 0xFF) {
+    switch (addr & 0xff) {
     case 0x00:
         // common::Debug("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;
@@ -48,6 +46,8 @@ u32 DMAC::ReadChannel(u32 addr) {
     default:
         common::Error("[DMAC] Handle %02x", addr & 0xFF);
     }
+
+    return 0;
 }
 
 void DMAC::WriteRegister(u32 addr, u32 data) {
@@ -317,7 +317,7 @@ void DMAC::DoSIF1Transfer() {
         // push data to the sif1 fifo
         u128 data = system->ee_core.ReadQuad(channel.address);
 
-        common::Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.i.hi, data.i.lo, interrupt_status);
+        common::Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
 
         system->sif.WriteSIF1FIFO(data);
 
@@ -354,7 +354,7 @@ void DMAC::EndTransfer(int index) {
 void DMAC::DoSourceChain(int index) {
     DMAChannel& channel = channels[index];
     u128 data = system->ee_core.ReadQuad(channel.tag_address);
-    u64 dma_tag = data.i.lo;
+    u64 dma_tag = data.lo;
 
     common::Log("[DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);
 

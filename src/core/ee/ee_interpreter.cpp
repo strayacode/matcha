@@ -281,8 +281,8 @@ void EEInterpreter::lq(EECore& cpu, CPUInstruction inst) {
     u128 data;
     u32 addr = (cpu.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
 
-    data.i.lo = cpu.ReadDouble(addr);
-    data.i.hi = cpu.ReadDouble(addr + 8);
+    data.lo = cpu.ReadDouble(addr);
+    data.hi = cpu.ReadDouble(addr + 8);
 
     cpu.SetReg<u128>(inst.rt, data);
 }
@@ -647,5 +647,5 @@ void EEInterpreter::unknown_instruction(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::stub_instruction(EECore& cpu, CPUInstruction inst) {
-    // common::Warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
+    common::Warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", EEDisassembleInstruction(inst, cpu.pc).c_str(), inst.data, cpu.pc, inst.opcode, inst.func, inst.rt);
 }

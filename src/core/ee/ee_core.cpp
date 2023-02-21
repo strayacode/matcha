@@ -111,8 +111,8 @@ u128 EECore::ReadQuad(u32 addr) {
     u128 data;
     // common::Debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
     // common::Debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
-    data.i.lo = system.memory.EEReadDouble(addr);
-    data.i.hi = system.memory.EEReadDouble(addr + 8);
+    data.lo = system.memory.EEReadDouble(addr);
+    data.hi = system.memory.EEReadDouble(addr + 8);
 
     return data;
 }
@@ -138,7 +138,7 @@ void EECore::WriteQuad(u32 addr, u128 data) {
 }
 
 void EECore::DoException(u32 target, ExceptionType exception) {
-    common::Log("[EE] trigger exception with type %02x at pc = %08x\n", static_cast<int>(exception), pc);
+    common::Log("[EE] trigger exception with type %02x at pc = %08x", static_cast<int>(exception), pc);
 
     bool level2_exception = static_cast<int>(exception) >= 14;
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
@@ -204,7 +204,7 @@ bool EECore::InterruptsEnabled() {
 void EECore::PrintState() {
     common::Log("[EE State]");
     for (int i = 0; i < 32; i++) {
-        common::Log("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).i.hi, GetReg<u128>(i).i.lo);
+        common::Log("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).hi, GetReg<u128>(i).lo);
     }
 
     common::Log("pc: %08x npc: %08x", pc, next_pc);

@@ -41,7 +41,7 @@ void GIF::WriteCTRL(u8 data) {
 }
 
 void GIF::WriteFIFO(u128 data) {
-    // common::Warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
+    // common::Warn("[GIF] write to fifo %016lx%016lx", data.hi, data.lo);
     fifo.push(data);
 }
 
