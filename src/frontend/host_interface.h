@@ -29,6 +29,7 @@ public:
 private:
     void HandleInput();
     void RenderMenubar();
+    void boot(const std::string& path);
     
     const char* glsl_version = "#version 330";
 

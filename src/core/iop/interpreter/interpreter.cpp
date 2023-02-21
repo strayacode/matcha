@@ -120,7 +120,7 @@ void IOPInterpreter::RegisterOpcode(InstructionHandler handler, int index, Instr
 }
 
 void IOPInterpreter::UndefinedInstruction() {
-    log_fatal("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.opcode, inst.func, inst.rt);
+    common::error("%s %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", IOPDisassembleInstruction(inst, regs.pc).c_str(), inst.data, regs.pc, inst.opcode, inst.func, inst.rt);
 }
 
 void IOPInterpreter::SecondaryInstruction() {
@@ -141,7 +141,7 @@ void IOPInterpreter::COP0Instruction() {
         rfe();
         break;
     default:
-        log_fatal("handle %d", format);
+        common::error("handle %d", format);
     }
 }
 

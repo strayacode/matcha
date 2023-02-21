@@ -37,7 +37,7 @@ void IOPDMAC::Run(int cycles) {
                 DoSIF1Transfer();
                 break;
             default:
-                log_fatal("[IOPDMAC] handle transfer for channel %d", i);
+                common::error("[IOPDMAC] handle transfer for channel %d", i);
             }
         }
     }
@@ -70,26 +70,26 @@ u32 IOPDMAC::ReadChannel(u32 addr) {
 
     switch (index) {
     case 0x0:
-        log_debug("[IOPDMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
+        common::debug("[IOPDMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
         return channels[channel].address;
     case 0x4:
-        log_debug("[IOPDMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
+        common::debug("[IOPDMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
         return (channels[channel].block_count << 16) | (channels[channel].block_size);
     case 0x8:
-        log_debug("[IOPDMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
+        common::debug("[IOPDMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
         return channels[channel].control;
     case 0xC:
-        log_debug("[IOPDMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
+        common::debug("[IOPDMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
         return channels[channel].tag_address;
     default:
-        log_fatal("[IOPDMAC] %08x", index);
+        common::error("[IOPDMAC] %08x", index);
     }
 }
 
 void IOPDMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1F8010F0:
-        log_debug("[IOPDMAC] dpcr write %08x", data);
+        common::debug("[IOPDMAC] dpcr write %08x", data);
         dpcr = data;
         break;
     case 0x1F8010F4:
@@ -173,7 +173,7 @@ void IOPDMAC::WriteChannel(u32 addr, u32 data) {
         channels[channel].tag_address = data;
         break;
     default:
-        log_fatal("handle %02x", index);
+        common::error("handle %02x", index);
     }
 }
 
@@ -197,7 +197,7 @@ void IOPDMAC::DoSIF0Transfer() {
         system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 8));
         system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 12));
 
-        // log_debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
+        // common::debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
         // round to the nearest 4
         channel.block_count = (block_count + 3) & 0xFFFFFFFC;

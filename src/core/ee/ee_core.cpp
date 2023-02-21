@@ -72,6 +72,7 @@ void EECore::Reset() {
 void EECore::Run(int cycles) {
     while (cycles--) {
         inst = CPUInstruction{ReadWord(pc)};
+        common::debug("run instruction %08x", inst.data);
 
         interpreter_table.Execute(*this, inst);
 
@@ -110,8 +111,8 @@ u64 EECore::ReadDouble(u32 addr) {
 
 u128 EECore::ReadQuad(u32 addr) {
     u128 data;
-    // log_debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
-    // log_debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
+    // common::debug("low double at address %08x = %016lx", addr, system.memory.EERead<u64>(addr));
+    // common::debug("high double at address %08x = %016lx", addr + 8, system.memory.EERead<u64>(addr + 8));
     data.i.lo = system.memory.EEReadDouble(addr);
     data.i.hi = system.memory.EEReadDouble(addr + 8);
 
@@ -145,7 +146,7 @@ void EECore::DoException(u32 target, ExceptionType exception) {
     int code = level2_exception ? static_cast<int>(exception) - 14 : static_cast<int>(exception);
 
     if (level2_exception) {
-        log_fatal("handle level 2 exception");
+        common::error("handle level 2 exception");
     } else {
         cop0.cause.exception = code;
         cop0.gpr[14] = pc - 4 * branch_delay;

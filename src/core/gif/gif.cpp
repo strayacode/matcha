@@ -21,17 +21,17 @@ void GIF::Reset() {
 }
 
 void GIF::SystemReset() {
-    log_warn("[GIF] reset gif state");
+    common::warn("[GIF] reset gif state");
 }
 
 u32 GIF::ReadStat() {
-    log_warn("[GIF] read stat %08x", stat);
+    common::warn("[GIF] read stat %08x", stat);
 
     return stat;
 }
 
 void GIF::WriteCTRL(u8 data) {
-    log_warn("[GIF] write ctrl %02x", data);
+    common::warn("[GIF] write ctrl %02x", data);
 
     if (data & 0x1) {
         SystemReset();
@@ -41,7 +41,7 @@ void GIF::WriteCTRL(u8 data) {
 }
 
 void GIF::WriteFIFO(u128 data) {
-    // log_warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
+    // common::warn("[GIF] write to fifo %016lx%016lx", data.i.hi, data.i.lo);
     fifo.push(data);
 }
 
@@ -70,7 +70,7 @@ void GIF::SendPath3(u128 data) {
             current_tag.transfers_left = current_tag.nloop * current_tag.nregs;
             break;
         default:
-            log_fatal("[GIF] handle GIFTag format %d", current_tag.format);
+            common::error("[GIF] handle GIFTag format %d", current_tag.format);
         }
     } else {
         switch (current_tag.format) {
@@ -78,7 +78,7 @@ void GIF::SendPath3(u128 data) {
             ProcessPacked(data);
             break;
         default:
-            log_fatal("[GIF] handle GIFTag format %d", current_tag.format);
+            common::error("[GIF] handle GIFTag format %d", current_tag.format);
         }
 
         current_tag.transfers_left--;
@@ -96,7 +96,7 @@ void GIF::ProcessPacked(u128 data) {
         system.gs.WriteRegister(data.ud[1] & 0xFF, data.ud[0]);
         break;
     default:
-        log_fatal("[GIF] handle register %02x", reg);
+        common::error("[GIF] handle register %02x", reg);
     }
 
     current_tag.reglist_offset++;

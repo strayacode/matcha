@@ -40,12 +40,12 @@ void SIF::WriteIOPControl(u32 data) {
 }
 
 void SIF::WriteBD6(u32 data) {
-    // log_warn("[SIF] write bd6 %08x", data);
+    // common::warn("[SIF] write bd6 %08x", data);
     bd6 = data;
 }
 
 void SIF::WriteMSCOM(u32 data) {
-    // log_warn("[SIF] write mscom %08x", data);
+    // common::warn("[SIF] write mscom %08x", data);
     mscom = data;
 }
 
@@ -54,7 +54,7 @@ void SIF::WriteSMCOM(u32 data) {
 }
 
 void SIF::SetMSFLAG(u32 data) {
-    // log_warn("[SIF] write msflag %08x", data);
+    // common::warn("[SIF] write msflag %08x", data);
     msflag |= data;
 }
 
@@ -71,22 +71,22 @@ void SIF::ResetSMFLAG(u32 data) {
 }
 
 u32 SIF::ReadMSFLAG() {
-    // log_warn("[SIF] read msflag %08x", msflag);
+    // common::warn("[SIF] read msflag %08x", msflag);
     return msflag;
 }
 
 u32 SIF::ReadMSCOM() {
-    // log_warn("[SIF] read mscom %08x", mscom);
+    // common::warn("[SIF] read mscom %08x", mscom);
     return mscom;
 }
 
 u32 SIF::ReadSMFLAG() {
-    // log_warn("[SIF] read smflag %08x", smflag);
+    // common::warn("[SIF] read smflag %08x", smflag);
     return smflag;
 }
 
 u32 SIF::ReadSMCOM() {
-    // log_warn("[SIF] read smcom %08x", smcom);
+    // common::warn("[SIF] read smcom %08x", smcom);
     return smcom;
 }
 

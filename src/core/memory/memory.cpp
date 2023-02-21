@@ -27,6 +27,8 @@ void Memory::Reset() {
     ee_table.fill(nullptr);
     iop_table.fill(nullptr);
 
+    common::info("a");
+
     InitialiseMemory();
     LoadBIOS();
     RegisterRegion(0x00000000, 0x02000000, 0x1FFFFFF, rdram, RegionType::EE);
@@ -93,15 +95,17 @@ void Memory::InitialiseMemory() {
 void Memory::LoadBIOS() {
     std::ifstream file("../bios/bios.bin", std::fstream::in | std::fstream::binary);
 
+    common::info("a");
+
     if (!file) {
-        log_fatal("bios does not exist!");
+        common::error("[Memory] bios does not exist!");
     }
 
     file.unsetf(std::ios::skipws);
     file.read(reinterpret_cast<char*>(bios), 0x400000);
     file.close();
 
-    log_debug("[Memory] Bios was successfully loaded!");
+    common::info("[Memory] bios was successfully loaded!");
 }
 
 u32 Memory::TranslateVirtualAddress(VAddr vaddr) {

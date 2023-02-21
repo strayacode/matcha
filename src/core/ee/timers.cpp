@@ -33,7 +33,7 @@ u32 Timers::ReadRegister(u32 addr) {
     case 0x14:
         return 0;
     default:
-        log_fatal("[Timers] handle %02x", addr & 0xFF);
+        common::error("[Timers] handle %02x", addr & 0xFF);
     }
 }
 
@@ -42,13 +42,13 @@ void Timers::WriteRegister(u32 addr, u32 data) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        log_debug("[Timer] T%d TN_COUNT write %04x", index, data);
+        common::debug("[Timer] T%d TN_COUNT write %04x", index, data);
         channels[index].counter = data;
         break;
     case 0x4:
         break;
     case 0x10:
-        log_debug("[Timer] T%d TN_MODE write %04x", index, data);
+        common::debug("[Timer] T%d TN_MODE write %04x", index, data);
         channels[index].control = data;
 
         // writing 1 to bit 10 or 11 clears them
@@ -85,15 +85,15 @@ void Timers::WriteRegister(u32 addr, u32 data) {
     case 0x14:
         break;
     case 0x20:
-        log_debug("[Timer] T%d TN_COMP write %04x", index, data);
+        common::debug("[Timer] T%d TN_COMP write %04x", index, data);
         channels[index].compare = data;
         break;
     case 0x30:
-        log_debug("[Timer] T%d TN_HOLD write %04x", index, data);
+        common::debug("[Timer] T%d TN_HOLD write %04x", index, data);
         channels[index].hold = data;
         break;
     default:
-        log_fatal("[Timer] handle address %08x", addr);
+        common::error("[Timer] handle address %08x", addr);
     }
 }
 
@@ -102,7 +102,7 @@ u32 Timers::ReadChannel(u32 addr) {
 
     switch (reg) {
     default:
-        log_fatal("handle reg %d", reg);
+        common::error("handle reg %d", reg);
     }
 
     return 0;
@@ -126,7 +126,7 @@ void Timers::Increment(int index) {
         }
 
         if (channels[index].control & (1 << 8)) {
-            log_fatal("handle timer interrupt with compare");
+            common::error("handle timer interrupt with compare");
         }
     }
 

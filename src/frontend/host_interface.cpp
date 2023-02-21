@@ -9,7 +9,7 @@ HostInterface::HostInterface() :
 bool HostInterface::Initialise() {
     // initialise sdl
     if (SDL_Init(SDL_INIT_VIDEO) > 0) {
-        log_warn("error initialising SDL");
+        common::warn("error initialising SDL");
         return false;
     }
 
@@ -117,6 +117,10 @@ void HostInterface::RenderMenubar() {
                 file_dialog.Open();
             }
 
+            if (ImGui::MenuItem("Boot BIOS")) {
+                boot("");
+            }
+
             if (ImGui::MenuItem("Quit")) {
                 running = false;
             }
@@ -152,9 +156,7 @@ void HostInterface::RenderMenubar() {
 
     file_dialog.Display();
     if (file_dialog.HasSelected()) {
-        core.Reset();
-        core.SetGamePath(file_dialog.GetSelected().string());
-        core.SetState(CoreState::Running);
+        boot(file_dialog.GetSelected().string());
         file_dialog.ClearSelected();
     }
 }
@@ -200,4 +202,10 @@ void HostInterface::TogglePause() {
     } else {
         core.SetState(CoreState::Running);
     }
+}
+
+void HostInterface::boot(const std::string& path = "") {
+    core.Reset();
+    core.SetGamePath(path);
+    core.SetState(CoreState::Running);
 }

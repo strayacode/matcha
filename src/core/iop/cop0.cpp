@@ -38,7 +38,7 @@ u32 IOPCOP0::GetReg(int reg) {
     case 12: case 13: case 14: case 15:
         return gpr[reg];
     default:
-        log_fatal("handle cop0 read %d", reg);
+        common::error("handle cop0 read %d", reg);
     }
 }
 

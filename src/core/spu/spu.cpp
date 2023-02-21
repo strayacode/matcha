@@ -16,7 +16,7 @@ u32 SPU::ReadRegister(u32 addr) {
         status &= ~0x80;
         break;
     default:
-        log_warn("[SPU] handle read %08x", addr);
+        common::warn("[SPU] handle read %08x", addr);
     }
 
     return return_value;
@@ -28,7 +28,7 @@ void SPU::WriteRegister(u32 addr, u32 data) {
         // status
         break;
     default:
-        log_warn("[SPU] handle write %08x = %08x", addr, data);
+        common::warn("[SPU] handle write %08x = %08x", addr, data);
     }
 }
 

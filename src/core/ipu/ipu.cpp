@@ -6,7 +6,7 @@ void IPU::Reset() {
 }
 
 void IPU::SystemReset() {
-    log_warn("[IPU] system reset");
+    common::warn("[IPU] system reset");
 }
 
 void IPU::WriteControl(u32 data) {
@@ -15,10 +15,10 @@ void IPU::WriteControl(u32 data) {
     }
 
     if (data != 0x40000000) {
-        log_fatal("handle");
+        common::error("handle");
     }
 
-    log_warn("[IPU] write control %08x", data);
+    common::warn("[IPU] write control %08x", data);
     control = data;
 }
 
@@ -27,7 +27,7 @@ u32 IPU::ReadControl() {
 }
 
 void IPU::WriteCommand(u32 data) {
-    log_warn("[IPU] write command %08x", data);
+    common::warn("[IPU] write command %08x", data);
 
     command = data;
 }

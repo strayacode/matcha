@@ -72,7 +72,7 @@ u32 IOPTimers::ReadRegister(u32 addr) {
     case 0x8:
         return channels[channel].target;
     default:
-        log_fatal("handle %02x", index);
+        common::error("handle %02x", index);
     }
 }
 
@@ -103,7 +103,7 @@ void IOPTimers::WriteRegister(u32 addr, u32 data) {
 
         break;
     default:
-        log_fatal("handle %02x", index);
+        common::error("handle %02x", index);
     }
 }
 

@@ -23,19 +23,19 @@ u32 IOPInterruptController::ReadRegister(int offset) {
         return value;
     }
     default:
-        log_fatal("InterruptController: handle read offset %02x", offset);
+        common::error("InterruptController: handle read offset %02x", offset);
     }
 }
 
 void IOPInterruptController::WriteRegister(int offset, u32 data) {
     switch (offset) {
     case 0x0:
-        // log_debug("[IOP INTC] I_STAT write %08x", data);
+        // common::debug("[IOP INTC] I_STAT write %08x", data);
         interrupt_status &= data & WRITE_MASK;
         UpdateInterrupts();
         break;
     case 0x4:
-        // log_debug("[IOP INTC] I_MASK write %08x", data);
+        // common::debug("[IOP INTC] I_MASK write %08x", data);
         interrupt_mask = data & WRITE_MASK;
         UpdateInterrupts();
         break;
@@ -44,7 +44,7 @@ void IOPInterruptController::WriteRegister(int offset, u32 data) {
         UpdateInterrupts();
         break;
     default:
-        log_fatal("InterruptController: handle write offset %02x", offset);
+        common::error("InterruptController: handle write offset %02x", offset);
     }
 }
 

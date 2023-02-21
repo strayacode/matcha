@@ -17,6 +17,8 @@ namespace common {
         va_start(args, format);
         std::printf("[" GREEN "INFO" RESET "] ");
         std::vfprintf(stdout, format, args);
+        std::printf("\n");
+        std::fflush(stdout);
         va_end(args);
     }
 
@@ -25,6 +27,8 @@ namespace common {
         va_start(args, format);
         std::printf("[" BLUE "DEBUG" RESET "] ");
         std::vfprintf(stdout, format, args);
+        std::printf("\n");
+        std::fflush(stdout);
         va_end(args);
     }
 
@@ -33,6 +37,8 @@ namespace common {
         va_start(args, format);
         std::printf("[" YELLOW "WARN" RESET "] ");
         std::vfprintf(stdout, format, args);
+        std::printf("\n");
+        std::fflush(stdout);
         va_end(args);
     }
 
@@ -40,8 +46,10 @@ namespace common {
         std::va_list args;
         va_start(args, format);
         std::printf("[" RED "ERROR" RESET "] ");
-        std::vfprintf(stdout, format, args);
+        std::vfprintf(stderr, format, args);
+        std::printf("\n");
+        std::fflush(stderr);
         va_end(args);
         std::exit(0);
     }
-} // namespace common
+}
