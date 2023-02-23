@@ -17,7 +17,13 @@ void EEInterpreter::mtc0(EECore& cpu, CPUInstruction inst) {
 // COP1 instructions
 // TODO: do instruction execution in the cop1
 void EEInterpreter::swc1(EECore& cpu, CPUInstruction inst) {
-    cpu.WriteWord(cpu.GetReg<u32>(inst.rs) + inst.simm, cpu.cop1.GetReg(inst.rt));
+    u32 vaddr = cpu.GetReg<u32>(inst.rs) + inst.simm;
+
+    if (vaddr & 0x3) {
+        common::Error("[EEInterpreter] handle unaligned swc1 vaddr %08x", vaddr);
+    }
+    
+    cpu.WriteWord(vaddr, cpu.cop1.GetReg(inst.rt));
 }
 
 void EEInterpreter::mtc1(EECore& cpu, CPUInstruction inst) {
@@ -56,13 +62,13 @@ void EEInterpreter::madd_s(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::lwc1(EECore& cpu, CPUInstruction inst) {
-    u32 addr = cpu.GetReg<u32>(inst.rs) + inst.simm;
+    u32 vaddr = cpu.GetReg<u32>(inst.rs) + inst.simm;
 
-    if (addr & 0x3) {
-        common::Error("[EEInterpreter] handle address exception");
+    if (vaddr & 0x3) {
+        common::Error("[EEInterpreter] handle unaligned lwc1 vaddr", vaddr);
     }
 
-    cpu.cop1.SetReg(inst.rt, cpu.ReadWord(addr));
+    cpu.cop1.SetReg(inst.rt, cpu.ReadWord(vaddr));
 }
 
 // COP2 instructions
@@ -622,7 +628,7 @@ void EEInterpreter::eret(EECore& cpu, CPUInstruction inst) {
     }
 
     // if (cpu.pc == 0x82000) {
-        // cpu.system.elf_loader.Load();
+    //     cpu.system.elf_loader.Load();
     // }
 
     // this is to account for the increment by 4 that

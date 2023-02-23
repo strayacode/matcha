@@ -33,7 +33,7 @@ void DMAC::Reset() {
 u32 DMAC::ReadChannel(u32 addr) {
     int index = GetChannelIndex(addr);
 
-    switch (addr & 0xff) {
+    switch (addr & 0xFF) {
     case 0x00:
         // common::Debug("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;

@@ -93,8 +93,6 @@ void Memory::InitialiseMemory() {
 void Memory::LoadBIOS() {
     std::ifstream file("../bios/bios.bin", std::fstream::in | std::fstream::binary);
 
-    common::Info("a");
-
     if (!file) {
         common::Error("[Memory] bios does not exist!");
     }
