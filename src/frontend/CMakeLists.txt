@@ -13,8 +13,8 @@ set(SOURCES
     imgui/imstb_truetype.h
     imgui/imgui_impl_opengl3.cpp
     imgui/imgui_impl_opengl3.h
-    imgui/imgui_impl_sdl.cpp
-    imgui/imgui_impl_sdl.h
+    imgui/imgui_impl_sdl2.cpp
+    imgui/imgui_impl_sdl2.h
     main.cpp
     host_interface.cpp
     debugger/ee.cpp

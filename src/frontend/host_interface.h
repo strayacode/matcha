@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_sdl2.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imfilebrowser.h"
 #include <SDL.h>
@@ -42,11 +42,12 @@ public:
     static constexpr ImVec4 colour_lighter_grey = ImVec4(0.180f, 0.180f, 0.180f, 1.000f);
     static constexpr ImVec4 colour_grey = ImVec4(0.140f, 0.140f, 0.140f, 1.000f);
     static constexpr ImVec4 colour_darker_grey = ImVec4(0.093f, 0.093f, 0.093f, 1.000f);
-    
+
 private:
     void HandleInput();
     void RenderMenubar();
-    void boot(const std::string& path);
+    void Boot(const std::string& path);
+    bool MenuItem(const char* label, const char* shortcut = NULL, bool selected = false, bool enabled = true);
     
     const char* glsl_version = "#version 330";
 

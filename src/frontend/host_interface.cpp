@@ -24,7 +24,7 @@ bool HostInterface::Initialise() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("otterstation", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    window = SDL_CreateWindow("matcha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -41,7 +41,7 @@ bool HostInterface::Initialise() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 13.0f);
-    io.Fonts->AddFontFromFileTTF("../data/fonts/Consolas.ttf", 14.0f);
+    io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
 
     return true;
@@ -111,24 +111,27 @@ void HostInterface::HandleInput() {
 }
 
 void HostInterface::RenderMenubar() {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6.0f, 6.0f));
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Load ROM")) {
+            
+            if (MenuItem("Load ROM")) {
                 file_dialog.Open();
             }
 
-            if (ImGui::MenuItem("Boot BIOS")) {
-                boot("");
+            if (MenuItem("Boot BIOS")) {
+                Boot("");
             }
 
-            if (ImGui::MenuItem("Quit")) {
+            if (MenuItem("Quit")) {
                 running = false;
             }
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Emulator")) {
-            if (ImGui::MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
+            if (MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
                 TogglePause();
             }
 
@@ -137,14 +140,14 @@ void HostInterface::RenderMenubar() {
 
         if (ImGui::BeginMenu("Debugger")) {
             if (ImGui::BeginMenu("EE")) {
-                ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
-                ImGui::MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
+                MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
+                MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("IOP")) {
-                ImGui::MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
-                ImGui::MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
+                MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
+                MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
                 ImGui::EndMenu();
             }
 
@@ -154,9 +157,11 @@ void HostInterface::RenderMenubar() {
         ImGui::EndMainMenuBar();
     }
 
+    ImGui::PopStyleVar(2);
+
     file_dialog.Display();
     if (file_dialog.HasSelected()) {
-        boot(file_dialog.GetSelected().string());
+        Boot(file_dialog.GetSelected().string());
         file_dialog.ClearSelected();
     }
 }
@@ -167,8 +172,8 @@ void HostInterface::SetupStyle() {
     ImGui::GetStyle().ChildBorderSize = 0.0f;
     ImGui::GetStyle().FrameBorderSize = 1.0f;
     ImGui::GetStyle().GrabMinSize = 7.0f;
-    ImGui::GetStyle().WindowRounding = 6.0f;
-    ImGui::GetStyle().FrameRounding = 3.0f;
+    ImGui::GetStyle().WindowRounding = 4.0f;
+    ImGui::GetStyle().FrameRounding = 1.0f;
     ImGui::GetStyle().PopupRounding = 0.0f;
     ImGui::GetStyle().ChildRounding = 0.0f;
     ImGui::GetStyle().GrabRounding = 4.0f;
@@ -211,8 +216,8 @@ void HostInterface::SetupStyle() {
     ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = colour_darker_grey;
     ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = colour_black;
     ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_DockingPreview] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = colour_black;
+    // ImGui::GetStyle().Colors[ImGuiCol_DockingPreview] = colour_blue;
+    // ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = colour_black;
 }
 
 void HostInterface::UpdateTitle(float fps) {
@@ -230,8 +235,14 @@ void HostInterface::TogglePause() {
     }
 }
 
-void HostInterface::boot(const std::string& path = "") {
+void HostInterface::Boot(const std::string& path = "") {
     core.Reset();
     core.SetGamePath(path);
     core.SetState(CoreState::Running);
+}
+
+bool HostInterface::MenuItem(const char* label, const char* shortcut, bool selected, bool enabled) {
+    // float x = ImGui::GetCursorPosX();
+    // ImGui::SetCursorPosX(x + 4.0f);
+    return ImGui::MenuItem(label, shortcut, selected, enabled);
 }

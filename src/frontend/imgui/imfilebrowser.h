@@ -543,11 +543,11 @@ inline void ImGui::FileBrowser::Display()
 
     SameLine();
 
-    int escIdx = GetIO().KeyMap[ImGuiKey_Escape];
+    // int escIdx = GetIO().KeyMap[ImGuiKey_Escape];
     if(Button("cancel") || closeFlag_ ||
         ((flags_ & ImGuiFileBrowserFlags_CloseOnEsc) &&
-         IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
-         escIdx >= 0 && IsKeyPressed(escIdx)))
+         IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)
+         ))
         CloseCurrentPopup();
 
     if(!statusStr_.empty() && !(flags_ & ImGuiFileBrowserFlags_NoStatusBar))
