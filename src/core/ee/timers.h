@@ -12,7 +12,7 @@ struct TimerChannel {
     int cycles_per_tick;
 };
 
-class System;
+struct System;
 
 class Timers {
 public:

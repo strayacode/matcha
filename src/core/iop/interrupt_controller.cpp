@@ -25,6 +25,8 @@ u32 IOPInterruptController::ReadRegister(int offset) {
     default:
         common::Error("InterruptController: handle read offset %02x", offset);
     }
+
+    return 0;
 }
 
 void IOPInterruptController::WriteRegister(int offset, u32 data) {

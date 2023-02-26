@@ -2,9 +2,7 @@
 #include "core/gs/gs.h"
 #include "core/system.h"
 
-GS::GS(System* system) : system(system) {
-
-}
+GS::GS(System& system) : system(system) {}
 
 void GS::Reset() {
     csr = 0;
@@ -35,7 +33,7 @@ void GS::SystemReset() {
     common::Warn("[GS] system reset");
 }
 
-u32 GS::ReadRegisterPrivileged(u32 addr) {
+u64 GS::ReadRegisterPrivileged(u32 addr) {
     switch (addr) {
     case 0x12001000:
         return csr;
@@ -46,118 +44,118 @@ u32 GS::ReadRegisterPrivileged(u32 addr) {
     return 0;
 }
 
-void GS::WriteRegisterPrivileged(u32 addr, u32 data) {
+void GS::WriteRegisterPrivileged(u32 addr, u64 value) {
     switch (addr) {
     case 0x12000000:
-        pmode = data;
+        pmode = value;
         break;
     case 0x12000004:
         break;
     case 0x12000010:
-        smode1 = (smode1 & ~0xFFFFFFFF) | data;
+        smode1 = (smode1 & ~0xFFFFFFFF) | value;
         break;
     case 0x12000014:
-        smode1 = ((u64)data << 32) | (smode1 & 0xFFFFFFFF);
+        smode1 = ((u64)value << 32) | (smode1 & 0xFFFFFFFF);
         break;
     case 0x12000020:
-        smode2 = (smode2 & ~0xFFFFFFFF) | data;
+        smode2 = (smode2 & ~0xFFFFFFFF) | value;
         break;
     case 0x12000024:
-        smode2 = ((u64)data << 32) | (smode2 & 0xFFFFFFFF);
+        smode2 = ((u64)value << 32) | (smode2 & 0xFFFFFFFF);
         break;
     case 0x12000030:
-        srfsh = (srfsh & ~0xFFFFFFFF) | data;
+        srfsh = (srfsh & ~0xFFFFFFFF) | value;
         break;
     case 0x12000034:
-        srfsh = ((u64)data << 32) | (srfsh & 0xFFFFFFFF);
+        srfsh = ((u64)value << 32) | (srfsh & 0xFFFFFFFF);
         break;
     case 0x12000040:
-        synch1 = (synch1 & ~0xFFFFFFFF) | data;
+        synch1 = (synch1 & ~0xFFFFFFFF) | value;
         break;
     case 0x12000044:
-        synch1 = ((u64)data << 32) | (synch1 & 0xFFFFFFFF);
+        synch1 = ((u64)value << 32) | (synch1 & 0xFFFFFFFF);
         break;
     case 0x12000050:
-        synch2 = (synch2 & ~0xFFFFFFFF) | data;
+        synch2 = (synch2 & ~0xFFFFFFFF) | value;
         break;
     case 0x12000054:
-        synch2 = ((u64)data << 32) | (synch2 & 0xFFFFFFFF);
+        synch2 = ((u64)value << 32) | (synch2 & 0xFFFFFFFF);
         break;
     case 0x12000060:
-        syncv = (syncv & ~0xFFFFFFFF) | data;
+        syncv = (syncv & ~0xFFFFFFFF) | value;
         break;
     case 0x12000064:
-        syncv = ((u64)data << 32) | (syncv & 0xFFFFFFFF);
+        syncv = ((u64)value << 32) | (syncv & 0xFFFFFFFF);
         break;
     case 0x12000090:
-        dispfb2 = (dispfb2 & ~0xFFFFFFFF) | data;
+        dispfb2 = (dispfb2 & ~0xFFFFFFFF) | value;
         break;
     case 0x12000094:
-        dispfb2 = ((u64)data << 32) | (dispfb2 & 0xFFFFFFFF);
+        dispfb2 = ((u64)value << 32) | (dispfb2 & 0xFFFFFFFF);
         break;
     case 0x120000A0:
-        display2 = (display2 & ~0xFFFFFFFF) | data;
+        display2 = (display2 & ~0xFFFFFFFF) | value;
         break;
     case 0x120000A4:
-        display2 = ((u64)data << 32) | (display2 & 0xFFFFFFFF);
+        display2 = ((u64)value << 32) | (display2 & 0xFFFFFFFF);
         break;
     case 0x120000E0:
-        bgcolour = data;
+        bgcolour = value;
         break;
     case 0x120000E4:
         break;
     case 0x12001000:
-        if (data & 0x200) {
+        if (value & 0x200) {
             SystemReset();
         }
 
-        csr = data;
+        csr = value;
         break;
     case 0x12001004:
         break;
     case 0x12001010:
-        imr = data;
+        imr = value;
         break;
     case 0x12001014:
         break;
     default:
-        common::Error("[GS] handle privileged write %08x = %08x", addr, data);
+        common::Error("[GS] handle privileged write %08x = %08x", addr, value);
     }
 }
 
-void GS::WriteRegister(u32 addr, u64 data) {
+void GS::WriteRegister(u32 addr, u64 value) {
     switch (addr) {
     case 0x00:
-        prim = data;
+        prim = value;
         break;
     case 0x01:
-        rgbaq = data;
+        rgbaq = value;
         break;
     case 0x05:
-        xyz2 = data;
+        xyz2 = value;
         break;
     case 0x18:
-        xyoffset1 = data;
+        xyoffset1 = value;
         break;
     case 0x40:
-        scissor1 = data;
+        scissor1 = value;
         break;
     case 0x4C:
-        frame1 = data;
+        frame1 = value;
         break;
     case 0x50:
-        bitbltbuf = data;
+        bitbltbuf = value;
         break;
     case 0x51:
-        trxpos = data;
+        trxpos = value;
         break;
     case 0x52:
-        trxreg = data;
+        trxreg = value;
         break;
     case 0x53:
-        trxdir = data;
+        trxdir = value;
         break;
     default:
-        common::Error("[GS] handle write %08x = %016lx", addr, data);
+        common::Error("[GS] handle write %08x = %016lx", addr, value);
     }
 }

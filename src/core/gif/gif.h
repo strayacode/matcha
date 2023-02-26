@@ -4,7 +4,7 @@
 #include "common/log.h"
 #include <queue>
 
-class System;
+struct System;
 
 // the gif, also known as the graphical interface, is a component of the ps2
 // which allows textures and geometry to be sent to the gs for rasterization.

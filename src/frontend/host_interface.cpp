@@ -115,23 +115,22 @@ void HostInterface::RenderMenubar() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6.0f, 6.0f));
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            
-            if (MenuItem("Load ROM")) {
+            if (ImGui::MenuItem("Load ROM")) {
                 file_dialog.Open();
             }
 
-            if (MenuItem("Boot BIOS")) {
+            if (ImGui::MenuItem("Boot BIOS")) {
                 Boot("");
             }
 
-            if (MenuItem("Quit")) {
+            if (ImGui::MenuItem("Quit")) {
                 running = false;
             }
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Emulator")) {
-            if (MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
+            if (ImGui::MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
                 TogglePause();
             }
 
@@ -140,14 +139,14 @@ void HostInterface::RenderMenubar() {
 
         if (ImGui::BeginMenu("Debugger")) {
             if (ImGui::BeginMenu("EE")) {
-                MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
-                MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
+                ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
+                ImGui::MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("IOP")) {
-                MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
-                MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
+                ImGui::MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
+                ImGui::MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
                 ImGui::EndMenu();
             }
 
@@ -239,10 +238,4 @@ void HostInterface::Boot(const std::string& path = "") {
     core.Reset();
     core.SetGamePath(path);
     core.SetState(CoreState::Running);
-}
-
-bool HostInterface::MenuItem(const char* label, const char* shortcut, bool selected, bool enabled) {
-    // float x = ImGui::GetCursorPosX();
-    // ImGui::SetCursorPosX(x + 4.0f);
-    return ImGui::MenuItem(label, shortcut, selected, enabled);
 }

@@ -2,15 +2,15 @@
 
 #include "common/types.h"
 
-class System;
+struct System;
 
 class GS {
 public:
-    GS(System* system);
+    GS(System& system);
 
-    u32 ReadRegisterPrivileged(u32 addr);
-    void WriteRegisterPrivileged(u32 addr, u32 data);
-    void WriteRegister(u32 addr, u64 data);
+    u64 ReadRegisterPrivileged(u32 addr);
+    void WriteRegisterPrivileged(u32 addr, u64 value);
+    void WriteRegister(u32 addr, u64 value);
 
     void Reset();
     void SystemReset();

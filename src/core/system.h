@@ -20,13 +20,13 @@
 #include "core/elf_loader.h"
 #include "core/spu/spu.h"
 #include <memory>
+#include <array>
 
 enum class CoreType {
     Interpreter,
 };
 
-class System {
-public:
+struct System {
     System();
 
     void Reset();
@@ -36,6 +36,7 @@ public:
     void VBlankStart();
     void VBlankFinish();
     void SetGamePath(std::string path);
+    void LoadBIOS();
 
     Scheduler scheduler;
 
@@ -61,6 +62,9 @@ public:
     // 2 spu cores
     SPU spu;
     SPU spu2;
+
+    // shared between ee and iop
+    std::unique_ptr<std::array<u8, 0x400000>> bios;
 
     std::function<void()> VBlankStartEvent;
     std::function<void()> VBlankFinishEvent;

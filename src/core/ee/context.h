@@ -2,15 +2,16 @@
 
 #include <string>
 #include "common/types.h"
-#include "core/memory/memory.h"
 #include "core/ee/cop0.h"
 #include "core/ee/cop1.h"
 #include "core/ee/interpreter.h"
 
+struct System;
+
 namespace ee {
 
 struct Context {
-    Context(Memory& memory);
+    Context(System& system);
 
     void Reset();
     void Run(int cycles);
@@ -28,11 +29,8 @@ struct Context {
         }
     }
 
-    u8 ReadByte(u32 addr);
-    u16 ReadHalf(u32 addr);
-    u32 ReadWord(u32 addr);
-    u64 ReadDouble(u32 addr);
-    u128 ReadQuad(u32 addr);
+    template <typename T>
+    T Read(VirtualAddress vaddr);
 
     void WriteByte(u32 addr, u8 value);
     void WriteHalf(u32 addr, u16 value);
@@ -56,8 +54,9 @@ struct Context {
     COP1 cop1;
 
 private:
+    VirtualPageTable vtlb;
     Interpreter interpreter;
-    Memory& memory;
+    System& system;
 };
 
 } // namespace ee

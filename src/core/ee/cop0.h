@@ -34,7 +34,14 @@ public:
         u32 data;
     } cause;
 
+    u32 index;
     std::array<u32, 32> gpr;
+
+private:
+    // structure of a tlb entry
+    struct Entry {
+
+    };
 };
 
 } // namespace ee

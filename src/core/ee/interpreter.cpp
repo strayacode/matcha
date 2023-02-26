@@ -16,7 +16,7 @@ void Interpreter::Reset() {
 
 void Interpreter::Run(int cycles) {
     while (cycles--) {
-        inst = Instruction{ctx.ReadWord(ctx.pc)};
+        inst = Instruction{ctx.Read<u32>(ctx.pc)};
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
 
@@ -179,7 +179,7 @@ void Interpreter::lwc1() {
         common::Error("[ee::Interpreter] handle unaligned lwc1 vaddr", vaddr);
     }
 
-    ctx.cop1.SetReg(inst.rt, ctx.ReadWord(vaddr));
+    ctx.cop1.SetReg(inst.rt, ctx.Read<u32>(vaddr));
 }
 
 // COP2 instructions
@@ -329,15 +329,15 @@ void Interpreter::bnel() {
 }
 
 void Interpreter::lb() {
-    ctx.SetReg<s64>(inst.rt, (s8)ctx.ReadByte(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, (s8)ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::lbu() {
-    ctx.SetReg<u64>(inst.rt, ctx.ReadByte(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::ld() {
-    ctx.SetReg<u64>(inst.rt, ctx.ReadDouble(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.Read<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::j() {
@@ -346,7 +346,7 @@ void Interpreter::j() {
 }
 
 void Interpreter::lw() {
-    ctx.SetReg<s64>(inst.rt, (s32)ctx.ReadWord(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, (s32)ctx.Read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::sb() {
@@ -363,7 +363,7 @@ void Interpreter::blez() {
 }
 
 void Interpreter::lhu() {
-    ctx.SetReg<u64>(inst.rt, ctx.ReadHalf(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.Read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::bgtz() {
@@ -395,17 +395,13 @@ void Interpreter::sq() {
 }
 
 void Interpreter::lq() {
-    u128 data;
-    u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
-
-    data.lo = ctx.ReadDouble(addr);
-    data.hi = ctx.ReadDouble(addr + 8);
-
+    u32 vaddr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
+    u128 data = ctx.Read<u128>(vaddr);
     ctx.SetReg<u128>(inst.rt, data);
 }
 
 void Interpreter::lh() {
-    ctx.SetReg<s64>(inst.rt, (s16)ctx.ReadHalf(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, (s16)ctx.Read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::cache() {
@@ -413,7 +409,7 @@ void Interpreter::cache() {
 }
 
 void Interpreter::lwu() {
-    ctx.SetReg<u64>(inst.rt, ctx.ReadWord(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.Read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::ldl() {
@@ -426,7 +422,7 @@ void Interpreter::ldl() {
 
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
-    u64 data = ctx.ReadDouble(addr & ~0x7);
+    u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.SetReg<u64>(inst.rt, (reg & mask[index]) | (data << shift[index]));
 }
@@ -441,7 +437,7 @@ void Interpreter::ldr() {
 
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
-    u64 data = ctx.ReadDouble(addr & ~0x7);
+    u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.SetReg<u64>(inst.rt, (reg & mask[index]) | (data >> shift[index]));
 }
@@ -457,7 +453,7 @@ void Interpreter::sdl() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
 
-    u64 data = ctx.ReadDouble(addr & ~0x7);
+    u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.WriteDouble(addr & ~0x7, (reg >> shift[index]) | (data & mask[index]));
 }
@@ -473,7 +469,7 @@ void Interpreter::sdr() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
 
-    u64 data = ctx.ReadDouble(addr & ~0x7);
+    u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.WriteDouble(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
 }
@@ -681,7 +677,7 @@ void Interpreter::dsrl32() {
 }
 
 void Interpreter::syscall_exception() {
-    u8 opcode = ctx.ReadByte(ctx.pc - 4);
+    u8 opcode = ctx.Read<u8>(ctx.pc - 4);
 
     common::Log("[ee::Interpreter] executing syscall %s", ctx.GetSyscallInfo(opcode).c_str());
     DoException(0x80000180, ExceptionType::Syscall);
@@ -709,6 +705,7 @@ void Interpreter::mtsa() {
 
 // tlb instructions
 void Interpreter::tlbwi() {
+    common::Warn("[ee::Interpreter] tlbwi entry %d", ctx.cop0.index);
     // when we handle mmu emulation the tlb will be used
 }
 

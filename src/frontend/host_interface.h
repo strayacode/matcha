@@ -47,7 +47,6 @@ private:
     void HandleInput();
     void RenderMenubar();
     void Boot(const std::string& path);
-    bool MenuItem(const char* label, const char* shortcut = NULL, bool selected = false, bool enabled = true);
     
     const char* glsl_version = "#version 330";
 

@@ -9,7 +9,7 @@
 #include "common/memory_helpers.h"
 #include "common/memory_map.h"
 
-class System;
+struct System;
 
 enum class RegionType {
     EE,
@@ -26,7 +26,6 @@ public:
     bool ValidEECodeRegion(VirtualAddress vaddr);
     bool ValidIOPCodeRegion(VirtualAddress vaddr);
     void InitialiseMemory();
-    void LoadBIOS();
     u32 TranslateVirtualAddress(VirtualAddress vaddr);
     void RegisterRegion(VirtualAddress vaddr_start, VirtualAddress vaddr_end, int mask, u8* region, RegionType region_type);
     int PageIndex(VirtualAddress vaddr);

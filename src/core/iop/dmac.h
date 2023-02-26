@@ -2,7 +2,7 @@
 
 #include "common/types.h"
 
-class System;
+struct System;
 
 class IOPDMAC {
 public:

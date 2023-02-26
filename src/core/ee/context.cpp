@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <array>
 #include "common/log.h"
+#include "common/memory.h"
 #include "core/ee/context.h"
 #include "core/ee/disassembler.h"
+#include "core/system.h"
 
 namespace ee {
 
@@ -47,7 +49,7 @@ static std::array<std::string, 256> syscall_info = {
     "Deci2Call", "PSMode", "MachineType", "GetMemorySize",
 };
 
-Context::Context(Memory& memory) : interpreter(*this), memory(memory) {}
+Context::Context(System& system) : interpreter(*this), system(system) {}
 
 void Context::Reset() {
     gpr.fill(0);
@@ -68,48 +70,41 @@ void Context::Run(int cycles) {
     interpreter.Run(cycles);
 }
 
-u8 Context::ReadByte(u32 addr) {
-    return memory.EEReadByte(addr);
-}
+template u8 Context::Read(VirtualAddress vaddr);
+template u16 Context::Read(VirtualAddress vaddr);
+template u32 Context::Read(VirtualAddress vaddr);
+template u64 Context::Read(VirtualAddress vaddr);
+template u128 Context::Read(VirtualAddress vaddr);
+template <typename T>
+T Context::Read(VirtualAddress vaddr) {
+    auto pointer = vtlb.Lookup(vaddr);
+    if (pointer) {
+        return common::Read<T>(pointer);
+    } else {
+        common::Error("[ee::Context] handle unmapped vaddr %08x", vaddr);
+    }
 
-u16 Context::ReadHalf(u32 addr) {
-    return memory.EEReadHalf(addr);
-}
-
-u32 Context::ReadWord(u32 addr) {
-    return memory.EEReadWord(addr);
-}
-
-u64 Context::ReadDouble(u32 addr) {
-    return memory.EEReadDouble(addr);
-}
-
-u128 Context::ReadQuad(u32 addr) {
-    u128 data;
-    data.lo = memory.EEReadDouble(addr);
-    data.hi = memory.EEReadDouble(addr + 8);
-
-    return data;
+    return 0;
 }
 
 void Context::WriteByte(u32 addr, u8 data) {
-    memory.EEWriteByte(addr, data);
+    system.memory.EEWriteByte(addr, data);
 }
 
 void Context::WriteHalf(u32 addr, u16 data) {
-    memory.EEWriteHalf(addr, data);
+    system.memory.EEWriteHalf(addr, data);
 }
 
 void Context::WriteWord(u32 addr, u32 data) {
-    memory.EEWriteWord(addr, data);
+    system.memory.EEWriteWord(addr, data);
 }
 
 void Context::WriteDouble(u32 addr, u64 data) {
-    memory.EEWriteDouble(addr, data);
+    system.memory.EEWriteDouble(addr, data);
 }
 
 void Context::WriteQuad(u32 addr, u128 data) {
-    memory.EEWriteQuad(addr, data);
+    system.memory.EEWriteQuad(addr, data);
 }
 
 void Context::RaiseInterrupt(int signal, bool value) {

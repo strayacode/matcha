@@ -254,7 +254,7 @@ void DMAC::DoGIFTransfer() {
     DMAChannel& channel = channels[2];
 
     if (channel.quadword_count) {
-        u128 data = system.ee.ReadQuad(channel.address);
+        u128 data = system.ee.Read<u128>(channel.address);
 
         system.gif.SendPath3(data);
         channel.address += 16;
@@ -313,7 +313,7 @@ void DMAC::DoSIF1Transfer() {
 
     if (channel.quadword_count) {
         // push data to the sif1 fifo
-        u128 data = system.ee.ReadQuad(channel.address);
+        u128 data = system.ee.Read<u128>(channel.address);
 
         common::Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
 
@@ -351,7 +351,7 @@ void DMAC::EndTransfer(int index) {
 
 void DMAC::DoSourceChain(int index) {
     DMAChannel& channel = channels[index];
-    u128 data = system.ee.ReadQuad(channel.tag_address);
+    u128 data = system.ee.Read<u128>(channel.tag_address);
     u64 dma_tag = data.lo;
 
     common::Log("[DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);

@@ -33,7 +33,8 @@ void COP0::Reset() {
     }
 
     cause.data = 0;
-    gpr[PRId] = 0x2E20;
+    index = 0;
+    gpr[PRId] = 0x2e20;
 }
 
 u32 COP0::GetReg(int reg) {
@@ -45,32 +46,36 @@ u32 COP0::GetReg(int reg) {
     default:
         common::Error("[ee::COP0] handle read r%d", reg);
     }
+
+    return 0;
 }
 
-void COP0::SetReg(int reg, u32 data) {
+void COP0::SetReg(int reg, u32 value) {
     switch (reg) {
-    case 0: case 2: case 3: case 5: case 6: 
+    case 0:
+        index = value;
+        break;
+    case 2: case 3: case 5: case 6: 
     case 9: case 10: case 12: case 16:
-        gpr[reg] = data;
+        gpr[reg] = value;
         break;
     case 13:
         // cause can't be written to.
         // this would allow some interrupt pending bits to possibly be set,
         // which can result in unintentional interrupts
-        
         break;
     case 11:
         // writing to compare clears timer interrupt pending bit
         // in cause
         cause.timer_pending = false;
-        gpr[reg] = data;
+        gpr[reg] = value;
         break;
     case 14:
-        // common::Warn("[COP0] write EPC %08x", data);
-        gpr[EPC] = data;
+        // common::Warn("[COP0] write EPC %08x", value);
+        gpr[EPC] = value;
         break;
     default:
-        common::Error("[ee::COP0] handle write r%d = %08x", reg, data);
+        common::Error("[ee::COP0] handle write r%d = %08x", reg, value);
     }
 }
 

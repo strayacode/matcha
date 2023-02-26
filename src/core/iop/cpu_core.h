@@ -6,7 +6,7 @@
 #include "core/iop/cop0.h"
 #include "core/iop/interrupt_controller.h"
 
-class System;
+struct System;
 
 class IOPCore {
 public:

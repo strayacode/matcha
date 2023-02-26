@@ -21,7 +21,7 @@ enum class EEInterruptSource : int {
     VUOWatchdog = 14,
 };
 
-class System;
+struct System;
 
 // the intc deals with interrupt requests
 // and can send interrupts to the ee core via the int0 signal

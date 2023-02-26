@@ -8,7 +8,7 @@
 #include <common/cpu_types.h>
 #include <array>
 
-class System;
+struct System;
 
 // TODO: just have the interpreter functions in a namespace
 

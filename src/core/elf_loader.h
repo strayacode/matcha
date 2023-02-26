@@ -5,7 +5,7 @@
 #include "common/types.h"
 #include "common/log.h"
 
-class System;
+struct System;
 
 class ELFLoader {
 public:

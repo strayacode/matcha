@@ -28,7 +28,6 @@ void Memory::Reset() {
     iop_table.fill(nullptr);
 
     InitialiseMemory();
-    LoadBIOS();
     RegisterRegion(0x00000000, 0x02000000, 0x1FFFFFF, rdram, RegionType::EE);
     RegisterRegion(0x1C000000, 0x1C200000, 0x1FFFFF, iop_ram, RegionType::EE);
     RegisterRegion(0x1FC00000, 0x20000000, 0x3FFFFF, bios, RegionType::EE);
@@ -88,20 +87,6 @@ void Memory::InitialiseMemory() {
     iop_ram = new u8[0x200000];
     bios = new u8[0x400000];
     scratchpad = new u8[0x4000];
-}
-
-void Memory::LoadBIOS() {
-    std::ifstream file("../bios/bios.bin", std::fstream::in | std::fstream::binary);
-
-    if (!file) {
-        common::Error("[Memory] bios does not exist!");
-    }
-
-    file.unsetf(std::ios::skipws);
-    file.read(reinterpret_cast<char*>(bios), 0x400000);
-    file.close();
-
-    common::Info("[Memory] bios was successfully loaded!");
 }
 
 u32 Memory::TranslateVirtualAddress(VirtualAddress vaddr) {

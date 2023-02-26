@@ -8,7 +8,7 @@ void EEDebugger::RegistersWindow(ee::Context& ee) {
     for (int i = 0; i < 32; i++) {
         ImGui::Text("%s", ee::GetRegisterName(i).c_str());
         ImGui::SameLine(90);
-        ImGui::Text("%016lx", ee.GetReg<u64>(i));
+        ImGui::Text("%016llx", ee.GetReg<u64>(i));
     }
 
     ImGui::Text("pc");
@@ -21,19 +21,19 @@ void EEDebugger::RegistersWindow(ee::Context& ee) {
 
     ImGui::Text("lo");
     ImGui::SameLine(90);
-    ImGui::Text("%016lx", ee.lo);
+    ImGui::Text("%016llx", ee.lo);
 
     ImGui::Text("hi");
     ImGui::SameLine(90);
-    ImGui::Text("%016lx", ee.hi);
+    ImGui::Text("%016llx", ee.hi);
 
     ImGui::Text("lo1");
     ImGui::SameLine(90);
-    ImGui::Text("%016lx", ee.lo1);
+    ImGui::Text("%016llx", ee.lo1);
 
     ImGui::Text("hi1");
     ImGui::SameLine(90);
-    ImGui::Text("%016lx", ee.hi1);
+    ImGui::Text("%016llx", ee.hi1);
 
     ImGui::PopFont();
     ImGui::End();

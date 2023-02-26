@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : memory(this), ee(memory), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(this), timers(*this), dmac(*this), elf_loader(*this) {
+System::System() : memory(this), ee(*this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
     InitialiseIOPCore(CoreType::Interpreter);
@@ -38,6 +38,8 @@ void System::Reset() {
     sif.Reset();
     spu.Reset();
     spu2.Reset();
+
+    LoadBIOS();
 }
 
 void System::InitialiseIOPCore(CoreType core_type) {
@@ -86,4 +88,18 @@ void System::VBlankFinish() {
 
 void System::SetGamePath(std::string path) {
     elf_loader.SetPath(path);
+}
+
+void System::LoadBIOS() {
+    std::ifstream file("../bios/bios.bin", std::fstream::in | std::fstream::binary);
+
+    if (!file) {
+        common::Error("[System] bios does not exist!");
+    }
+
+    file.unsetf(std::ios::skipws);
+    file.read(reinterpret_cast<char*>(bios.get()), 0x400000);
+    file.close();
+
+    common::Info("[System] bios was successfully loaded!");
 }

@@ -27,7 +27,7 @@ struct DMAChannel {
     bool end_transfer;
 };
 
-class System;
+struct System;
 
 class DMAC {
 public:
