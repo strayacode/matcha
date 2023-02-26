@@ -2,7 +2,7 @@
 
 HostInterface::HostInterface() :
     core([this](float fps) {
-        UpdateTitle(fps);
+        this->fps = fps;
     }) {
 }
 
@@ -217,13 +217,6 @@ void HostInterface::SetupStyle() {
     ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = colour_black;
     // ImGui::GetStyle().Colors[ImGuiCol_DockingPreview] = colour_blue;
     // ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = colour_black;
-}
-
-void HostInterface::UpdateTitle(float fps) {
-    char window_title[100];
-    float percent_usage = (fps / 60.0f) * 100;
-    snprintf(window_title, 100, "otterstation | %0.2f FPS | %0.2f%s", fps, percent_usage, "%");
-    SDL_SetWindowTitle(window, window_title);
 }
 
 void HostInterface::TogglePause() {

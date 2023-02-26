@@ -134,7 +134,7 @@ void Interpreter::swc1() {
         common::Error("[ee::Interpreter] handle unaligned swc1 vaddr %08x", vaddr);
     }
     
-    ctx.WriteWord(vaddr, ctx.cop1.GetReg(inst.rt));
+    ctx.Write<u32>(vaddr, ctx.cop1.GetReg(inst.rt));
 }
 
 void Interpreter::mtc1() {
@@ -276,11 +276,11 @@ void Interpreter::addiu() {
 }
 
 void Interpreter::sw() {
-    ctx.WriteWord(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u32>(inst.rt));
+    ctx.Write<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u32>(inst.rt));
 }
 
 void Interpreter::sd() {
-    ctx.WriteDouble(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u64>(inst.rt));
+    ctx.Write<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::jal() {
@@ -350,7 +350,7 @@ void Interpreter::lw() {
 }
 
 void Interpreter::sb() {
-    ctx.WriteByte(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u8>(inst.rt));
+    ctx.Write<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u8>(inst.rt));
 }
 
 void Interpreter::blez() {
@@ -376,7 +376,7 @@ void Interpreter::bgtz() {
 }
 
 void Interpreter::sh() {
-    ctx.WriteHalf(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u16>(inst.rt));
+    ctx.Write<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u16>(inst.rt));
 }
 
 void Interpreter::xori() {
@@ -391,7 +391,7 @@ void Interpreter::sq() {
     u128 reg = ctx.GetReg<u128>(inst.rt);
     u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
 
-    ctx.WriteQuad(addr, reg);
+    ctx.Write<u128>(addr, reg);
 }
 
 void Interpreter::lq() {
@@ -455,7 +455,7 @@ void Interpreter::sdl() {
 
     u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
-    ctx.WriteDouble(addr & ~0x7, (reg >> shift[index]) | (data & mask[index]));
+    ctx.Write<u64>(addr & ~0x7, (reg >> shift[index]) | (data & mask[index]));
 }
 
 void Interpreter::sdr() {
@@ -471,7 +471,7 @@ void Interpreter::sdr() {
 
     u64 data = ctx.Read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
-    ctx.WriteDouble(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
+    ctx.Write<u64>(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
 }
 
 // regimm instructions

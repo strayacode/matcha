@@ -32,9 +32,16 @@ public:
         };
 
         u32 data;
-    } cause;
+    };
+
+    // union EntryLo {
+    //     struct {
+
+    //     };
+    // };
 
     u32 index;
+    Cause cause;
     std::array<u32, 32> gpr;
 
 private:

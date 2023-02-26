@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <array>
+#include <memory>
 #include "common/types.h"
 #include "common/virtual_page_table.h"
 #include "core/ee/cop0.h"
@@ -33,11 +35,8 @@ struct Context {
     template <typename T>
     T Read(VirtualAddress vaddr);
 
-    void WriteByte(u32 addr, u8 value);
-    void WriteHalf(u32 addr, u16 value);
-    void WriteWord(u32 addr, u32 value);
-    void WriteDouble(u32 addr, u64 value);
-    void WriteQuad(u32 addr, u128 value);
+    template <typename T>
+    void Write(VirtualAddress vaddr, T value);
 
     void RaiseInterrupt(int signal, bool value);
     std::string GetSyscallInfo(int index);
@@ -55,6 +54,17 @@ struct Context {
     COP1 cop1;
 
 private:
+    u32 ReadIO(u32 paddr);
+    void WriteIO(u32 paddr, u32 value);
+    
+    std::array<u8, 0x4000> scratchpad;
+    std::unique_ptr<std::array<u8, 0x2000000>> rdram;
+
+    // rdram initialisation registers
+    u32 mch_drd;
+    u32 rdram_sdevid;
+    u32 mch_ricm;
+
     common::VirtualPageTable vtlb;
     Interpreter interpreter;
     System& system;

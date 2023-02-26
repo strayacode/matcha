@@ -7,7 +7,7 @@ namespace common {
 
 template <typename T>
 inline T Read(void* data, int offset = 0) {
-    T return_value = 0;
+    T return_value;
     std::memcpy(&return_value, (u8*)data + offset, sizeof(T));
     return return_value;
 }

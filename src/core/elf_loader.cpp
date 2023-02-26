@@ -49,7 +49,7 @@ void ELFLoader::LoadHeader() {
             u32 data = 0;
             memcpy(&data, &elf[program_offset], 4);
 
-            system.memory.EEWriteWord(program_header.paddr, data);
+            system.ee.Write<u32>(program_header.paddr, data);
             program_header.paddr += 4;
         }
     }

@@ -275,7 +275,7 @@ void DMAC::DoSIF0Transfer() {
 
                 common::Log("[DMAC] SIF0 reading data from fifo %08x", data);
 
-                system.ee.WriteWord(channel.address, data);
+                system.ee.Write<u32>(channel.address, data);
                 channel.address += 4;
             }
 

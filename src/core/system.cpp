@@ -75,7 +75,9 @@ void System::RunFrame() {
 }
 
 // implement later
-void System::SingleStep() {}
+void System::SingleStep() {
+    ee.Run(1);
+}
 
 void System::VBlankStart() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);

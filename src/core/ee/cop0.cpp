@@ -55,7 +55,15 @@ void COP0::SetReg(int reg, u32 value) {
     case 0:
         index = value;
         break;
-    case 2: case 3: case 5: case 6: 
+    case 2: 
+        common::Warn("[ee::COP0] entrylo0 write %08x", value);
+        gpr[reg] = value;
+        break;
+    case 3:
+        common::Warn("[ee::COP0] entrylo1 write %08x", value);
+        gpr[reg] = value;
+        break;
+    case 5: case 6: 
     case 9: case 10: case 12: case 16:
         gpr[reg] = value;
         break;

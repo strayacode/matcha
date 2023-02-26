@@ -22,7 +22,6 @@ public:
     void Run();
     void Shutdown();
     void SetupStyle();
-    void UpdateTitle(float fps);
     void TogglePause();
 
     Core core;
@@ -58,4 +57,6 @@ private:
     ImGui::FileBrowser file_dialog;
     EEDebugger ee_debugger;
     IOPDebugger iop_debugger;
+
+    float fps;
 };

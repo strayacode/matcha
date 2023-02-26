@@ -13,54 +13,14 @@ Memory::~Memory() {
     if (iop_ram) {
         delete[] iop_ram;
     }
-
-    if (bios) {
-        delete[] bios;
-    }
-
-    if (scratchpad) {
-        delete[] scratchpad;
-    }
 }
 
 void Memory::Reset() {
-    ee_table.fill(nullptr);
     iop_table.fill(nullptr);
 
     InitialiseMemory();
-    RegisterRegion(0x00000000, 0x02000000, 0x1FFFFFF, rdram, RegionType::EE);
-    RegisterRegion(0x1C000000, 0x1C200000, 0x1FFFFF, iop_ram, RegionType::EE);
-    RegisterRegion(0x1FC00000, 0x20000000, 0x3FFFFF, bios, RegionType::EE);
-    RegisterRegion(0x70000000, 0x70004000, 0x3FFF, scratchpad, RegionType::EE);
-    RegisterRegion(0x1FC00000, 0x20000000, 0x3FFFFF, bios, RegionType::IOP);
+    RegisterRegion(0x1FC00000, 0x20000000, 0x3FFFFF, system->bios->data(), RegionType::IOP);
     RegisterRegion(0x0000000, 0x200000, 0x1FFFFF, iop_ram, RegionType::IOP);
-
-    ee_map.RegisterReadMemory(0x00000000, 0x02000000, rdram);
-    ee_map.RegisterWriteMemory(0x00000000, 0x02000000, rdram);
-
-    ee_map.RegisterReadHandler(0x10000000, 0x10010000, [this](u32 addr) {
-        return EEReadIO(addr);
-    });
-
-    ee_map.RegisterReadHandler(0x12000000, 0x12002000, [this](u32 addr) {
-        return EEReadIO(addr);
-    });
-
-    ee_map.RegisterWriteHandler(0x10000000, 0x10010000, [this](u32 addr, u32 data) {
-        EEWriteIO(addr, data);
-    });
-
-    ee_map.RegisterWriteHandler(0x12000000, 0x12002000, [this](u32 addr, u32 data) {
-        EEWriteIO(addr, data);
-    });
-
-    ee_map.RegisterReadMemory(0x1FC00000, 0x20000000, bios);
-    ee_map.RegisterReadMemory(0x70000000, 0x70004000, scratchpad);
-    ee_map.RegisterWriteMemory(0x70000000, 0x70004000, scratchpad);
-    
-    mch_drd = 0;
-    rdram_sdevid = 0;
-    mch_ricm = 0;
 }
 
 bool Memory::InRange(u32 base, u32 size, u32 addr) {
@@ -69,7 +29,7 @@ bool Memory::InRange(u32 base, u32 size, u32 addr) {
 
 // TODO: check if this affects performance
 bool Memory::ValidEECodeRegion(VirtualAddress vaddr) {
-    u32 addr = TranslateVirtualAddress(vaddr);
+    u32 addr = vaddr & 0x1FFFFFFF;
 
     // for now we just assume code is in main ram or the bios
     return (InRange(RDRAM_BASE, RDRAM_SIZE, addr) || InRange(BIOS_BASE, BIOS_SIZE, addr));
@@ -85,19 +45,6 @@ bool Memory::ValidIOPCodeRegion(VirtualAddress vaddr) {
 void Memory::InitialiseMemory() {
     rdram = new u8[0x2000000];
     iop_ram = new u8[0x200000];
-    bios = new u8[0x400000];
-    scratchpad = new u8[0x4000];
-}
-
-u32 Memory::TranslateVirtualAddress(VirtualAddress vaddr) {
-    if (in_range(0x70000000, 0x70004000, vaddr)) {
-        // scratchpad is only accessible by virtual addressing
-        return vaddr;
-    } else if (in_range(0x30100000, 0x32000000, vaddr)) {
-        return vaddr & 0x1FFFFFF;
-    } else {
-        return vaddr & 0x1FFFFFFF;
-    }
 }
 
 void Memory::RegisterRegion(VirtualAddress vaddr_start, VirtualAddress vaddr_end, int mask, u8* region, RegionType region_type) {
@@ -118,207 +65,6 @@ int Memory::PageIndex(VirtualAddress vaddr) {
 
 int Memory::PageOffset(VirtualAddress vaddr) {
     return vaddr & 0xFFF;
-}
-
-u8 Memory::EEReadByte(u32 addr) {
-    addr = TranslateVirtualAddress(addr);
-
-    return ee_map.ReadByte(addr);
-}
-
-u16 Memory::EEReadHalf(u32 addr) {
-    addr = TranslateVirtualAddress(addr);
-
-    return ee_map.ReadHalf(addr);
-}
-
-u32 Memory::EEReadWord(u32 addr) {
-    addr = TranslateVirtualAddress(addr);
-
-    return ee_map.ReadWord(addr);
-}
-
-u64 Memory::EEReadDouble(u32 addr) {
-    addr = TranslateVirtualAddress(addr);
-    u64 data = 0;
-
-    data |= ee_map.ReadWord(addr);
-    data |= static_cast<u64>(ee_map.ReadWord(addr + 4)) << 32;
-
-    return data;
-}
-
-void Memory::EEWriteByte(u32 addr, u8 data) {
-    addr = TranslateVirtualAddress(addr);
-
-    ee_map.WriteByte(addr, data);
-}
-
-void Memory::EEWriteHalf(u32 addr, u16 data) {
-    addr = TranslateVirtualAddress(addr);
-
-    ee_map.WriteHalf(addr, data);
-}
-
-void Memory::EEWriteWord(u32 addr, u32 data) {
-    addr = TranslateVirtualAddress(addr);
-
-    ee_map.WriteWord(addr, data);
-}
-
-u32 Memory::EEReadIO(u32 addr) {
-    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
-        return system->timers.ReadRegister(addr);
-    } else if (in_range(0x10008000, 0x1000E000, addr)) {
-        return system->dmac.ReadChannel(addr);
-    }
-
-    switch (addr) {
-    case 0x10002010:
-        return system->ipu.ReadControl();
-    case 0x10003020:
-        return system->gif.ReadStat();
-    case 0x1000E000:
-        return system->dmac.ReadControl();
-    case 0x1000E010:
-        return system->dmac.ReadInterruptStatus();
-    case 0x1000E020:
-        return system->dmac.ReadPriorityControl();
-    case 0x1000E030:
-        return system->dmac.ReadPriorityControl();
-    case 0x1000F000:
-        return system->ee_intc.ReadStat();
-    case 0x1000F010:
-        return system->ee_intc.ReadMask();
-    case 0x1000F130:
-        return 0;
-    case 0x1000F200:
-        return system->sif.ReadMSCOM();
-    case 0x1000F210:
-        return system->sif.ReadSMCOM();
-    case 0x1000F220:
-        return system->sif.ReadMSFLAG();
-    case 0x1000F230:
-        return system->sif.ReadSMFLAG();
-    case 0x1000F440:
-        if (!((mch_ricm >> 6) & 0xF)) {
-            switch ((mch_ricm >> 16) & 0xFFF) {
-            case 0x21:
-                if (rdram_sdevid < 2) {
-                    rdram_sdevid++;
-                    return 0x1F;
-                }
-                return 0;
-            case 0x23:
-                return 0x0D0D;
-            case 0x24:
-                return 0x0090;
-            case 0x40:
-                return mch_ricm & 0x1F;
-            }
-        }
-
-        break;
-    case 0x1000F520:
-        return system->dmac.disabled_status;
-    default:
-        common::Log("[Memory] undefined ee read %08x", addr);
-    }
-    
-    return 0;
-}
-
-void Memory::EEWriteIO(u32 addr, u32 data) {
-    if (addr >= EE_TIMERS_REGION_START && addr < EE_TIMERS_REGION_END) {
-        system->timers.WriteRegister(addr, data);
-        return;
-    } if (addr >= GS_PRIVILEGED_REGION_START && addr < GS_PRIVILEGED_REGION_END) {
-        system->gs.WriteRegisterPrivileged(addr, data);
-        return;
-    } else if ((addr >= EE_DMA_REGION1_START && addr < EE_DMA_REGION1_END) ||
-        (addr >= EE_DMA_REGION2_START && addr < EE_DMA_REGION2_END)) {
-        system->dmac.WriteRegister(addr, data);
-        return;
-    } 
-
-    switch (addr) {
-    case 0x10002000:
-        system->ipu.WriteCommand(data);
-        break;
-    case 0x10002010:
-        system->ipu.WriteControl(data);
-        break;
-    case 0x10003000:
-        system->gif.WriteCTRL(data);
-        break;
-    case 0x10003810:
-        system->vif0.WriteFBRST(data);
-        break;
-    case 0x10003820:
-        system->vif0.WriteERR(data);
-        break;
-    case 0x10003830:
-        system->vif0.WriteMark(data);
-        break;
-    case 0x10003C00:
-        system->vif1.WriteStat(data);
-        break;
-    case 0x10003C10:
-        system->vif1.WriteFBRST(data);
-        break;
-    case 0x1000F000:
-        system->ee_intc.WriteStat(data);
-        break;
-    case 0x1000F010:
-        system->ee_intc.WriteMask(data);
-        break;
-    case 0x1000F180:
-        // kputchar
-        common::LogNoNewline("%c", data);
-        break;
-    case 0x1000F200:
-        system->sif.WriteMSCOM(data);
-        break;
-    case 0x1000F220:
-        system->sif.SetMSFLAG(data);
-        break;
-    case 0x1000F230:
-        system->sif.SetSMFLAG(data);
-        break;
-    case 0x1000F240:
-        system->sif.WriteEEControl(data);
-        break;
-    case 0x1000F260:
-        system->sif.WriteBD6(data);
-        break;
-    case 0x1000F430:
-        if ((((data >> 16) & 0xFFF) == 0x21) && (((data >> 6) & 0xF) == 1) && (((mch_drd >> 7) & 1) == 0)) {
-            rdram_sdevid = 0;
-        }
-                
-        mch_ricm = data & ~0x80000000;
-        break;
-    case 0x1000F440:
-        mch_drd = data;
-        break;
-    default:
-        common::Log("[Memory] undefined ee write %08x = %08x", addr, data);
-    }
-}
-
-void Memory::EEWriteDouble(u32 addr, u64 data) {
-    addr = TranslateVirtualAddress(addr);
-
-    ee_map.WriteWord(addr, data & 0xFFFFFFFF);
-    ee_map.WriteWord(addr + 4, data >> 32);
-}
-
-void Memory::EEWriteQuad(u32 addr, u128 data) {
-    addr = TranslateVirtualAddress(addr);
-
-    for (int i = 0; i < 4; i++) {
-        ee_map.WriteWord(addr + 4 * i, data.uw[i]);
-    }
 }
 
 template u8 Memory::IOPRead(VirtualAddress vaddr);

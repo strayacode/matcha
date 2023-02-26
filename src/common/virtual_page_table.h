@@ -2,6 +2,7 @@
 
 #include <array>
 #include "common/types.h"
+#include "common/log.h"
 
 namespace common {
 
@@ -13,7 +14,8 @@ struct VirtualPageTable {
     void Map(u8* data, VirtualAddress base, u32 size) {
         for (VirtualAddress addr = base; addr < base + size; addr += PAGE_SIZE) {
             int index = addr >> PAGE_BITS;
-            page_table[index] = &data[addr - base];
+            u32 mask = size - 1;
+            page_table[index] = &data[addr & mask];
         }
     }
 
