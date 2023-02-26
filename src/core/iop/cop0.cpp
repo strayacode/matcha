@@ -1,51 +1,53 @@
+#include "common/log.h"
 #include "core/iop/cop0.h"
 
-enum COP0Regs {
-    Index = 0,
-    Random = 1,
-    EntryLo0 = 2,
-    EntryLo1 = 3,
-    Context = 4,
-    PageMask = 5,
-    Wired = 6,
-    BadVAddr = 8,
-    Count = 9,
-    EntryHi = 10,
-    Compare = 11,
-    Status = 12,
-    Cause = 13,
-    EPC = 14,
-    PRId = 15,
-    Config = 16,
-    BadPAddr = 23,
-    Debug = 24,
-    Perf = 25,
-    TagLo = 28,
-    TagHi = 29,
-    ErrorEPC = 30,
-};
+namespace iop {
 
-void IOPCOP0::Reset() {
-    for (int i = 0; i < 32; i++) {
-        gpr[i] = 0;
-    }
-
-    gpr[PRId] = 0x1F;
+void COP0::Reset() {
+    status.data = 0;
+    cause.data = 0;
+    epc = 0;
+    prid = 0x1f;
 }
 
-u32 IOPCOP0::GetReg(int reg) {
+u32 COP0::GetReg(int reg) {
     switch (reg) {
-    case 12: case 13: case 14: case 15:
-        return gpr[reg];
+    case 12:
+        return status.data;
+    case 13:
+        return cause.data;
+    case 14:
+        return epc;
+    case 15:
+        return prid;
     default:
-        common::Error("handle cop0 read %d", reg);
+        common::Error("[iop::COP0] handle read r%d", reg);
+    }
+
+    return 0;
+}
+
+void COP0::SetReg(int reg, u32 value) {
+    switch (reg) {
+    case 3:
+    case 5:
+    case 6:
+    case 7:
+    case 9:
+    case 11:
+        break;
+    case 12:
+        status.data = value;
+        break;
+    case 13:
+        common::Log("[iop::COP0] cause write %08x", value);
+        break;
+    case 14:
+        epc = value;
+        break;
+    default:
+        common::Error("[iop::COP0] handle write r%d = %08x", reg, value);
     }
 }
 
-void IOPCOP0::SetReg(int reg, u32 data) {
-    switch (reg) {
-    case 12: case 14:
-        gpr[reg] = data;
-        break;
-    }
-}
+} // namespace iop

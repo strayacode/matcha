@@ -17,7 +17,7 @@ void EEDebugger::RegistersWindow(EECore& ee_core) {
 
     ImGui::Text("npc");
     ImGui::SameLine(90);
-    ImGui::Text("%016x", ee_core.next_pc);
+    ImGui::Text("%016x", ee_core.npc);
 
     ImGui::Text("lo");
     ImGui::SameLine(90);

@@ -54,7 +54,7 @@ void EECore::Reset() {
     }
 
     pc = 0xBFC00000;
-    next_pc = 0;
+    npc = 0;
     hi = 0;
     lo = 0;
     hi1 = 0;
@@ -78,7 +78,7 @@ void EECore::Run(int cycles) {
 
         if (branch_delay) {
             if (branch) {
-                pc = next_pc;
+                pc = npc;
                 branch_delay = false;
                 branch = false;
             } else {
@@ -137,7 +137,7 @@ void EECore::WriteQuad(u32 addr, u128 data) {
     system.memory.EEWriteQuad(addr, data);
 }
 
-void EECore::DoException(u32 target, ExceptionType exception) {
+void EECore::DoException(u32 target, Exception exception) {
     common::Log("[EE] trigger exception with type %02x at pc = %08x", static_cast<int>(exception), pc);
 
     bool level2_exception = static_cast<int>(exception) >= 14;
@@ -176,7 +176,7 @@ void EECore::CheckInterrupts() {
         
         if (int0_enable && cop0.cause.int0_pending) {
             common::Log("[EE] do int0 interrupt");
-            DoException(0x80000200, ExceptionType::Interrupt);
+            DoException(0x80000200, Exception::Interrupt);
             return;
         }
 
@@ -184,7 +184,7 @@ void EECore::CheckInterrupts() {
         
         if (int1_enable && cop0.cause.int1_pending) {
             common::Log("[EE] do int1 interrupt");
-            DoException(0x80000200, ExceptionType::Interrupt);
+            DoException(0x80000200, Exception::Interrupt);
             return;
         }
 
@@ -207,7 +207,7 @@ void EECore::PrintState() {
         common::Log("%s: %016lx%016lx", EEGetRegisterName(i).c_str(), GetReg<u128>(i).hi, GetReg<u128>(i).lo);
     }
 
-    common::Log("pc: %08x npc: %08x", pc, next_pc);
+    common::Log("pc: %08x npc: %08x", pc, npc);
     common::Log("branch: %d branch delay: %d", branch, branch_delay);
     common::Log("%s", EEDisassembleInstruction(inst, pc).c_str());
 }

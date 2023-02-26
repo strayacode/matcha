@@ -37,7 +37,7 @@ public:
     void SendInterruptSignal(bool value);
     void CheckInterrupts();
 
-    enum class ExceptionType {
+    enum class Exception {
         Interrupt = 0x00,
         LoadError = 0x04,
         StoreError = 0x05,
@@ -47,10 +47,10 @@ public:
         Overflow = 0x0C,
     };
 
-    void DoException(ExceptionType exception);
+    void DoException(Exception exception);
 
     IOPRegs regs;
-    IOPCOP0 cop0;
+    iop::COP0 cop0;
     System* system;
     IOPInterruptController interrupt_controller;
     

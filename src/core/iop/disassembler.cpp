@@ -296,7 +296,3 @@ std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc) {
 std::string IOPGetRegisterName(int reg) {
     return reg_names[reg];
 }
-
-std::string IOPCOP0GetRegisterName(int reg) {
-    return cop0_names[reg];
-}

@@ -69,14 +69,14 @@ bool Memory::InRange(u32 base, u32 size, u32 addr) {
 }
 
 // TODO: check if this affects performance
-bool Memory::ValidEECodeRegion(VAddr vaddr) {
+bool Memory::ValidEECodeRegion(VirtualAddress vaddr) {
     u32 addr = TranslateVirtualAddress(vaddr);
 
     // for now we just assume code is in main ram or the bios
     return (InRange(RDRAM_BASE, RDRAM_SIZE, addr) || InRange(BIOS_BASE, BIOS_SIZE, addr));
 }
 
-bool Memory::ValidIOPCodeRegion(VAddr vaddr) {
+bool Memory::ValidIOPCodeRegion(VirtualAddress vaddr) {
     u32 addr = vaddr & 0x1FFFFFFF;
 
     // for now we just assume code is in iop ram or the bios
@@ -104,7 +104,7 @@ void Memory::LoadBIOS() {
     common::Info("[Memory] bios was successfully loaded!");
 }
 
-u32 Memory::TranslateVirtualAddress(VAddr vaddr) {
+u32 Memory::TranslateVirtualAddress(VirtualAddress vaddr) {
     if (in_range(0x70000000, 0x70004000, vaddr)) {
         // scratchpad is only accessible by virtual addressing
         return vaddr;
@@ -115,7 +115,7 @@ u32 Memory::TranslateVirtualAddress(VAddr vaddr) {
     }
 }
 
-void Memory::RegisterRegion(VAddr vaddr_start, VAddr vaddr_end, int mask, u8* region, RegionType region_type) {
+void Memory::RegisterRegion(VirtualAddress vaddr_start, VirtualAddress vaddr_end, int mask, u8* region, RegionType region_type) {
     for (u32 vaddr = vaddr_start; vaddr < vaddr_end; vaddr += 0x1000) {
         int index = PageIndex(vaddr);
 
@@ -127,11 +127,11 @@ void Memory::RegisterRegion(VAddr vaddr_start, VAddr vaddr_end, int mask, u8* re
     }
 }
 
-int Memory::PageIndex(VAddr vaddr) {
+int Memory::PageIndex(VirtualAddress vaddr) {
     return vaddr >> 12;
 }
 
-int Memory::PageOffset(VAddr vaddr) {
+int Memory::PageOffset(VirtualAddress vaddr) {
     return vaddr & 0xFFF;
 }
 
@@ -336,11 +336,11 @@ void Memory::EEWriteQuad(u32 addr, u128 data) {
     }
 }
 
-template u8 Memory::IOPRead(VAddr vaddr);
-template u16 Memory::IOPRead(VAddr vaddr);
-template u32 Memory::IOPRead(VAddr vaddr);
+template u8 Memory::IOPRead(VirtualAddress vaddr);
+template u16 Memory::IOPRead(VirtualAddress vaddr);
+template u32 Memory::IOPRead(VirtualAddress vaddr);
 template <typename T>
-T Memory::IOPRead(VAddr vaddr) {
+T Memory::IOPRead(VirtualAddress vaddr) {
     T return_value = 0;
     u32 addr = vaddr & 0x1FFFFFFF;
     u8* page = iop_table[PageIndex(addr)];
@@ -429,11 +429,11 @@ u32 Memory::IOPReadWord(u32 addr) {
     return 0;
 }
 
-template void Memory::IOPWrite(VAddr vaddr, u8 data);
-template void Memory::IOPWrite(VAddr vaddr, u16 data);
-template void Memory::IOPWrite(VAddr vaddr, u32 data);
+template void Memory::IOPWrite(VirtualAddress vaddr, u8 data);
+template void Memory::IOPWrite(VirtualAddress vaddr, u16 data);
+template void Memory::IOPWrite(VirtualAddress vaddr, u32 data);
 template <typename T>
-void Memory::IOPWrite(VAddr vaddr, T data) {
+void Memory::IOPWrite(VirtualAddress vaddr, T data) {
     u32 addr = vaddr & 0x1FFFFFFF;
     u8* page = iop_table[PageIndex(addr)];
 

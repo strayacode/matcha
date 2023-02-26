@@ -6,7 +6,7 @@ void IOPInterpreter::sll() {
 }
 
 void IOPInterpreter::jr() {
-    regs.next_pc = GetReg(inst.rs);
+    regs.npc = GetReg(inst.rs);
     branch_delay = true;
 }
 
@@ -61,7 +61,7 @@ void IOPInterpreter::jalr() {
 
     SetReg(inst.rd, regs.pc + 8);
     
-    regs.next_pc = addr;
+    regs.npc = addr;
     branch_delay = true;
 }
 
@@ -93,7 +93,7 @@ void IOPInterpreter::mtlo() {
 }
 
 void IOPInterpreter::syscall_exception() {
-    DoException(ExceptionType::Syscall);
+    DoException(Exception::Syscall);
 }
 
 void IOPInterpreter::mult() {

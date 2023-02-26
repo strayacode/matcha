@@ -146,7 +146,7 @@ void EEInterpreter::bne(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<u64>(inst.rs) != cpu.GetReg<u64>(inst.rt)) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -174,7 +174,7 @@ void EEInterpreter::sd(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::jal(EECore& cpu, CPUInstruction inst) {
     cpu.SetReg<u64>(31, cpu.pc + 8);
-    cpu.next_pc = ((cpu.pc + 4) & 0xF0000000) + (inst.offset << 2);
+    cpu.npc = ((cpu.pc + 4) & 0xF0000000) + (inst.offset << 2);
     cpu.branch_delay = true;
 }
 
@@ -186,7 +186,7 @@ void EEInterpreter::beq(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<u64>(inst.rs) == cpu.GetReg<u64>(inst.rt)) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -195,7 +195,7 @@ void EEInterpreter::beql(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<u64>(inst.rs) == cpu.GetReg<u64>(inst.rt)) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
         cpu.pc += 4;
@@ -210,7 +210,7 @@ void EEInterpreter::bnel(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<u64>(inst.rs) != cpu.GetReg<u64>(inst.rt)) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
         cpu.pc += 4;
@@ -230,7 +230,7 @@ void EEInterpreter::ld(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::j(EECore& cpu, CPUInstruction inst) {
-    cpu.next_pc = ((cpu.pc + 4) & 0xF0000000) + (inst.offset << 2);
+    cpu.npc = ((cpu.pc + 4) & 0xF0000000) + (inst.offset << 2);
     cpu.branch_delay = true;
 }
 
@@ -246,7 +246,7 @@ void EEInterpreter::blez(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) <= 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -259,7 +259,7 @@ void EEInterpreter::bgtz(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) > 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -372,7 +372,7 @@ void EEInterpreter::bgez(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) >= 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -381,7 +381,7 @@ void EEInterpreter::bltz(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) < 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     }
 }
@@ -390,7 +390,7 @@ void EEInterpreter::bltzl(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) < 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
         cpu.pc += 4;
@@ -401,7 +401,7 @@ void EEInterpreter::bgezl(EECore& cpu, CPUInstruction inst) {
     s32 offset = inst.simm << 2;
 
     if (cpu.GetReg<s64>(inst.rs) >= 0) {
-        cpu.next_pc = cpu.pc + offset + 4;
+        cpu.npc = cpu.pc + offset + 4;
         cpu.branch_delay = true;
     } else {
         cpu.pc += 4;
@@ -415,7 +415,7 @@ void EEInterpreter::sll(EECore& cpu, CPUInstruction inst) {
 }
 
 void EEInterpreter::jr(EECore& cpu, CPUInstruction inst) {
-    cpu.next_pc = cpu.GetReg<u32>(inst.rs);
+    cpu.npc = cpu.GetReg<u32>(inst.rs);
     cpu.branch_delay = true;
 }
 
@@ -425,7 +425,7 @@ void EEInterpreter::sync(EECore& cpu, CPUInstruction inst) {
 
 void EEInterpreter::jalr(EECore& cpu, CPUInstruction inst) {
     cpu.SetReg<u64>(inst.rd, cpu.pc + 8);
-    cpu.next_pc = cpu.GetReg<u32>(inst.rs);
+    cpu.npc = cpu.GetReg<u32>(inst.rs);
     cpu.branch_delay = true;
 }
 
@@ -573,7 +573,7 @@ void EEInterpreter::syscall_exception(EECore& cpu, CPUInstruction inst) {
     u8 opcode = cpu.ReadByte(cpu.pc - 4);
 
     common::Log("[EE] executing syscall %s", cpu.GetSyscallInfo(opcode).c_str());
-    cpu.DoException(0x80000180, ExceptionType::Syscall);
+    cpu.DoException(0x80000180, Exception::Syscall);
 }
 
 void EEInterpreter::dsubu(EECore& cpu, CPUInstruction inst) {

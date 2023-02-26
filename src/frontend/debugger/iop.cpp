@@ -21,7 +21,7 @@ void IOPDebugger::RegistersWindow(IOPCore& iop_core) {
 
             ImGui::Text("npc");
             ImGui::SameLine(90);
-            ImGui::Text("%08x", iop_core.regs.next_pc);
+            ImGui::Text("%08x", iop_core.regs.npc);
 
             ImGui::PopFont();
             ImGui::EndTabItem();
@@ -30,15 +30,10 @@ void IOPDebugger::RegistersWindow(IOPCore& iop_core) {
         if (ImGui::BeginTabItem("COP0")) {
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
-            for (int i = 0; i < 32; i++) {
-                if (IOPCOP0GetRegisterName(i).compare("") == 0) {
-                    continue;
-                }
-
-                ImGui::Text("%s", IOPCOP0GetRegisterName(i).c_str());
-                ImGui::SameLine(90);
-                ImGui::Text("%08x", iop_core.cop0.gpr[i]);
-            }
+            ImGui::Text("status: %08x", iop_core.cop0.status.data);
+            ImGui::Text("cause: %08x", iop_core.cop0.cause.data);
+            ImGui::Text("epc: %08x", iop_core.cop0.epc);
+            ImGui::Text("prid: %08x", iop_core.cop0.prid);
 
             ImGui::PopFont();
             ImGui::EndTabItem();

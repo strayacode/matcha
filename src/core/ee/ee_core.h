@@ -3,14 +3,13 @@
 #include <string>
 #include "common/types.h"
 #include "common/cpu_types.h"
-#include "common/int128.h"
 #include "core/ee/cop0.h"
 #include "core/ee/cop1.h"
 #include "core/ee/interpreter_table.h"
 
 class System;
 
-enum class ExceptionType : int {
+enum class Exception : int {
     Interrupt = 0,
     TLBModified = 1,
     TLBRefillInstruction = 2,
@@ -40,24 +39,12 @@ public:
 
     // credit goes to DobieStation for the elegant way of accessing 128 bit registers
     template <typename T>
-    T GetReg(int reg) {
-        return *(T*)&gpr[reg * sizeof(u64) * 2];
-    }
-
-    template <typename T>
-    T GetReg(int reg, int offset) {
+    T GetReg(int reg, int offset = 0) {
         return *(T*)&gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))];
     }
 
     template <typename T>
-    void SetReg(int reg, T data) {
-        if (reg) {
-            *(T*)&gpr[reg * sizeof(u64) * 2] = data;
-        }
-    }
-
-    template <typename T>
-    void SetReg(int reg, T data, int offset) {
+    void SetReg(int reg, T data, int offset = 0) {
         if (reg) {
             *(T*)&gpr[(reg * sizeof(u64) * 2) + (offset * sizeof(T))] = data;
         }
@@ -75,7 +62,7 @@ public:
     void WriteDouble(u32 addr, u64 data);
     void WriteQuad(u32 addr, u128 data);
 
-    void DoException(u32 target, ExceptionType exception);
+    void DoException(u32 target, Exception exception);
     void SendInterruptSignal(int signal, bool value);
     void CheckInterrupts();
     bool InterruptsEnabled();
@@ -85,7 +72,7 @@ public:
 
     u8 gpr[32 * sizeof(u64) * 2] = {};
     u32 pc = 0;
-    u32 next_pc = 0;
+    u32 npc = 0;
     u64 hi = 0;
     u64 lo = 0;
     u64 hi1 = 0;

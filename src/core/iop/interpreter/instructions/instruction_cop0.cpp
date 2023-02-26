@@ -11,8 +11,7 @@ void IOPInterpreter::mtc0() {
 }
 
 void IOPInterpreter::rfe() {
-    // pop the 3 entry stack in sr
-    u8 stack = cop0.gpr[12] & 0x3F;
-    cop0.gpr[12] &= ~0xF;
-    cop0.gpr[12] |= (stack >> 2);
+    u8 stack = cop0.status.data & 0x3f;
+    cop0.status.data &= ~0xf;
+    cop0.status.data |= stack >> 2;
 }

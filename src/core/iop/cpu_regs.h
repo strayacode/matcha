@@ -5,7 +5,7 @@
 struct IOPRegs {
     u32 gpr[32];
     u32 pc;
-    u32 next_pc;
+    u32 npc;
     u32 hi;
     u32 lo;
 };

@@ -74,7 +74,7 @@ void IOPInterpreter::Reset() {
     }
 
     regs.pc = 0xBFC00000;
-    regs.next_pc = 0;
+    regs.npc = 0;
     regs.hi = 0;
     regs.lo = 0;
     inst.data = 0;
@@ -99,7 +99,7 @@ void IOPInterpreter::Run(int cycles) {
 
         if (branch_delay) {
             if (branch) {
-                regs.pc = regs.next_pc;
+                regs.pc = regs.npc;
                 branch_delay = false;
                 branch = false;
             } else {

@@ -3,7 +3,6 @@
 #include <queue>
 #include "common/types.h"
 #include "common/log.h"
-#include "common/int128.h"
 #include "common/ring_buffer.h"
 
 class SIF {

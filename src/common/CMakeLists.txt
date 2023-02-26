@@ -1,5 +1,5 @@
 add_library(common
-    types.h int128.h
+    types.h
     log.h log.cpp
     memory_helpers.h
     emu_thread.h emu_thread.cpp

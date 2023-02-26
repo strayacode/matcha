@@ -8,7 +8,6 @@
 #include "common/log.h"
 #include "common/memory_helpers.h"
 #include "common/memory_map.h"
-#include "common/int128.h"
 
 class System;
 
@@ -24,14 +23,14 @@ public:
 
     void Reset();
     bool InRange(u32 base, u32 size, u32 addr);
-    bool ValidEECodeRegion(VAddr vaddr);
-    bool ValidIOPCodeRegion(VAddr vaddr);
+    bool ValidEECodeRegion(VirtualAddress vaddr);
+    bool ValidIOPCodeRegion(VirtualAddress vaddr);
     void InitialiseMemory();
     void LoadBIOS();
-    u32 TranslateVirtualAddress(VAddr vaddr);
-    void RegisterRegion(VAddr vaddr_start, VAddr vaddr_end, int mask, u8* region, RegionType region_type);
-    int PageIndex(VAddr vaddr);
-    int PageOffset(VAddr vaddr);
+    u32 TranslateVirtualAddress(VirtualAddress vaddr);
+    void RegisterRegion(VirtualAddress vaddr_start, VirtualAddress vaddr_end, int mask, u8* region, RegionType region_type);
+    int PageIndex(VirtualAddress vaddr);
+    int PageOffset(VirtualAddress vaddr);
 
     u8 EEReadByte(u32 addr);
     u16 EEReadHalf(u32 addr);
@@ -48,14 +47,14 @@ public:
     void EEWriteIO(u32 addr, u32 data);
 
     template <typename T>
-    T IOPRead(VAddr vaddr);
+    T IOPRead(VirtualAddress vaddr);
 
     u8 IOPReadByte(u32 addr);
     u16 IOPReadHalf(u32 addr);
     u32 IOPReadWord(u32 addr);
 
     template <typename T>
-    void IOPWrite(VAddr vaddr, T data);
+    void IOPWrite(VirtualAddress vaddr, T data);
 
     void IOPWriteByte(u32 addr, u8 data);
     void IOPWriteHalf(u32 addr, u16 data);

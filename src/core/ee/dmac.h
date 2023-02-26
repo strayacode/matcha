@@ -1,8 +1,7 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
-#include <common/int128.h>
+#include "common/types.h"
+#include "common/log.h"
 
 enum class DMAChannelType : int {
     VIF0 = 0,

@@ -32,61 +32,48 @@ void IOPCore::WriteWord(u32 addr, u32 data) {
 
 void IOPCore::SendInterruptSignal(bool value) {
     if (value) {
-        cop0.gpr[13] |= (1 << 10);
+        cop0.cause.data |= 1 << 10;
     } else {
-        cop0.gpr[13] &= ~(1 << 10);
+        cop0.cause.data &= ~(1 << 10);
     }
 }
 
 void IOPCore::CheckInterrupts() {
-    bool iec = cop0.gpr[12] & 0x1;
-    u8 im = (cop0.gpr[12] >> 8) & 0xFF;
-    u8 ip = (cop0.gpr[13] >> 8) & 0xFF;
-
-    if (iec && (im & ip)) {
-        DoException(ExceptionType::Interrupt);
+    if (cop0.status.iec && (cop0.status.im & cop0.cause.ip)) {
+        DoException(Exception::Interrupt);
     }
 }
 
-void IOPCore::DoException(ExceptionType exception) {
+void IOPCore::DoException(Exception exception) {
     common::Log("[IOP] trigger exception with type %02x", static_cast<int>(exception));
 
     // record the cause of the exception
-    cop0.gpr[13] &= ~0x7C;
-    cop0.gpr[13] |= (static_cast<u8>(exception) << 2);
+    cop0.cause.excode = static_cast<u8>(exception);
 
-    // store the address where the exception took place
-    // in cop0 epc
-    // if we are currently in a branch delay slot with a syscall
-    // instruction then we save the address of the branch instruction
-    // (pc - 4)
+    // store pc to epc
     if (branch_delay) {
-        cop0.SetReg(14, regs.pc - 4);
-        cop0.gpr[13] |= (1 << 31);
+        cop0.epc = regs.pc - 4;
+        cop0.cause.bd = true;
     } else {
-        cop0.SetReg(14, regs.pc);
-        cop0.gpr[13] &= ~(1 << 31);
+        cop0.epc = regs.pc;
+        cop0.cause.bd = false;
     }
 
-    u32 exception_base = 0;
-
-    if (cop0.GetReg(12) & (1 << 22)) {
-        // exception base address in rom/kseg1
-        exception_base = 0xBFC00180;
-    } else {
-        // exception base address in rom/kseg0
-        exception_base = 0x80000080;
+    if (cop0.status.bev) {
+        common::Log("[iop::Interpreter] handle bev=1");
     }
+
+    u32 target = 0x80000080;
 
     // shift the interrupt and kernel/user mode bit 
     // by 2 bits to the left to act as a stack with maximum of 3 entries
-    u8 stack = cop0.gpr[12] & 0x3F;
-    cop0.gpr[12] &= ~0x3F;
-    cop0.gpr[12] |= (stack << 2) & 0x3F;
+    u8 stack = cop0.status.data & 0x3f;
+    cop0.status.data &= ~0x3f;
+    cop0.status.data |= (stack << 2) & 0x3f;
 
     // since we increment by 4 after each instruction we need to account for that
     // so that we can execute at the exception base on the next instruction
-    regs.pc = exception_base - 4;
+    regs.pc = target - 4;
 
     branch_delay = false;
     branch = false;
