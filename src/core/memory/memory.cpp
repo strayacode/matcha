@@ -92,7 +92,7 @@ u8 Memory::IOPReadByte(u32 addr) {
         // cdvd n command status
         return 0;
     default:
-        common::Log("[Memory] handle iop byte read %08x", addr);
+        common::Log("[iop::Context] handle iop byte read %08x", addr);
     }
 
     return 0;
@@ -108,7 +108,7 @@ u16 Memory::IOPReadHalf(u32 addr) {
     } else if (addr >= SPU2_REGION_START && addr < SPU2_REGION_END) {
         return system->spu2.ReadRegister(addr);
     } else {
-        common::Log("[Memory] handle iop half read %08x", addr);
+        common::Log("[iop::Context] handle iop half read %08x", addr);
     }
 
     return 0;
@@ -149,7 +149,7 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801078:
         return system->iop_core->interrupt_controller.ReadRegister(8);
     default:
-        common::Log("[Memory] handle iop word read %08x", addr);
+        common::Log("[iop::Context] handle iop word read %08x", addr);
     }
 
     return 0;
@@ -181,7 +181,7 @@ void Memory::IOPWriteByte(u32 addr, u8 data) {
     case 0x1F802070:
         return;
     default:
-        common::Log("[Memory] handle iop byte write %08x = %02x", addr, data);
+        common::Log("[iop::Context] handle iop byte write %08x = %02x", addr, data);
         break;
     }
 }
@@ -204,7 +204,7 @@ void Memory::IOPWriteHalf(u32 addr, u16 data) {
         system->spu2.WriteRegister(addr, data);
         return;
     } else {
-        common::Log("[Memory] handle iop half write %08x = %04x", addr, data);
+        common::Log("[iop::Context] handle iop half write %08x = %04x", addr, data);
     }
 }
 
@@ -270,6 +270,6 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
     case 0x1F8015F0:
         break;
     default:
-        common::Log("[Memory] handle iop word write %08x = %08x", addr, data);
+        common::Log("[iop::Context] handle iop word write %08x = %08x", addr, data);
     }
 }

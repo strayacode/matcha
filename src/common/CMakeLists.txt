@@ -6,6 +6,7 @@ add_library(common
     arithmetic.h arithmetic.cpp
     cpu_types.h ring_buffer.h
     memory.h virtual_page_table.h
+    string.h
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

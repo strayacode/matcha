@@ -58,5 +58,8 @@ private:
     EEDebugger ee_debugger;
     IOPDebugger iop_debugger;
 
+    int window_width;
+    int window_height;
+
     float fps;
 };

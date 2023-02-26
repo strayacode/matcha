@@ -1,3 +1,4 @@
+#include "common/string.h"
 #include "frontend/host_interface.h"
 
 HostInterface::HostInterface() :
@@ -28,6 +29,8 @@ bool HostInterface::Initialise() {
     gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    SDL_GetWindowSize(window, &window_width, &window_height);
 
     // setup imgui context
     IMGUI_CHECKVERSION();
@@ -151,6 +154,21 @@ void HostInterface::RenderMenubar() {
             }
 
             ImGui::EndMenu();
+        }
+
+        if (core.GetState() == CoreState::Running && fps != 0.0f) {
+            std::string fps_string = common::format("%.0f FPS | %.2f ms", fps, 1000.0f / fps);\
+            auto pos = window_width - ImGui::CalcTextSize(fps_string.c_str()).x - ImGui::GetStyle().ItemSpacing.x;
+
+            ImGui::SetCursorPosX(pos);
+            ImGui::Text("%s", fps_string.c_str());
+        } else if (core.GetState() == CoreState::Paused) {
+            std::string fps_string = "Paused";
+
+            auto pos = window_width - ImGui::CalcTextSize(fps_string.c_str()).x - ImGui::GetStyle().ItemSpacing.x;
+
+            ImGui::SetCursorPosX(pos);
+            ImGui::TextColored(colour_yellow, "%s", fps_string.c_str());
         }
 
         ImGui::EndMainMenuBar();

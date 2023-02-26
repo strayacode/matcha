@@ -208,6 +208,18 @@ void Context::WriteIO(u32 paddr, u32 value) {
     } else if (paddr >= 0x1000f520 && paddr < 0x1000f594) {
         system.dmac.WriteRegister(paddr, value);
         return;
+    } else if (paddr >= 0x11000000 && paddr < 0x11001000) {
+        system.vu0.WriteCodeMemory(paddr, value);
+        return;
+    } else if (paddr >= 0x11004000 && paddr < 0x11005000) {
+        system.vu0.WriteDataMemory(paddr, value);
+        return;
+    } else if (paddr >= 0x11008000 && paddr < 0x1100c000) {
+        system.vu1.WriteCodeMemory(paddr, value);
+        return;
+    } else if (paddr >= 0x1100c000 && paddr < 0x11010000) {
+        system.vu1.WriteDataMemory(paddr, value);
+        return;
     }
 
     switch (paddr) {
