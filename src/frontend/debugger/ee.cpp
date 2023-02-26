@@ -54,7 +54,7 @@ void EEDebugger::DisassemblyWindow(Core& core) {
 
         if (core.system.memory.ValidEECodeRegion(addr)) {
             for (int i = 0; i < disassembly_size; i++) {
-                ee::Instruction inst = core.system.ee.ReadWord(addr);
+                ee::Instruction inst = core.system.ee.Read<u32>(addr);
 
                 if (addr == pc) {
                     ImGui::TextColored(ImVec4(0, 1, 0, 1), "%08x: %08x %s", addr, inst.data, ee::DisassembleInstruction(inst, addr).c_str());

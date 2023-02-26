@@ -2,6 +2,7 @@
 
 #include <string>
 #include "common/types.h"
+#include "common/virtual_page_table.h"
 #include "core/ee/cop0.h"
 #include "core/ee/cop1.h"
 #include "core/ee/interpreter.h"
@@ -54,7 +55,7 @@ struct Context {
     COP1 cop1;
 
 private:
-    VirtualPageTable vtlb;
+    common::VirtualPageTable vtlb;
     Interpreter interpreter;
     System& system;
 };

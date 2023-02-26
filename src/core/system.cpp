@@ -1,6 +1,7 @@
 #include <core/system.h>
 
 System::System() : memory(this), ee(*this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
+    bios = std::make_unique<std::array<u8, 0x400000>>();
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
     InitialiseIOPCore(CoreType::Interpreter);

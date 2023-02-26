@@ -7,6 +7,7 @@ add_library(common
     cpu_types.h ring_buffer.h
     memory_map.h memory_map.cpp
     memory.h
+    virtual_page_table.h
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

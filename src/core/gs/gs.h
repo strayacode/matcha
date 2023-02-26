@@ -42,5 +42,5 @@ private:
     u64 trxreg;
     u8 trxdir;
 
-    System* system;
+    System& system;
 };

@@ -64,6 +64,7 @@ void Context::Reset() {
     cop0.Reset();
     cop1.Reset();
     interpreter.Reset();
+    vtlb.Reset();
 }
 
 void Context::Run(int cycles) {
@@ -74,10 +75,9 @@ template u8 Context::Read(VirtualAddress vaddr);
 template u16 Context::Read(VirtualAddress vaddr);
 template u32 Context::Read(VirtualAddress vaddr);
 template u64 Context::Read(VirtualAddress vaddr);
-template u128 Context::Read(VirtualAddress vaddr);
 template <typename T>
 T Context::Read(VirtualAddress vaddr) {
-    auto pointer = vtlb.Lookup(vaddr);
+    auto pointer = vtlb.Lookup<T>(vaddr);
     if (pointer) {
         return common::Read<T>(pointer);
     } else {
@@ -85,6 +85,14 @@ T Context::Read(VirtualAddress vaddr) {
     }
 
     return 0;
+}
+
+template <>
+u128 Context::Read<u128>(VirtualAddress vaddr) {
+    u128 value;
+    value.lo = Read<u64>(vaddr);
+    value.hi = Read<u64>(vaddr + 8);
+    return value;
 }
 
 void Context::WriteByte(u32 addr, u8 data) {
