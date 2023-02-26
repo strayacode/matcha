@@ -7,7 +7,6 @@
 #include "common/types.h"
 #include "common/log.h"
 #include "common/memory_helpers.h"
-#include "common/memory_map.h"
 
 struct System;
 
@@ -44,10 +43,6 @@ public:
     void IOPWriteByte(u32 addr, u8 data);
     void IOPWriteHalf(u32 addr, u16 data);
     void IOPWriteWord(u32 addr, u32 data);
-
-    // 0x00000000 - 0x02000000 32MB RDRAM
-    // (first 1MB reserved for the kernel)
-    u8* rdram;
 
     // 0x1C000000 - 0x1C200000 2MB IOP RAM
     u8* iop_ram;

@@ -6,10 +6,6 @@
 Memory::Memory(System* system) : system(system) {}
 
 Memory::~Memory() {
-    if (rdram) {
-        delete[] rdram;
-    }
-
     if (iop_ram) {
         delete[] iop_ram;
     }
@@ -43,7 +39,6 @@ bool Memory::ValidIOPCodeRegion(VirtualAddress vaddr) {
 }
 
 void Memory::InitialiseMemory() {
-    rdram = new u8[0x2000000];
     iop_ram = new u8[0x200000];
 }
 
