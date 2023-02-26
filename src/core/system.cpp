@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : ee_core(*this), memory(this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(this), timers(*this), dmac(this), elf_loader(*this) {
+System::System() : memory(this), ee(memory), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(this), timers(*this), dmac(*this), elf_loader(*this) {
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
     InitialiseIOPCore(CoreType::Interpreter);
@@ -20,7 +20,7 @@ System::System() : ee_core(*this), memory(this), iop_dmac(*this), iop_timers(*th
 
 void System::Reset() {
     scheduler.Reset();
-    ee_core.Reset();
+    ee.Reset();
     iop_core->Reset();
     memory.Reset();
     iop_dmac.Reset();
@@ -55,7 +55,7 @@ void System::RunFrame() {
     scheduler.Add(CYCLES_PER_FRAME, VBlankFinishEvent);
 
     while (scheduler.GetCurrentTime() < end_timestamp) {
-        ee_core.Run(cycles);
+        ee.Run(cycles);
         
         // ee timers and dmac run at half the speed of the ee
         timers.Run(cycles / 2);

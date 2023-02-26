@@ -31,7 +31,7 @@ class System;
 
 class DMAC {
 public:
-    DMAC(System* system);
+    DMAC(System& system);
 
     void Reset();
     void Run(int cycles);
@@ -70,5 +70,5 @@ public:
     u32 ringbuffer_offset;
     u32 disabled_status;
 
-    System* system;
+    System& system;
 };

@@ -3,13 +3,13 @@ add_library(core
     system.h system.cpp
     scheduler.h scheduler.cpp
 
-    ee/ee_core.h ee/ee_core.cpp
+    ee/context.h ee/context.cpp
     ee/cop0.h ee/cop0.cpp
     ee/cop1.h ee/cop1.cpp
     ee/disassembler.h ee/disassembler.cpp
-    ee/ee_interpreter.h ee/ee_interpreter.cpp
-    ee/interpreter_table.h ee/interpreter_table.cpp
-
+    ee/interpreter.h ee/interpreter.cpp
+    ee/decoder.h ee/executor.h
+    ee/instruction.h
     ee/intc.h ee/intc.cpp
     ee/timers.h ee/timers.cpp
     ee/dmac.h ee/dmac.cpp

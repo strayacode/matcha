@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/log.h"
-#include "core/ee/ee_core.h"
+#include "core/ee/context.h"
 #include <core/memory/memory.h>
 #include <core/ee/intc.h>
 #include <core/scheduler.h>
@@ -39,9 +39,10 @@ public:
 
     Scheduler scheduler;
 
-    EECore ee_core;
-    std::unique_ptr<IOPCore> iop_core;
     Memory memory;
+    ee::Context ee;
+    std::unique_ptr<IOPCore> iop_core;
+    
     IOPDMAC iop_dmac;
     IOPTimers iop_timers;
     EEINTC ee_intc;

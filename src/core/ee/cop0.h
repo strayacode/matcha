@@ -4,7 +4,9 @@
 #include "common/types.h"
 #include "common/log.h"
 
-class EECOP0 {
+namespace ee {
+
+class COP0 {
 public:
     void Reset();
 
@@ -34,3 +36,5 @@ public:
 
     std::array<u32, 32> gpr;
 };
+
+} // namespace ee

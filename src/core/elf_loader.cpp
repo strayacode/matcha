@@ -56,7 +56,7 @@ void ELFLoader::LoadHeader() {
 
     common::Debug("[ELFLoader] entrypoint: %08x", header.entry);
     
-    system.ee_core.pc = header.entry;
+    system.ee.pc = header.entry;
 }
 
 void ELFLoader::SetPath(std::string elf_path) {

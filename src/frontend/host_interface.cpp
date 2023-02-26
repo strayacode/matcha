@@ -65,7 +65,7 @@ void HostInterface::Run() {
         }
 
         if (ee_debugger.show_registers_window) {
-            ee_debugger.RegistersWindow(core.system.ee_core);
+            ee_debugger.RegistersWindow(core.system.ee);
         }
 
         if (ee_debugger.show_disassembly_window) {

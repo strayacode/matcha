@@ -2,10 +2,11 @@
 
 #include "frontend/imgui/imgui.h"
 #include "core/core.h"
+#include "core/ee/context.h"
 
 class EEDebugger {
 public:
-    void RegistersWindow(EECore& ee_core);
+    void RegistersWindow(ee::Context& ee_core);
     void DisassemblyWindow(Core& core);
 
     bool show_registers_window = false;

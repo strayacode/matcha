@@ -1,6 +1,8 @@
-#include <core/ee/cop1.h>
+#include "core/ee/cop1.h"
 
-void EECOP1::Reset() {
+namespace ee {
+
+void COP1::Reset() {
     for (int i = 0; i < 32; i++) {
         fpr[i].u = 0;
         control[i] = 0;
@@ -9,25 +11,25 @@ void EECOP1::Reset() {
     accumulator.u = 0;
 }
 
-u32 EECOP1::GetReg(int reg) {
+u32 COP1::GetReg(int reg) {
     return fpr[reg].u;
 }
 
-void EECOP1::SetReg(int reg, u32 data) {
+void COP1::SetReg(int reg, u32 data) {
     fpr[reg].u = data;
 }
 
-u32 EECOP1::GetControlReg(int reg) {
+u32 COP1::GetControlReg(int reg) {
     return control[reg];
 }
 
-void EECOP1::SetControlReg(int reg, u32 data) {
+void COP1::SetControlReg(int reg, u32 data) {
     control[reg] = data;
 }
 
 // converts a u32 representation of a ps2 float
 // to one that conforms to IEEE 754 floats
-f32 EECOP1::AsFloat(u32 value) {
+f32 COP1::AsFloat(u32 value) {
     // we must handle the cases when exponent == 255 or 0
     switch (value & 0x7F800000) {
     case 0:
@@ -43,3 +45,5 @@ f32 EECOP1::AsFloat(u32 value) {
         return static_cast<float>(value);
     }
 }
+
+} // namespace ee

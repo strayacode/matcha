@@ -149,7 +149,7 @@ void IOPInterpreter::IOPPuts() {
     u32 address = GetReg(5);
     u32 length = GetReg(6);
     
-    for (int i = 0; i < length; i++) {
+    for (u32 i = 0; i < length; i++) {
         common::LogNoNewline("%c", system->memory.iop_ram[address & 0x1fffff]);
         address++;
     }

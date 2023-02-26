@@ -37,7 +37,7 @@ public:
     void WriteMask(u16 data);
     void WriteStat(u16 data);
 
-    void CheckInterruptSignal();
+    void CheckInterrupts();
 
     void RequestInterrupt(EEInterruptSource interrupt);
 private:

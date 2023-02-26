@@ -42,6 +42,8 @@ u32 GS::ReadRegisterPrivileged(u32 addr) {
     default:
         common::Error("[GS] handle privileged read %08x", addr);
     }
+
+    return 0;
 }
 
 void GS::WriteRegisterPrivileged(u32 addr, u32 data) {

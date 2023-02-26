@@ -84,6 +84,8 @@ u32 IOPDMAC::ReadChannel(u32 addr) {
     default:
         common::Error("[IOPDMAC] %08x", index);
     }
+
+    return 0;
 }
 
 void IOPDMAC::WriteRegister(u32 addr, u32 data) {

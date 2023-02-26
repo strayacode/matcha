@@ -1,7 +1,9 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
+#include "common/types.h"
+#include "common/log.h"
+
+namespace ee {
 
 union FPURegister {
     f32 f;
@@ -9,7 +11,7 @@ union FPURegister {
     s32 s;
 };
 
-class EECOP1 {
+class COP1 {
 public:
     void Reset();
 
@@ -24,3 +26,5 @@ public:
     FPURegister accumulator;
     u32 control[32];
 };
+
+} // namespace ee

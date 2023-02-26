@@ -35,6 +35,8 @@ u32 Timers::ReadRegister(u32 addr) {
     default:
         common::Error("[Timers] handle %02x", addr & 0xFF);
     }
+
+    return 0;
 }
 
 void Timers::WriteRegister(u32 addr, u32 data) {

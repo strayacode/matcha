@@ -7,7 +7,7 @@ static const char* channel_names[10] = {
     "SIF0", "SIF1", "SIF2", "SPR_FROM", "SPR_TO",
 };
 
-DMAC::DMAC(System* system) : system(system) {}
+DMAC::DMAC(System& system) : system(system) {}
 
 void DMAC::Reset() {
     for (int i = 0; i < 10; i++) {
@@ -140,46 +140,44 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
 }
 
 int DMAC::GetChannelIndex(u32 addr) {
-    u8 channel_identifier = (addr >> 8) & 0xFF;
+    u8 channel = (addr >> 8) & 0xff;
 
-    DMAChannelType index;
-
-    switch (channel_identifier) {
+    switch (channel) {
     case 0x80:
-        index = DMAChannelType::VIF0;
+        return static_cast<int>(DMAChannelType::VIF0);
         break;
     case 0x90:
-        index = DMAChannelType::VIF1;
+        return static_cast<int>(DMAChannelType::VIF1);
         break;
     case 0xA0:
-        index = DMAChannelType::GIF;
+        return static_cast<int>(DMAChannelType::GIF);
         break;
     case 0xB0:
-        index = DMAChannelType::IPUFrom;
+        return static_cast<int>(DMAChannelType::IPUFrom);
         break;
     case 0xB4:
-        index = DMAChannelType::IPUTo;
+        return static_cast<int>(DMAChannelType::IPUTo);
         break;
     case 0xC0:
-        index = DMAChannelType::SIF0;
+        return static_cast<int>(DMAChannelType::SIF0);
         break;
     case 0xC4:
-        index = DMAChannelType::SIF1;
+        return static_cast<int>(DMAChannelType::SIF1);
         break;
     case 0xC8:
-        index = DMAChannelType::SIF2;
+        return static_cast<int>(DMAChannelType::SIF2);
         break;
     case 0xD0:
-        index = DMAChannelType::SPRFrom;
+        return static_cast<int>(DMAChannelType::SPRFrom);
         break;
     case 0xD4:
-        index = DMAChannelType::SPRTo;
+        return static_cast<int>(DMAChannelType::SPRTo);
         break;
     default:
         common::Error("[DMAC] Random behaviour!");
     }
 
-    return static_cast<int>(index);
+    return 0;
 }
 
 u32 DMAC::ReadInterruptStatus() {
@@ -213,7 +211,7 @@ void DMAC::CheckInterruptSignal() {
         }
     }
 
-    system->ee_core.SendInterruptSignal(1, irq);
+    system.ee.RaiseInterrupt(1, irq);
 }
 
 // note:
@@ -256,9 +254,9 @@ void DMAC::DoGIFTransfer() {
     DMAChannel& channel = channels[2];
 
     if (channel.quadword_count) {
-        u128 data = system->ee_core.ReadQuad(channel.address);
+        u128 data = system.ee.ReadQuad(channel.address);
 
-        system->gif.SendPath3(data);
+        system.gif.SendPath3(data);
         channel.address += 16;
         channel.quadword_count--;        
     } else {
@@ -271,13 +269,13 @@ void DMAC::DoSIF0Transfer() {
 
     if (channel.quadword_count) {
         // dmac can only transfer a quadword at a time
-        if (system->sif.GetSIF0FIFOSize() >= 4) {
+        if (system.sif.GetSIF0FIFOSize() >= 4) {
             for (int i = 0; i < 4; i++) {
-                u32 data = system->sif.ReadSIF0FIFO();
+                u32 data = system.sif.ReadSIF0FIFO();
 
                 common::Log("[DMAC] SIF0 reading data from fifo %08x", data);
 
-                system->ee_core.WriteWord(channel.address, data);
+                system.ee.WriteWord(channel.address, data);
                 channel.address += 4;
             }
 
@@ -286,12 +284,12 @@ void DMAC::DoSIF0Transfer() {
     } else if (channel.end_transfer) {
         EndTransfer(5);
     } else {
-        if (system->sif.GetSIF0FIFOSize() >= 2) {
+        if (system.sif.GetSIF0FIFOSize() >= 2) {
             // form a dmatag
             u64 dma_tag = 0;
 
-            dma_tag |= system->sif.ReadSIF0FIFO();
-            dma_tag |= (u64)system->sif.ReadSIF0FIFO() << 32;
+            dma_tag |= system.sif.ReadSIF0FIFO();
+            dma_tag |= (u64)system.sif.ReadSIF0FIFO() << 32;
 
             common::Log("[DMAC] SIF0 read DMATag %016lx", dma_tag);
 
@@ -315,11 +313,11 @@ void DMAC::DoSIF1Transfer() {
 
     if (channel.quadword_count) {
         // push data to the sif1 fifo
-        u128 data = system->ee_core.ReadQuad(channel.address);
+        u128 data = system.ee.ReadQuad(channel.address);
 
         common::Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
 
-        system->sif.WriteSIF1FIFO(data);
+        system.sif.WriteSIF1FIFO(data);
 
         // madr and qwc must be updated as the transfer proceeds
         channel.address += 16;
@@ -353,7 +351,7 @@ void DMAC::EndTransfer(int index) {
 
 void DMAC::DoSourceChain(int index) {
     DMAChannel& channel = channels[index];
-    u128 data = system->ee_core.ReadQuad(channel.tag_address);
+    u128 data = system.ee.ReadQuad(channel.tag_address);
     u64 dma_tag = data.lo;
 
     common::Log("[DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);
