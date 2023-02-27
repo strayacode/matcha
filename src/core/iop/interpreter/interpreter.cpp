@@ -82,6 +82,7 @@ void IOPInterpreter::Reset() {
     branch = false;
 
     cop0.Reset();
+    cdvd.Reset();
     interrupt_controller.Reset();
 }
 

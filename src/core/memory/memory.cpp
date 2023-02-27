@@ -87,10 +87,11 @@ T Memory::IOPRead(VirtualAddress vaddr) {
 }
 
 u8 Memory::IOPReadByte(u32 addr) {
+    if (addr >= 0x1f402004 && addr < 0x1f402019) {
+        return system->iop_core->cdvd.ReadRegister(addr);
+    }
+
     switch (addr) {
-    case 0x1F402005:
-        // cdvd n command status
-        return 0;
     default:
         common::Log("[iop::Context] handle iop byte read %08x", addr);
     }

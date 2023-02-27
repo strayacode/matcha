@@ -5,6 +5,7 @@
 #include "core/iop/cpu_regs.h"
 #include "core/iop/cop0.h"
 #include "core/iop/interrupt_controller.h"
+#include "core/iop/cdvd.h"
 
 struct System;
 
@@ -51,6 +52,7 @@ public:
 
     IOPRegs regs;
     iop::COP0 cop0;
+    iop::CDVD cdvd;
     System* system;
     IOPInterruptController interrupt_controller;
     

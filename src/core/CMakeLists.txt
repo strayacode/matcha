@@ -25,6 +25,7 @@ add_library(core
     iop/dmac.h iop/dmac.cpp
     iop/interrupt_controller.h iop/interrupt_controller.cpp
     iop/timers.h iop/timers.cpp
+    iop/cdvd.h iop/cdvd.cpp
 
     memory/memory.h memory/memory.cpp
     memory/memory_constants.h
