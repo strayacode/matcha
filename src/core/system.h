@@ -59,6 +59,7 @@ struct System {
 
     // shared between ee and iop
     std::unique_ptr<std::array<u8, 0x400000>> bios;
+    std::unique_ptr<std::array<u8, 0x200000>> iop_ram;
 
     std::function<void()> VBlankStartEvent;
     std::function<void()> VBlankFinishEvent;

@@ -184,20 +184,20 @@ void IOPDMAC::DoSIF0Transfer() {
 
     if (channel.block_count) {
         // read data from iop ram and push to the sif0 fifo
-        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.address));
+        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.address));
 
         channel.address += 4;
         channel.block_count--;
     } else if (channel.end_transfer) {
         EndTransfer(9);
     } else {
-        u32 data = system.iop.ReadWord(channel.tag_address);
-        u32 block_count = system.iop.ReadWord(channel.tag_address + 4);
+        u32 data = system.iop.Read<u32>(channel.tag_address);
+        u32 block_count = system.iop.Read<u32>(channel.tag_address + 4);
 
         common::Log("[IOPDMAC] SIF0 read DMATag %016lx", ((u64)block_count << 32) | data);
 
-        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.tag_address + 8));
-        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.tag_address + 12));
+        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 8));
+        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 12));
 
         // common::Debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
@@ -224,7 +224,7 @@ void IOPDMAC::DoSIF1Transfer() {
         if (system.sif.GetSIF1FIFOSize() > 0) {
             u32 data = system.sif.ReadSIF1FIFO();
 
-            system.iop.WriteWord(channel.address, data);
+            system.iop.Write<u32>(channel.address, data);
             channel.address += 4;
             channel.block_count--;
         }

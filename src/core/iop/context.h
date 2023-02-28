@@ -2,6 +2,7 @@
 
 #include <array>
 #include "common/types.h"
+#include "common/virtual_page_table.h"
 #include "core/iop/cop0.h"
 #include "core/iop/cdvd.h"
 #include "core/iop/intc.h"
@@ -27,13 +28,11 @@ struct Context {
         }
     }
 
-    u8 ReadByte(u32 addr);
-    u16 ReadHalf(u32 addr);
-    u32 ReadWord(u32 addr);
+    template <typename T>
+    T Read(VirtualAddress vaddr);
 
-    void WriteByte(u32 addr, u8 value);
-    void WriteHalf(u32 addr, u16 value);
-    void WriteWord(u32 addr, u32 value);
+    template <typename T>
+    void Write(VirtualAddress vaddr, T value);
 
     void RaiseInterrupt(bool value);
 
@@ -48,6 +47,10 @@ struct Context {
     INTC intc;
 
 private:
+    u32 ReadIO(u32 paddr);
+    void WriteIO(u32 paddr, u32 value);
+
+    common::VirtualPageTable vtlb;
     Interpreter interpreter;
     System& system;
 };

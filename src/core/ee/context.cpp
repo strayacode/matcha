@@ -74,7 +74,7 @@ void Context::Reset() {
     cop1.Reset();
     interpreter.Reset();
 
-    // do initial hardcoded mappings (kseg0 and kseg1)
+    // do initial hardcoded mappings
     vtlb.Reset();
     vtlb.Map(rdram->data(), 0x00000000, 0x2000000);
     vtlb.Map(rdram->data(), 0x20000000, 0x2000000);
@@ -100,9 +100,6 @@ T Context::Read(VirtualAddress vaddr) {
     if (pointer) {
         return common::Read<T>(pointer);
     } else {
-        if ((vaddr & 0x1fffffff) == 0x0008c240) {
-            common::Log("vaddr %08x paddr %08x", vaddr, vaddr & 0x1fffffff);
-        }
         return ReadIO(vaddr & 0x1fffffff);
     }
 }

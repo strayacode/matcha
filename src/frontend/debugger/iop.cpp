@@ -55,7 +55,7 @@ void IOPDebugger::DisassemblyWindow(Core& core) {
 
         if (core.system.memory.ValidIOPCodeRegion(addr)) {
             for (int i = 0; i < disassembly_size; i++) {
-                iop::Instruction inst = core.system.iop.ReadWord(addr);
+                iop::Instruction inst = core.system.iop.Read<u32>(addr);
 
                 if (addr == pc) {
                     ImGui::TextColored(ImVec4(0, 1, 0, 1), "%08x: %08x %s", addr, inst.data, iop::DisassembleInstruction(inst, addr).c_str());

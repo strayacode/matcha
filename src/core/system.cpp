@@ -2,6 +2,7 @@
 
 System::System() : memory(this), ee(*this), iop(*this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
     bios = std::make_unique<std::array<u8, 0x400000>>();
+    iop_ram = std::make_unique<std::array<u8, 0x200000>>();
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
 }
@@ -40,6 +41,7 @@ void System::Reset() {
     spu2.Reset();
 
     LoadBIOS();
+    iop_ram->fill(0);
 }
 
 void System::RunFrame() {

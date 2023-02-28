@@ -79,7 +79,7 @@ void Interpreter::Reset() {
 
 void Interpreter::Run(int cycles) {
     while (cycles--) {
-        inst = Instruction{ctx.ReadWord(ctx.pc)};
+        inst = Instruction{ctx.Read<u32>(ctx.pc)};
 
         if (ctx.pc == 0x00012c48 || ctx.pc == 0x0001420c || ctx.pc == 0x0001430c) {
             IOPPuts();
@@ -229,7 +229,7 @@ void Interpreter::beq() {
 
 void Interpreter::lw() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, ctx.ReadWord(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
+        ctx.SetReg(inst.rt, ctx.Read<u32>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
     }
 }
 
@@ -247,19 +247,19 @@ void Interpreter::addi() {
 
 void Interpreter::sw() {
     if (!ctx.cop0.status.isc) {
-        ctx.WriteWord(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
+        ctx.Write<u32>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
     }
 }
 
 void Interpreter::sb() {
     if (!ctx.cop0.status.isc) {
-        ctx.WriteByte(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
+        ctx.Write<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
     }
 }
 
 void Interpreter::lb() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, SignExtend<s32, 8>(ctx.ReadByte(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm))));
+        ctx.SetReg(inst.rt, SignExtend<s32, 8>(ctx.Read<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm))));
     }
 }
 
@@ -273,7 +273,7 @@ void Interpreter::lh() {
     if (!ctx.cop0.status.isc) {
         u32 addr = ctx.gpr[inst.rs] + SignExtend<s32, 16>(inst.imm);
 
-        ctx.SetReg(inst.rt, SignExtend<s32, 16>(ctx.ReadHalf(addr)));
+        ctx.SetReg(inst.rt, SignExtend<s32, 16>(ctx.Read<u16>(addr)));
     }
 }
 
@@ -284,7 +284,7 @@ void Interpreter::j() {
 
 void Interpreter::lbu() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, ctx.ReadByte(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
+        ctx.SetReg(inst.rt, ctx.Read<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
     }
 }
 
@@ -296,7 +296,7 @@ void Interpreter::lhu() {
     if (!ctx.cop0.status.isc) {
         u32 addr = ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm);
 
-        ctx.SetReg(inst.rt, ctx.ReadHalf(addr));
+        ctx.SetReg(inst.rt, ctx.Read<u16>(addr));
     }
 }
 
@@ -317,7 +317,7 @@ void Interpreter::bgtz() {
 void Interpreter::sh() {
     if (!ctx.cop0.status.isc) {
         u32 addr = ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm);
-        ctx.WriteHalf(addr, ctx.GetReg(inst.rt));
+        ctx.Write<u16>(addr, ctx.GetReg(inst.rt));
     }
 }
 
@@ -338,7 +338,7 @@ void Interpreter::bcondz() {
 
 void Interpreter::lwl() {
     u32 addr = ctx.GetReg(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.ReadWord(addr & ~0x3);
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xFFFFFF >> shift;
     
@@ -347,7 +347,7 @@ void Interpreter::lwl() {
 
 void Interpreter::lwr() {
     u32 addr = ctx.GetReg(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.ReadWord(addr & ~0x3);
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xFFFFFF00 << (24 - shift);
     
@@ -356,22 +356,20 @@ void Interpreter::lwr() {
 
 void Interpreter::swl() {
     u32 addr = ctx.GetReg(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.ReadWord(addr & ~0x3);
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xFFFFFF00 << shift;
     u32 updated_data = (aligned_data & mask) | (ctx.GetReg(inst.rt) >> (24 - shift));
-
-    ctx.WriteWord(addr & ~0x3, updated_data);
+    ctx.Write<u32>(addr & ~0x3, updated_data);
 }
 
 void Interpreter::swr() {
     u32 addr = ctx.GetReg(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.ReadWord(addr & ~0x3);
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xFFFFFF >> (24 - shift);
     u32 updated_data = (aligned_data & mask) | (ctx.GetReg(inst.rt) << shift);
-
-    ctx.WriteWord(addr & ~0x3, updated_data);
+    ctx.Write<u32>(addr & ~0x3, updated_data);
 }
 
 // secondary

@@ -14,11 +14,11 @@ void INTC::Reset() {
 
 u32 INTC::ReadRegister(int offset) {
     switch (offset) {
-    case 0x0:
+    case 0x1f801070:
         return interrupt_status;
-    case 0x4:
+    case 0x1f801074:
         return interrupt_mask;
-    case 0x8: {
+    case 0x1f801078: {
         u32 value = interrupt_control;
         interrupt_control = 0;
         UpdateInterrupts();
@@ -33,17 +33,17 @@ u32 INTC::ReadRegister(int offset) {
 
 void INTC::WriteRegister(int offset, u32 data) {
     switch (offset) {
-    case 0x0:
+    case 0x1f801070:
         // common::Debug("[IOP INTC] I_STAT write %08x", data);
         interrupt_status &= data & WRITE_MASK;
         UpdateInterrupts();
         break;
-    case 0x4:
+    case 0x1f801074:
         // common::Debug("[IOP INTC] I_MASK write %08x", data);
         interrupt_mask = data & WRITE_MASK;
         UpdateInterrupts();
         break;
-    case 0x8:
+    case 0x1f801078:
         interrupt_control = data & 0x1;
         UpdateInterrupts();
         break;
