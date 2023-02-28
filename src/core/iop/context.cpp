@@ -85,6 +85,12 @@ u32 Context::ReadIO(u32 paddr) {
     } else if ((paddr >> 24) == 0x1e) {
         // not sure what this is
         return 0;
+    } else if (paddr >= 0x1f900000 && paddr < 0x1f900400) {
+        return 0;
+    } else if (paddr >= 0x1f900760 && paddr < 0x1f900770) {
+        return 0;
+    } else if (paddr >= 0x1f900400 && paddr < 0x1f900800) {
+        return system.spu2.ReadRegister(paddr);
     }
 
     switch (paddr) {
@@ -93,6 +99,7 @@ u32 Context::ReadIO(u32 paddr) {
     case 0x1f801010:
     case 0x1f801450:
     case 0x1ffe0130:
+    case 0x1f801414:
         return 0;
     case 0x1d000010:
         return system.sif.ReadSMCOM();
@@ -129,6 +136,15 @@ void Context::WriteIO(u32 paddr, u32 value) {
         return;
     } else if (paddr >= 0x1f801070 && paddr < 0x1f801079) {
         intc.WriteRegister(paddr, value);
+        return;
+    } else if (paddr >= 0x1f900000 && paddr < 0x1f900400) {
+        system.spu.WriteRegister(paddr, value);
+        return;
+    } else if (paddr >= 0x1f900760 && paddr < 0x1f900770) {
+        system.spu.WriteRegister(paddr, value);
+        return;
+    } else if (paddr >= 0x1f900400 && paddr < 0x1f900800) {
+        system.spu2.WriteRegister(paddr, value);
         return;
     }
 
