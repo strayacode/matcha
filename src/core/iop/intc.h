@@ -24,11 +24,13 @@ enum class IOPInterruptSource : u32 {
     USB = 22,
 };
 
-class IOPCore;
+namespace iop {
 
-class IOPInterruptController {
+struct Context;
+
+class INTC {
 public:
-    IOPInterruptController(IOPCore& cpu);
+    INTC(Context& ctx);
 
     void Reset();
 
@@ -44,5 +46,7 @@ private:
 
     static constexpr int WRITE_MASK = (1 << 26) - 1;
 
-    IOPCore& cpu;
+    Context& ctx;
 };
+
+} // namespace iop

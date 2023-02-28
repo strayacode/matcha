@@ -1,16 +1,18 @@
 #include "common/log.h"
-#include "core/iop/interrupt_controller.h"
-#include "core/system.h"
+#include "core/iop/intc.h"
+#include "core/iop/context.h"
 
-IOPInterruptController::IOPInterruptController(IOPCore& cpu) : cpu(cpu) {}
+namespace iop {
 
-void IOPInterruptController::Reset() {
+INTC::INTC(Context& ctx) : ctx(ctx) {}
+
+void INTC::Reset() {
     interrupt_mask = 0;
     interrupt_status = 0;
     interrupt_control = 0;
 }
 
-u32 IOPInterruptController::ReadRegister(int offset) {
+u32 INTC::ReadRegister(int offset) {
     switch (offset) {
     case 0x0:
         return interrupt_status;
@@ -29,7 +31,7 @@ u32 IOPInterruptController::ReadRegister(int offset) {
     return 0;
 }
 
-void IOPInterruptController::WriteRegister(int offset, u32 data) {
+void INTC::WriteRegister(int offset, u32 data) {
     switch (offset) {
     case 0x0:
         // common::Debug("[IOP INTC] I_STAT write %08x", data);
@@ -50,11 +52,13 @@ void IOPInterruptController::WriteRegister(int offset, u32 data) {
     }
 }
 
-void IOPInterruptController::RequestInterrupt(IOPInterruptSource source) {
+void INTC::RequestInterrupt(IOPInterruptSource source) {
     interrupt_status |= 1 << static_cast<u32>(source);
     UpdateInterrupts();
 }
 
-void IOPInterruptController::UpdateInterrupts() {
-    cpu.SendInterruptSignal(interrupt_control && (interrupt_status & interrupt_mask));
+void INTC::UpdateInterrupts() {
+    ctx.RaiseInterrupt(interrupt_control && (interrupt_status & interrupt_mask));
 }
+
+} // namespace iop

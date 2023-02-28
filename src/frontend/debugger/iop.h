@@ -2,10 +2,11 @@
 
 #include "frontend/imgui/imgui.h"
 #include "core/core.h"
+#include "core/iop/context.h"
 
 class IOPDebugger {
 public:
-    void RegistersWindow(IOPCore& iop_core);
+    void RegistersWindow(iop::Context& iop);
     void DisassemblyWindow(Core& core);
 
     bool show_registers_window = false;

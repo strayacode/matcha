@@ -184,20 +184,20 @@ void IOPDMAC::DoSIF0Transfer() {
 
     if (channel.block_count) {
         // read data from iop ram and push to the sif0 fifo
-        system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.address));
+        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.address));
 
         channel.address += 4;
         channel.block_count--;
     } else if (channel.end_transfer) {
         EndTransfer(9);
     } else {
-        u32 data = system.iop_core->ReadWord(channel.tag_address);
-        u32 block_count = system.iop_core->ReadWord(channel.tag_address + 4);
+        u32 data = system.iop.ReadWord(channel.tag_address);
+        u32 block_count = system.iop.ReadWord(channel.tag_address + 4);
 
         common::Log("[IOPDMAC] SIF0 read DMATag %016lx", ((u64)block_count << 32) | data);
 
-        system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 8));
-        system.sif.WriteSIF0FIFO(system.iop_core->ReadWord(channel.tag_address + 12));
+        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.tag_address + 8));
+        system.sif.WriteSIF0FIFO(system.iop.ReadWord(channel.tag_address + 12));
 
         // common::Debug("[IOPDMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
@@ -224,7 +224,7 @@ void IOPDMAC::DoSIF1Transfer() {
         if (system.sif.GetSIF1FIFOSize() > 0) {
             u32 data = system.sif.ReadSIF1FIFO();
 
-            system.iop_core->WriteWord(channel.address, data);
+            system.iop.WriteWord(channel.address, data);
             channel.address += 4;
             channel.block_count--;
         }
@@ -284,6 +284,6 @@ void IOPDMAC::EndTransfer(int index) {
 
     if (dicr2.flags & dicr2.masks) {
         common::Log("[IOPDMAC %d] interrupt was requested", index);
-        system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::DMA);
+        system.iop.intc.RequestInterrupt(IOPInterruptSource::DMA);
     }
 }

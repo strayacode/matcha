@@ -1,4 +1,10 @@
-#include <core/iop/disassembler.h>
+#include <array>
+#include <sstream>
+#include <iomanip>
+#include <map>
+#include "core/iop/disassembler.h"
+
+namespace iop {
 
 static std::array<std::string, 32> reg_names = {
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
@@ -192,7 +198,7 @@ static std::string ConvertHex(T data) {
     return stream.str();
 }
 
-static std::string DisassembleImmediate(CPUInstruction inst, u32 pc, std::string format) {
+static std::string DisassembleImmediate(Instruction inst, u32 pc, std::string format) {
     std::string disassembled;
     u64 i = 0;
 
@@ -218,7 +224,7 @@ static std::string DisassembleImmediate(CPUInstruction inst, u32 pc, std::string
     return disassembled;
 }
 
-static std::string DisassembleJump(CPUInstruction inst, u32 pc, std::string format) {
+static std::string DisassembleJump(Instruction inst, u32 pc, std::string format) {
     std::string disassembled;
     u64 i = 0;
 
@@ -235,7 +241,7 @@ static std::string DisassembleJump(CPUInstruction inst, u32 pc, std::string form
     return disassembled;
 }
 
-static std::string DisassembleRegister(CPUInstruction inst, u32 pc, std::string format) {
+static std::string DisassembleRegister(Instruction inst, u32 pc, std::string format) {
     std::string disassembled;
     u64 i = 0;
 
@@ -264,7 +270,7 @@ static std::string DisassembleRegister(CPUInstruction inst, u32 pc, std::string 
     return disassembled;
 }
 
-std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc) {
+std::string DisassembleInstruction(Instruction inst, u32 pc) {
     std::string disassembled;
 
     DisassemblyInfo info = primary_table[inst.opcode];
@@ -293,6 +299,8 @@ std::string IOPDisassembleInstruction(CPUInstruction inst, u32 pc) {
     return disassembled;
 }
 
-std::string IOPGetRegisterName(int reg) {
+std::string GetRegisterName(int reg) {
     return reg_names[reg];
 }
+
+} // namespace iop

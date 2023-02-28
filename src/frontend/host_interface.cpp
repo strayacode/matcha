@@ -76,7 +76,7 @@ void HostInterface::Run() {
         }
 
         if (iop_debugger.show_registers_window) {
-            iop_debugger.RegistersWindow(*core.system.iop_core);
+            iop_debugger.RegistersWindow(core.system.iop);
         }
 
         if (iop_debugger.show_disassembly_window) {

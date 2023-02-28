@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <memory>
 #include "common/log.h"
 #include "core/ee/context.h"
 #include <core/memory/memory.h>
@@ -13,24 +15,16 @@
 #include <core/vif/vif.h>
 #include <core/ipu/ipu.h>
 #include <core/sif/sif.h>
-#include <core/iop/cpu_core.h>
-#include <core/iop/interpreter/interpreter.h>
+#include "core/iop/context.h"
 #include "core/iop/dmac.h"
 #include "core/iop/timers.h"
 #include "core/elf_loader.h"
 #include "core/spu/spu.h"
-#include <memory>
-#include <array>
-
-enum class CoreType {
-    Interpreter,
-};
 
 struct System {
     System();
 
     void Reset();
-    void InitialiseIOPCore(CoreType core_type);
     void RunFrame();
     void SingleStep();
     void VBlankStart();
@@ -42,7 +36,7 @@ struct System {
 
     Memory memory;
     ee::Context ee;
-    std::unique_ptr<IOPCore> iop_core;
+    iop::Context iop;
     
     IOPDMAC iop_dmac;
     IOPTimers iop_timers;

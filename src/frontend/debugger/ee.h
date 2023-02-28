@@ -6,7 +6,7 @@
 
 class EEDebugger {
 public:
-    void RegistersWindow(ee::Context& ee_core);
+    void RegistersWindow(ee::Context& ee);
     void DisassemblyWindow(Core& core);
 
     bool show_registers_window = false;

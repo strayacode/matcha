@@ -88,7 +88,7 @@ T Memory::IOPRead(VirtualAddress vaddr) {
 
 u8 Memory::IOPReadByte(u32 addr) {
     if (addr >= 0x1f402004 && addr < 0x1f402019) {
-        return system->iop_core->cdvd.ReadRegister(addr);
+        return system->iop.cdvd.ReadRegister(addr);
     }
 
     switch (addr) {
@@ -144,11 +144,11 @@ u32 Memory::IOPReadWord(u32 addr) {
     case 0x1F801400:
     case 0x1F801450:
     case 0x1F801070:
-        return system->iop_core->interrupt_controller.ReadRegister(0);
+        return system->iop.intc.ReadRegister(0);
     case 0x1F801074:
-        return system->iop_core->interrupt_controller.ReadRegister(4);
+        return system->iop.intc.ReadRegister(4);
     case 0x1F801078:
-        return system->iop_core->interrupt_controller.ReadRegister(8);
+        return system->iop.intc.ReadRegister(8);
     default:
         common::Log("[iop::Context] handle iop word read %08x", addr);
     }
@@ -260,13 +260,13 @@ void Memory::IOPWriteWord(u32 addr, u32 data) {
         break;
     // TODO: clean this
     case 0x1F801070:
-        system->iop_core->interrupt_controller.WriteRegister(0, data);
+        system->iop.intc.WriteRegister(0, data);
         break;
     case 0x1F801074:
-        system->iop_core->interrupt_controller.WriteRegister(4, data);
+        system->iop.intc.WriteRegister(4, data);
         break;
     case 0x1F801078:
-        system->iop_core->interrupt_controller.WriteRegister(8, data);
+        system->iop.intc.WriteRegister(8, data);
         break;
     case 0x1F8015F0:
         break;

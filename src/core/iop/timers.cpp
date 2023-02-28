@@ -26,7 +26,7 @@ void IOPTimers::Run(int cycles) {
 
         if ((channel.mode & (1 << 4)) && (channel.mode & (1 << 10))) {
             common::Log("[IOP Timers] channel 5 send timer interrupt");
-            system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
+            system.iop.intc.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {
                 // bit 10 of mode is set to 0 after an interrupt occurs
@@ -44,7 +44,7 @@ void IOPTimers::Run(int cycles) {
 
         if ((channel.mode & (1 << 5)) && (channel.mode & (1 << 10))) {
             common::Log("[IOP Timers] channel 5 send timer interrupt");
-            system.iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::Timer5);
+            system.iop.intc.RequestInterrupt(IOPInterruptSource::Timer5);
 
             if ((channel.mode & (1 << 6)) == 0) {
                 // bit 10 of mode is set to 0 after an interrupt occurs

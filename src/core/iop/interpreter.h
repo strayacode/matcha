@@ -1,26 +1,34 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
-#include <common/log.h>
-#include <common/arithmetic.h>
-#include <core/iop/cpu_core.h>
-#include <common/cpu_types.h>
 #include <array>
+#include "common/types.h"
+#include "core/iop/instruction.h"
+#include "core/iop/executor.h"
 
-struct System;
+namespace iop {
 
-// TODO: just have the interpreter functions in a namespace
+struct Context;
 
-class IOPInterpreter : public IOPCore {
+class Interpreter : public Executor {
 public:
-    IOPInterpreter(System* system);
+    Interpreter(Context& ctx);
 
     void Reset() override;
     void Run(int cycles) override;
 
+    enum class InstructionTable {
+        Primary,
+        Secondary,
+        RegImm,
+        COP0,
+    };
+
+    void DoException(Exception exception);
+    void RaiseInterrupt(bool value);
+    void CheckInterrupts();
+
 private:
-    typedef void (IOPInterpreter::*InstructionHandler)();
+    typedef void (Interpreter::*InstructionHandler)();
     void RegisterOpcode(InstructionHandler handler, int index, InstructionTable table);
 
     void UndefinedInstruction();
@@ -85,8 +93,15 @@ private:
 
     void IOPPuts();
 
-    CPUInstruction inst;
+private:
+    bool branch_delay;
+    bool branch;
+
+    Instruction inst;
+    Context& ctx;
 
     std::array<InstructionHandler, 64> primary_table;
     std::array<InstructionHandler, 64> secondary_table;
 };
+
+} // namespace iop

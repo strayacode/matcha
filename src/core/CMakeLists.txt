@@ -14,18 +14,16 @@ add_library(core
     ee/timers.h ee/timers.cpp
     ee/dmac.h ee/dmac.cpp
 
-    iop/cpu_core.h iop/cpu_core.cpp
-    iop/cpu_regs.h
-    iop/interpreter/interpreter.h iop/interpreter/interpreter.cpp
+    iop/context.h iop/context.cpp
+    iop/interpreter.h iop/interpreter.cpp
     iop/disassembler.h iop/disassembler.cpp
     iop/cop0.h iop/cop0.cpp
-    iop/interpreter/instructions/instruction_cop0.cpp
-    iop/interpreter/instructions/instruction_secondary.cpp
-    iop/interpreter/instructions/instruction_primary.cpp
     iop/dmac.h iop/dmac.cpp
-    iop/interrupt_controller.h iop/interrupt_controller.cpp
+    iop/intc.h iop/intc.cpp
     iop/timers.h iop/timers.cpp
     iop/cdvd.h iop/cdvd.cpp
+    iop/executor.h
+    iop/instruction.h
 
     memory/memory.h memory/memory.cpp
     memory/memory_constants.h

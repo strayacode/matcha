@@ -12,6 +12,7 @@ Interpreter::Interpreter(Context& ctx) : ctx(ctx) {}
 void Interpreter::Reset() {
     branch_delay = false;
     branch = false;
+    inst.data = 0;
 }
 
 void Interpreter::Run(int cycles) {
@@ -194,11 +195,11 @@ void Interpreter::ctc2() {
 // MMI instructions
 void Interpreter::divu1() {
     if (ctx.GetReg<u32>(inst.rt)) {
-        ctx.lo1 = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs) / ctx.GetReg<u32>(inst.rt));
-        ctx.hi1 = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs) % ctx.GetReg<u32>(inst.rt));
+        ctx.lo1 = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs) / ctx.GetReg<u32>(inst.rt));
+        ctx.hi1 = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs) % ctx.GetReg<u32>(inst.rt));
     } else {
         ctx.lo1 = 0xFFFFFFFFFFFFFFFF;
-        ctx.hi1 = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs));
+        ctx.hi1 = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs));
     }
 }
 
@@ -208,8 +209,8 @@ void Interpreter::mflo1() {
 
 void Interpreter::mult1() {
     s64 result = ctx.GetReg<s32>(inst.rt) * ctx.GetReg<s32>(inst.rs);
-    ctx.lo1 = sign_extend<s64, 32>(result & 0xFFFFFFFF);
-    ctx.hi1 = sign_extend<s64, 32>(result >> 32);
+    ctx.lo1 = SignExtend<s64, 32>(result & 0xFFFFFFFF);
+    ctx.hi1 = SignExtend<s64, 32>(result >> 32);
     ctx.SetReg<u64>(inst.rd, ctx.lo1);
 }
 
@@ -250,7 +251,7 @@ void Interpreter::mtlo1() {
 
 // primary instructions
 void Interpreter::slti() {
-    ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < sign_extend<s64, 16>(inst.imm));
+    ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < SignExtend<s64, 16>(inst.imm));
 }
 
 void Interpreter::bne() {
@@ -263,7 +264,7 @@ void Interpreter::bne() {
 }
 
 void Interpreter::lui() {
-    ctx.SetReg<u64>(inst.rt, sign_extend<s64, 32>(inst.imm << 16));
+    ctx.SetReg<u64>(inst.rt, SignExtend<s64, 32>(inst.imm << 16));
 }
 
 void Interpreter::ori() {
@@ -384,7 +385,7 @@ void Interpreter::xori() {
 }
 
 void Interpreter::daddiu() {
-    ctx.SetReg<s64>(inst.rt, ctx.GetReg<s64>(inst.rs) + sign_extend<s64, 16>(inst.imm));
+    ctx.SetReg<s64>(inst.rt, ctx.GetReg<s64>(inst.rs) + SignExtend<s64, 16>(inst.imm));
 }
 
 void Interpreter::sq() {
@@ -554,10 +555,10 @@ void Interpreter::mult() {
 void Interpreter::divu() {
     if (ctx.GetReg<u32>(inst.rt) == 0) {
         ctx.lo = 0xFFFFFFFFFFFFFFFF;
-        ctx.hi = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs));
+        ctx.hi = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs));
     } else {
-        ctx.lo = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs) / ctx.GetReg<u32>(inst.rt));
-        ctx.hi = sign_extend<s64, 32>(ctx.GetReg<u32>(inst.rs) % ctx.GetReg<u32>(inst.rt));
+        ctx.lo = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs) / ctx.GetReg<u32>(inst.rt));
+        ctx.hi = SignExtend<s64, 32>(ctx.GetReg<u32>(inst.rs) % ctx.GetReg<u32>(inst.rt));
     }
 }
 
@@ -614,8 +615,8 @@ void Interpreter::div() {
     } else if (ctx.GetReg<s32>(inst.rt) == 0) {
         common::Error("can't divide by 0");
     } else {
-        ctx.lo = sign_extend<s64, 32>(ctx.GetReg<s32>(inst.rs) / ctx.GetReg<s32>(inst.rt));
-        ctx.hi = sign_extend<s64, 32>(ctx.GetReg<s32>(inst.rs) % ctx.GetReg<s32>(inst.rt));
+        ctx.lo = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) / ctx.GetReg<s32>(inst.rt));
+        ctx.hi = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) % ctx.GetReg<s32>(inst.rt));
     }
 }
 
@@ -647,7 +648,7 @@ void Interpreter::dsllv() {
 
 void Interpreter::sllv() {
     u32 result = ctx.GetReg<u32>(inst.rt) << (ctx.GetReg<u8>(inst.rs) & 0x1F);
-    ctx.SetReg<s64>(inst.rd, sign_extend<s64, 32>(result));
+    ctx.SetReg<s64>(inst.rd, SignExtend<s64, 32>(result));
 }
 
 void Interpreter::dsll() {

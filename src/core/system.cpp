@@ -1,10 +1,9 @@
 #include <core/system.h>
 
-System::System() : memory(this), ee(*this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
+System::System() : memory(this), ee(*this), iop(*this), iop_dmac(*this), iop_timers(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
     bios = std::make_unique<std::array<u8, 0x400000>>();
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
     VBlankFinishEvent = std::bind(&System::VBlankFinish, this);
-    InitialiseIOPCore(CoreType::Interpreter);
 }
 
 // credit goes to pcsx2
@@ -22,7 +21,7 @@ System::System() : memory(this), ee(*this), iop_dmac(*this), iop_timers(*this), 
 void System::Reset() {
     scheduler.Reset();
     ee.Reset();
-    iop_core->Reset();
+    iop.Reset();
     memory.Reset();
     iop_dmac.Reset();
     iop_timers.Reset();
@@ -43,14 +42,6 @@ void System::Reset() {
     LoadBIOS();
 }
 
-void System::InitialiseIOPCore(CoreType core_type) {
-    if (core_type == CoreType::Interpreter) {
-        iop_core = std::make_unique<IOPInterpreter>(this);
-    } else {
-        common::Error("[System] Unknown core type");
-    }
-}
-
 void System::RunFrame() {
     u64 end_timestamp = scheduler.GetCurrentTime() + CYCLES_PER_FRAME;
     int cycles = 32;
@@ -65,7 +56,7 @@ void System::RunFrame() {
         dmac.Run(cycles / 2);
 
         // iop runs at 1 / 8 speed of the ee
-        iop_core->Run(cycles / 8);
+        iop.Run(cycles / 8);
         iop_dmac.Run(cycles / 8);
         iop_timers.Run(cycles / 8);
         
@@ -81,12 +72,12 @@ void System::SingleStep() {
 
 void System::VBlankStart() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);
-    iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::VBlankStart);
+    iop.intc.RequestInterrupt(IOPInterruptSource::VBlankStart);
 }
 
 void System::VBlankFinish() {
     ee_intc.RequestInterrupt(EEInterruptSource::VBlankFinish);
-    iop_core->interrupt_controller.RequestInterrupt(IOPInterruptSource::VBlankFinish);
+    iop.intc.RequestInterrupt(IOPInterruptSource::VBlankFinish);
 }
 
 void System::SetGamePath(std::string path) {

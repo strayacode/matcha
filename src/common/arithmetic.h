@@ -3,13 +3,12 @@
 #include "common/types.h"
 
 template <typename T, int size>
-T sign_extend(T data) {
+T SignExtend(T data) {
     struct {
         T data : size;
     } s;
 
     s.data = data;
-
     return s.data;
 }
 
