@@ -53,6 +53,8 @@ struct Context {
     COP0 cop0;
     COP1 cop1;
 
+    System& system;
+
 private:
     u32 ReadIO(u32 paddr);
     void WriteIO(u32 paddr, u32 value);
@@ -67,7 +69,6 @@ private:
 
     common::VirtualPageTable vtlb;
     Interpreter interpreter;
-    System& system;
 };
 
 } // namespace ee

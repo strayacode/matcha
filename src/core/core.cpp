@@ -30,6 +30,8 @@ void Core::RunFrame() {
     system.RunFrame();
 }
 
-void Core::SetGamePath(std::string path) {
-    system.SetGamePath(path);
+void Core::Boot(BootMode boot_mode, std::string path) {
+    Reset();
+    system.SetBootParameters(boot_mode, path);
+    SetState(CoreState::Running);
 }

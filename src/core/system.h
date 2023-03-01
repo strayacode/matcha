@@ -18,6 +18,11 @@
 #include "core/elf_loader.h"
 #include "core/spu/spu.h"
 
+enum class BootMode {
+    Fast,
+    BIOS,
+};
+
 struct System {
     System();
 
@@ -26,7 +31,7 @@ struct System {
     void SingleStep();
     void VBlankStart();
     void VBlankFinish();
-    void SetGamePath(std::string path);
+    void SetBootParameters(BootMode boot_mode, std::string path);
     void LoadBIOS();
 
     Scheduler scheduler;
@@ -57,4 +62,7 @@ struct System {
 
     std::function<void()> VBlankStartEvent;
     std::function<void()> VBlankFinishEvent;
+
+    BootMode boot_mode;
+    bool fastboot_done;
 };

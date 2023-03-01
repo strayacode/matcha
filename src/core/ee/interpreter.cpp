@@ -4,6 +4,7 @@
 #include "core/ee/context.h"
 #include "core/ee/interpreter.h"
 #include "core/ee/disassembler.h"
+#include "core/system.h"
 
 namespace ee {
 
@@ -736,9 +737,10 @@ void Interpreter::eret() {
         ctx.cop0.SetReg(12, status & ~(1 << 1));
     }
 
-    // if (ctx.pc == 0x82000) {
-    //     ctx.system.elf_loader.Load();
-    // }
+    if (ctx.system.boot_mode == BootMode::Fast && !ctx.system.fastboot_done && ctx.pc == 0x82000) {
+        ctx.system.fastboot_done = true;
+        ctx.system.elf_loader.Load();
+    }
 
     // this is to account for the increment by 4 that
     // happens after each instruction is executed

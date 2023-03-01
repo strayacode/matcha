@@ -39,6 +39,8 @@ void System::Reset() {
 
     LoadBIOS();
     iop_ram->fill(0);
+
+    fastboot_done = false;
 }
 
 void System::RunFrame() {
@@ -77,8 +79,12 @@ void System::VBlankFinish() {
     iop.intc.RequestInterrupt(IOPInterruptSource::VBlankFinish);
 }
 
-void System::SetGamePath(std::string path) {
-    elf_loader.SetPath(path);
+void System::SetBootParameters(BootMode boot_mode, std::string path = "") {
+    if (boot_mode == BootMode::Fast) {
+        elf_loader.SetPath(path);
+    }
+    
+    this->boot_mode = boot_mode;
 }
 
 void System::LoadBIOS() {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <common/emu_thread.h>
-#include <core/system.h>
+#include "common/emu_thread.h"
+#include "core/system.h"
 
 enum class CoreState {
     Running,
@@ -18,7 +18,7 @@ public:
     void SetState(CoreState new_state);
     CoreState GetState();
     void RunFrame();
-    void SetGamePath(std::string path);
+    void Boot(BootMode boot_mode, std::string path = "");
 
     System system;
     

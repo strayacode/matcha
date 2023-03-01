@@ -123,7 +123,7 @@ void HostInterface::RenderMenubar() {
             }
 
             if (ImGui::MenuItem("Boot BIOS")) {
-                Boot("");
+                core.Boot(BootMode::BIOS);
             }
 
             if (ImGui::MenuItem("Quit")) {
@@ -178,7 +178,7 @@ void HostInterface::RenderMenubar() {
 
     file_dialog.Display();
     if (file_dialog.HasSelected()) {
-        Boot(file_dialog.GetSelected().string());
+        core.Boot(BootMode::Fast, file_dialog.GetSelected().string());
         file_dialog.ClearSelected();
     }
 }
@@ -243,10 +243,4 @@ void HostInterface::TogglePause() {
     } else {
         core.SetState(CoreState::Running);
     }
-}
-
-void HostInterface::Boot(const std::string& path = "") {
-    core.Reset();
-    core.SetGamePath(path);
-    core.SetState(CoreState::Running);
 }

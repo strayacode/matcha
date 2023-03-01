@@ -49,7 +49,7 @@ static std::array<std::string, 256> syscall_info = {
     "Deci2Call", "PSMode", "MachineType", "GetMemorySize",
 };
 
-Context::Context(System& system) : interpreter(*this), system(system) {
+Context::Context(System& system) : system(system), interpreter(*this) {
     rdram = std::make_unique<std::array<u8, 0x2000000>>();
 }
 
