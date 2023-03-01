@@ -19,6 +19,12 @@ void Interpreter::Reset() {
 void Interpreter::Run(int cycles) {
     while (cycles--) {
         inst = Instruction{ctx.Read<u32>(ctx.pc)};
+
+        if (ctx.pc == 0x113bc0) {
+            LogState();
+            // common::Error("good");
+        }
+
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
 
@@ -103,7 +109,7 @@ bool Interpreter::InterruptsEnabled() {
     return ie && eie && !exl && !erl;
 }
 
-void Interpreter::PrintState() {
+void Interpreter::LogState() {
     common::Log("[EE State]");
     for (int i = 0; i < 32; i++) {
         common::Log("%s: %016lx%016lx", GetRegisterName(i).c_str(), ctx.GetReg<u128>(i).hi, ctx.GetReg<u128>(i).lo);
@@ -707,7 +713,7 @@ void Interpreter::mtsa() {
 
 // tlb instructions
 void Interpreter::tlbwi() {
-    common::Warn("[ee::Interpreter] tlbwi entry %d", ctx.cop0.index);
+    common::Log("[ee::Interpreter] tlbwi entry %d", ctx.cop0.index);
     // when we handle mmu emulation the tlb will be used
 }
 
@@ -756,7 +762,7 @@ void Interpreter::ei() {
 
     if (edi || exl || erl || ksu) {
         ctx.cop0.SetReg(12, status | (1 << 16));
-    } 
+    }
 }
 
 void Interpreter::illegal_instruction() {
@@ -764,7 +770,7 @@ void Interpreter::illegal_instruction() {
 }
 
 void Interpreter::stub_instruction() {
-    common::Warn("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt);
+    common::Log("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt);
 }
 
 } // namespace ee

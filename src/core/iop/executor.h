@@ -8,8 +8,8 @@ enum class Exception : int {
     StoreError = 0x05,
     Syscall = 0x08,
     Break = 0x09,
-    Reserved = 0x0A,
-    Overflow = 0x0C,
+    Reserved = 0x0a,
+    Overflow = 0x0c,
 };
 
 struct Executor {

@@ -17,7 +17,7 @@ struct Interpreter : public Executor {
     void RaiseInterrupt(int signal, bool value);
     void CheckInterrupts();
     bool InterruptsEnabled();
-    void PrintState();
+    void LogState();
     std::string GetSyscallInfo(int index);
     void LogInstruction();
 

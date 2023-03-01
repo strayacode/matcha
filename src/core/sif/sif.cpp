@@ -16,7 +16,7 @@ void SIF::Reset() {
 }
 
 void SIF::WriteEEControl(u32 data) {
-    if (!(data & (0x100))) {
+    if (!(data & 0x100)) {
         control &= ~0x100;
     } else {
         control |= 0x100;
@@ -26,17 +26,16 @@ void SIF::WriteEEControl(u32 data) {
 void SIF::WriteIOPControl(u32 data) {
     // not sure how this works tbh. figure out later
     u8 value = data & 0xF0;
-
-    if (data & 0xA0)
-    {
+    if (data & 0xA0) {
         control &= ~0xF000;
         control |= 0x2000;
     }
 
-    if (control & value)
+    if (control & value) {
         control &= ~value;
-    else
+    } else {
         control |= value;
+    }
 }
 
 void SIF::WriteBD6(u32 data) {

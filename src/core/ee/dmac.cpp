@@ -35,7 +35,7 @@ u32 DMAC::ReadChannel(u32 addr) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        // common::Debug("[DMAC %d] control read %08x", index, channels[index].control);
+        // common::Log("[DMAC %d] control read %08x", index, channels[index].control);
         return channels[index].control;
     case 0x10:
         return channels[index].address;
@@ -52,43 +52,43 @@ u32 DMAC::ReadChannel(u32 addr) {
 
 void DMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
-    case 0x1000E000:
-        common::Debug("[DMAC] D_CTRL write %08x", data);
+    case 0x1000e000:
+        common::Log("[DMAC] D_CTRL write %08x", data);
         control = data;
         break;
-    case 0x1000E010:
+    case 0x1000e010:
         common::Log("[DMAC] D_STAT write %08x", data);
 
         // for bits (0..15) they get cleared if 1 is written
-        interrupt_status &= ~(data & 0xFFFF);
+        interrupt_status &= ~(data & 0xffff);
 
         // for bits (16..31) they get reversed if 1 is written
-        interrupt_status ^= (data & 0xFFFF0000);
+        interrupt_status ^= (data & 0xffff0000);
 
         CheckInterruptSignal();
         break;
-    case 0x1000E020:
-        common::Debug("[DMAC] D_PCR write %08x", data);
+    case 0x1000e020:
+        common::Log("[DMAC] D_PCR write %08x", data);
         priority_control = data;
         break;
-    case 0x1000E030:
-        common::Debug("[DMAC] D_SQWC write %08x", data);
+    case 0x1000e030:
+        common::Log("[DMAC] D_SQWC write %08x", data);
         skip_quadword = data;
         break;
-    case 0x1000E040:
-        common::Debug("[DMAC] D_RBSR write %08x", data);
+    case 0x1000e040:
+        common::Log("[DMAC] D_RBSR write %08x", data);
         ringbuffer_size = data;
         break;
-    case 0x1000E050:
-        common::Debug("[DMAC] D_RBOR write %08x", data);
+    case 0x1000e050:
+        common::Log("[DMAC] D_RBOR write %08x", data);
         ringbuffer_offset = data;
         break;
-    case 0x1000F590:
-        common::Debug("[DMAC] D_ENABLE write %08x", data);
+    case 0x1000f590:
+        common::Log("[DMAC] D_ENABLE write %08x", data);
         disabled_status = data;
         break;
     default:
-        if (addr >= 0x1000E000) {
+        if (addr >= 0x1000e000) {
             common::Error("[DMAC] handle write %08x = %08x", addr, data);
         } else {
             WriteChannel(addr, data);
@@ -104,34 +104,34 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        common::Debug("[DMAC] %s Dn_CHCR write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_CHCR write %08x", channel_name, data);
         channels[index].control = data;
 
         StartTransfer(index);
         break;
     case 0x10:
-        common::Debug("[DMAC] %s Dn_MADR write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_MADR write %08x", channel_name, data);
         channels[index].address = data & ~0xF;
         break;
     case 0x20:
         // In normal and interleaved mode, the transfer ends when QWC reaches zero. Chain mode behaves differently
-        common::Debug("[DMAC] %s Dn_QWC write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_QWC write %08x", channel_name, data);
         channels[index].quadword_count = data & 0xFFFF;
         break;
     case 0x30:
-        common::Debug("[DMAC] %s Dn_TADR write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_TADR write %08x", channel_name, data);
         channels[index].tag_address = data & ~0xF;
         break;
     case 0x40:
-        common::Debug("[DMAC] %s Dn_ASR0 write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_ASR0 write %08x", channel_name, data);
         channels[index].saved_tag_address0 = data & ~0xF;
         break;
     case 0x50:
-        common::Debug("[DMAC] %s Dn_ASR1 write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_ASR1 write %08x", channel_name, data);
         channels[index].saved_tag_address1 = data & ~0xF;
         break;
     case 0x80:
-        common::Debug("[DMAC] %s Dn_SADR write %08x", channel_name, data);
+        common::Log("[DMAC] %s Dn_SADR write %08x", channel_name, data);
         channels[index].scratchpad_address = data & ~0xF;
         break;
     default:
@@ -186,17 +186,17 @@ u32 DMAC::ReadInterruptStatus() {
 }
 
 u32 DMAC::ReadControl() {
-    common::Debug("[DMAC] read control %08x", control);
+    common::Log("[DMAC] read control %08x", control);
     return control;
 }
 
 u32 DMAC::ReadPriorityControl() {
-    common::Warn("[DMAC] read priority control %08x", priority_control);
+    common::Log("[DMAC] read priority control %08x", priority_control);
     return priority_control;
 }
 
 u32 DMAC::ReadSkipQuadword() {
-    common::Warn("[DMAC] read skip quadword %08x", skip_quadword);
+    common::Log("[DMAC] read skip quadword %08x", skip_quadword);
     return skip_quadword;
 }
 
@@ -218,7 +218,7 @@ void DMAC::CheckInterruptSignal() {
 // dmac can transfer one quadword (16 bytes / 128 bits) per bus cycle
 void DMAC::Run(int cycles) {
     // don't run anything if the dmac is not enabled
-    if (((control & 0x1) == false) || (disabled_status & (1 << 16))) {
+    if (!(control & 0x1) || (disabled_status & (1 << 16))) {
         return;
     }
 

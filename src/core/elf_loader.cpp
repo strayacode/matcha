@@ -25,8 +25,8 @@ void ELFLoader::Load() {
     file.read(reinterpret_cast<char*>(elf), size);
     file.close();
 
-    common::Debug("[ELFLoader] ELF was successfully loaded!");
-    common::Debug("[ELFLoader] Size: %08x", size);
+    common::Log("[ELFLoader] ELF was successfully loaded!");
+    common::Log("[ELFLoader] Size: %08x", size);
 
     LoadHeader();
 }
@@ -54,7 +54,7 @@ void ELFLoader::LoadHeader() {
         }
     }
 
-    common::Debug("[ELFLoader] entrypoint: %08x", header.entry);
+    common::Log("[ELFLoader] entrypoint: %08x", header.entry);
     
     system.ee.pc = header.entry;
 }
