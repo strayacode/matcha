@@ -5,7 +5,7 @@
 
 namespace iop {
 
-Context::Context(System& system) : dmac(system), timers(system), intc(*this), interpreter(*this), system(system) {}
+Context::Context(System& system) : dmac(system), timers(system), intc(*this), sio2(intc), interpreter(*this), system(system) {}
 
 void Context::Reset() {
     gpr.fill(0);
@@ -16,10 +16,10 @@ void Context::Reset() {
     
     cop0.Reset();
     cdvd.Reset();
-    sio2.Reset();
     dmac.Reset();
     timers.Reset();
     intc.Reset();
+    sio2.Reset();
     interpreter.Reset();
 
     // do initial hardcoded mappings

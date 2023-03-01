@@ -47,10 +47,10 @@ struct Context {
 
     COP0 cop0;
     CDVD cdvd;
-    SIO2 sio2;
     DMAC dmac;
     Timers timers;
     INTC intc;
+    SIO2 sio2;
 
 private:
     u32 ReadIO(u32 paddr);
