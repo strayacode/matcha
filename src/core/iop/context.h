@@ -5,6 +5,9 @@
 #include "common/virtual_page_table.h"
 #include "core/iop/cop0.h"
 #include "core/iop/cdvd.h"
+#include "core/iop/sio2.h"
+#include "core/iop/dmac.h"
+#include "core/iop/timers.h"
 #include "core/iop/intc.h"
 #include "core/iop/interpreter.h"
 
@@ -44,6 +47,9 @@ struct Context {
 
     COP0 cop0;
     CDVD cdvd;
+    SIO2 sio2;
+    DMAC dmac;
+    Timers timers;
     INTC intc;
 
 private:

@@ -4,9 +4,11 @@
 
 struct System;
 
-class IOPTimers {
+namespace iop {
+
+class Timers {
 public:
-    IOPTimers(System& system);
+    Timers(System& system);
     void Reset();
     void Run(int cycles);
     u32 ReadRegister(u32 addr);
@@ -22,3 +24,5 @@ public:
 private:
     System& system;
 };
+
+} // namespace iop

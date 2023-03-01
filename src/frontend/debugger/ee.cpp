@@ -52,7 +52,7 @@ void EEDebugger::DisassemblyWindow(Core& core) {
         u32 pc = core.system.ee.pc;
         u32 addr = pc - ((disassembly_size - 1) / 2) * 4;
 
-        if (core.system.memory.ValidEECodeRegion(addr)) {
+        if ((addr >= 0x00000000 && addr < 0x2000000) || (addr >= 0x1fc00000 && addr < 0x20000000)) {
             for (int i = 0; i < disassembly_size; i++) {
                 ee::Instruction inst = core.system.ee.Read<u32>(addr);
 

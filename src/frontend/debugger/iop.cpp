@@ -53,10 +53,9 @@ void IOPDebugger::DisassemblyWindow(Core& core) {
         u32 pc = core.system.iop.pc;
         u32 addr = pc - ((disassembly_size - 1) / 2) * 4;
 
-        if (core.system.memory.ValidIOPCodeRegion(addr)) {
+        if ((addr >= 0x00000000 && addr < 0x200000) || (addr >= 0x1fc00000 && addr < 0x20000000)) {
             for (int i = 0; i < disassembly_size; i++) {
                 iop::Instruction inst = core.system.iop.Read<u32>(addr);
-
                 if (addr == pc) {
                     ImGui::TextColored(ImVec4(0, 1, 0, 1), "%08x: %08x %s", addr, inst.data, iop::DisassembleInstruction(inst, addr).c_str());
                 } else {

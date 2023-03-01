@@ -4,7 +4,6 @@
 #include <memory>
 #include "common/log.h"
 #include "core/ee/context.h"
-#include <core/memory/memory.h>
 #include <core/ee/intc.h>
 #include <core/scheduler.h>
 #include <core/gif/gif.h>
@@ -16,8 +15,6 @@
 #include <core/ipu/ipu.h>
 #include <core/sif/sif.h>
 #include "core/iop/context.h"
-#include "core/iop/dmac.h"
-#include "core/iop/timers.h"
 #include "core/elf_loader.h"
 #include "core/spu/spu.h"
 
@@ -34,12 +31,9 @@ struct System {
 
     Scheduler scheduler;
 
-    Memory memory;
     ee::Context ee;
     iop::Context iop;
     
-    IOPDMAC iop_dmac;
-    IOPTimers iop_timers;
     EEINTC ee_intc;
     GIF gif;
     GS gs;

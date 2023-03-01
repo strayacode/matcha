@@ -22,11 +22,9 @@ add_library(core
     iop/intc.h iop/intc.cpp
     iop/timers.h iop/timers.cpp
     iop/cdvd.h iop/cdvd.cpp
+    iop/sio2.h iop/sio2.cpp
     iop/executor.h
     iop/instruction.h
-
-    memory/memory.h memory/memory.cpp
-    memory/memory_constants.h
 
     gif/gif.h gif/gif.cpp
 

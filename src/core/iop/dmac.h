@@ -4,9 +4,11 @@
 
 struct System;
 
-class IOPDMAC {
+namespace iop {
+
+class DMAC {
 public:
-    IOPDMAC(System& system);
+    DMAC(System& system);
 
     void Reset();
     void Run(int cycles);
@@ -71,3 +73,5 @@ public:
 private:
     System& system;
 };
+
+} // namespace iop

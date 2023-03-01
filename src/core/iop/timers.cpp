@@ -3,9 +3,11 @@
 #include "core/iop/timers.h"
 #include "core/system.h"
 
-IOPTimers::IOPTimers(System& system) : system(system) {}
+namespace iop {
 
-void IOPTimers::Reset() {
+Timers::Timers(System& system) : system(system) {}
+
+void Timers::Reset() {
     for (int i = 0; i < 5; i++) {
         channels[i].counter = 0;
         channels[i].mode = 0;
@@ -14,7 +16,7 @@ void IOPTimers::Reset() {
 }
 
 // TODO: handle repeat bit
-void IOPTimers::Run(int cycles) {
+void Timers::Run(int cycles) {
     // only timer 5 is required for now it seems
     Channel& channel = channels[5];
 
@@ -56,7 +58,7 @@ void IOPTimers::Run(int cycles) {
     }
 }
 
-u32 IOPTimers::ReadRegister(u32 addr) {
+u32 Timers::ReadRegister(u32 addr) {
     int channel = GetTimerIndex(addr);
     int index = addr & 0xF;
 
@@ -78,7 +80,7 @@ u32 IOPTimers::ReadRegister(u32 addr) {
     return 0;
 }
 
-void IOPTimers::WriteRegister(u32 addr, u32 data) {
+void Timers::WriteRegister(u32 addr, u32 data) {
     int channel = GetTimerIndex(addr);
     int index = addr & 0xF;
 
@@ -109,7 +111,7 @@ void IOPTimers::WriteRegister(u32 addr, u32 data) {
     }
 }
 
-int IOPTimers::GetTimerIndex(u32 addr) {
+int Timers::GetTimerIndex(u32 addr) {
     int channel = (addr >> 4) & 0xF;
 
     if (channel >= 8) {
@@ -118,3 +120,5 @@ int IOPTimers::GetTimerIndex(u32 addr) {
         return channel;
     }
 }
+
+} // namespace iop
