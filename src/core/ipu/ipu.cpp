@@ -6,7 +6,7 @@ void IPU::Reset() {
 }
 
 void IPU::SystemReset() {
-    common::Warn("[IPU] system reset");
+    common::Log("[IPU] system reset");
 }
 
 void IPU::WriteControl(u32 data) {
@@ -18,7 +18,7 @@ void IPU::WriteControl(u32 data) {
         common::Error("handle");
     }
 
-    common::Warn("[IPU] write control %08x", data);
+    common::Log("[IPU] write control %08x", data);
     control = data;
 }
 
@@ -27,7 +27,7 @@ u32 IPU::ReadControl() {
 }
 
 void IPU::WriteCommand(u32 data) {
-    common::Warn("[IPU] write command %08x", data);
+    common::Log("[IPU] write command %08x", data);
 
     command = data;
 }

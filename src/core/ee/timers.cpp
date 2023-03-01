@@ -44,13 +44,13 @@ void Timers::WriteRegister(u32 addr, u32 data) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        common::Debug("[Timer] T%d TN_COUNT write %04x", index, data);
+        common::Log("[Timer] T%d TN_COUNT write %04x", index, data);
         channels[index].counter = data;
         break;
     case 0x4:
         break;
     case 0x10:
-        common::Debug("[Timer] T%d TN_MODE write %04x", index, data);
+        common::Log("[Timer] T%d TN_MODE write %04x", index, data);
         channels[index].control = data;
 
         // writing 1 to bit 10 or 11 clears them
@@ -87,11 +87,11 @@ void Timers::WriteRegister(u32 addr, u32 data) {
     case 0x14:
         break;
     case 0x20:
-        common::Debug("[Timer] T%d TN_COMP write %04x", index, data);
+        common::Log("[Timer] T%d TN_COMP write %04x", index, data);
         channels[index].compare = data;
         break;
     case 0x30:
-        common::Debug("[Timer] T%d TN_HOLD write %04x", index, data);
+        common::Log("[Timer] T%d TN_HOLD write %04x", index, data);
         channels[index].hold = data;
         break;
     default:

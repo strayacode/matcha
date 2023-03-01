@@ -21,17 +21,17 @@ void GIF::Reset() {
 }
 
 void GIF::SystemReset() {
-    common::Warn("[GIF] reset gif state");
+    common::Log("[GIF] reset gif state");
 }
 
 u32 GIF::ReadStat() {
-    common::Warn("[GIF] read stat %08x", stat);
+    common::Log("[GIF] read stat %08x", stat);
 
     return stat;
 }
 
 void GIF::WriteCTRL(u8 data) {
-    common::Warn("[GIF] write ctrl %02x", data);
+    common::Log("[GIF] write ctrl %02x", data);
 
     if (data & 0x1) {
         SystemReset();
@@ -41,7 +41,7 @@ void GIF::WriteCTRL(u8 data) {
 }
 
 void GIF::WriteFIFO(u128 data) {
-    // common::Warn("[GIF] write to fifo %016lx%016lx", data.hi, data.lo);
+    // common::Log("[GIF] write to fifo %016lx%016lx", data.hi, data.lo);
     fifo.push(data);
 }
 

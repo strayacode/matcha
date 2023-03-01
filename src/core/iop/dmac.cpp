@@ -72,16 +72,16 @@ u32 DMAC::ReadChannel(u32 addr) {
 
     switch (index) {
     case 0x0:
-        common::Debug("[iop::DMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
+        common::Log("[iop::DMAC %d] Dn_MADR read %08x", channel, channels[channel].address);
         return channels[channel].address;
     case 0x4:
-        common::Debug("[iop::DMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
+        common::Log("[iop::DMAC %d] Dn_BCR read %08x", channel, (channels[channel].block_count << 16) | (channels[channel].block_size));
         return (channels[channel].block_count << 16) | (channels[channel].block_size);
     case 0x8:
-        common::Debug("[iop::DMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
+        common::Log("[iop::DMAC %d] Dn_CHCR read %08x", channel, channels[channel].control);
         return channels[channel].control;
     case 0xC:
-        common::Debug("[iop::DMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
+        common::Log("[iop::DMAC %d] Dn_TADR read %08x", channel, channels[channel].tag_address);
         return channels[channel].tag_address;
     default:
         common::Error("[iop::DMAC] %08x", index);
@@ -93,29 +93,41 @@ u32 DMAC::ReadChannel(u32 addr) {
 void DMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1F8010F0:
-        common::Debug("[iop::DMAC] dpcr write %08x", data);
+        common::Log("[iop::DMAC] dpcr write %08x", data);
         dpcr = data;
         break;
-    case 0x1F8010F4:
+    case 0x1f8010f4: {
         common::Log("[iop::DMAC] dicr write %08x", data);
+        u8 flags = dicr.flags;
         dicr.data = data;
 
         // writing 1 to the flag bits clears them
-        dicr.flags &= ~((data >> 24) & 0x7F);
+        dicr.flags = flags & ~((data >> 24) & 0x7f);
 
         // update dicr master flag
         dicr.master_interrupt_flag = dicr.force_irq || (dicr.master_interrupt_enable && (dicr.masks & dicr.flags));
+
+        if (dicr.force_irq) {
+            common::Error("force irq dicr");
+        }
         break;
-    case 0x1F801570:
+    }
+    case 0x1f801570:
         dpcr2 = data;
         break;
-    case 0x1F801574:
+    case 0x1f801574: {
         common::Log("[iop::DMAC] dicr2 write %08x", data);
+        u8 flags = dicr2.flags;
         dicr2.data = data;
 
         // writing 1 to the flag bits clears them
-        dicr2.flags &= ~((data >> 24) & 0x7F);
+        dicr2.flags = flags & ~((data >> 24) & 0x7f);
+
+        if (dicr2.force_irq) {
+            common::Error("force irq dicr2");
+        }
         break;
+    }
     case 0x1F801578:
         global_dma_enable = data & 0x1;
         break;
@@ -201,7 +213,7 @@ void DMAC::DoSIF0Transfer() {
         system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 8));
         system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 12));
 
-        // common::Debug("[iop::DMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
+        // common::Log("[iop::DMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 
         // round to the nearest 4
         channel.block_count = (block_count + 3) & 0xFFFFFFFC;

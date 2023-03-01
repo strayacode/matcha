@@ -3,6 +3,7 @@
 #include "core/iop/interpreter.h"
 #include "core/iop/disassembler.h"
 #include "core/iop/context.h"
+#include "core/system.h"
 
 namespace iop {
 
@@ -190,10 +191,10 @@ void Interpreter::IOPPuts() {
     u32 address = ctx.GetReg(5);
     u32 length = ctx.GetReg(6);
     
-    // for (u32 i = 0; i < length; i++) {
-        // common::LogNoNewline("%c", system->memory.iop_ram[address & 0x1fffff]);
-        // address++;
-    // }
+    for (u32 i = 0; i < length; i++) {
+        printf("%c", ctx.system.iop_ram->data()[address & 0x1fffff]);
+        address++;
+    }
 }
 
 // primary

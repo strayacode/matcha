@@ -15,10 +15,10 @@ struct Decoder {
         fpu_s_table.fill(&D::illegal_instruction);
         cop2_table.fill(&D::stub_instruction);
         tlb_table.fill(&D::illegal_instruction);
-        mmi_table.fill(&D::illegal_instruction);
-        mmi1_table.fill(&D::illegal_instruction);
-        mmi2_table.fill(&D::illegal_instruction);
-        mmi3_table.fill(&D::illegal_instruction);
+        mmi_table.fill(&D::stub_instruction);
+        mmi1_table.fill(&D::stub_instruction);
+        mmi2_table.fill(&D::stub_instruction);
+        mmi3_table.fill(&D::stub_instruction);
 
         // primary instructions
         RegisterOpcode(&D::j, 2, InstructionType::Primary);

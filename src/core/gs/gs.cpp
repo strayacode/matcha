@@ -30,7 +30,7 @@ void GS::Reset() {
 }
 
 void GS::SystemReset() {
-    common::Warn("[GS] system reset");
+    common::Log("[GS] system reset");
 }
 
 u64 GS::ReadRegisterPrivileged(u32 addr) {

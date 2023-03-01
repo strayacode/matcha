@@ -48,7 +48,8 @@ public:
     union DICR2 {
         struct {
             u16 tag_interrupt : 13;
-            u8 : 3;
+            u8 : 2;
+            bool force_irq : 1;
             u8 masks : 6;
             u8 : 2;
             u8 flags : 6;
