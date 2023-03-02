@@ -125,6 +125,11 @@ struct Interpreter : public Executor {
     void dsrlv();
     void xorr();
     void bgezal();
+    void bgezall();
+    void bgtzl();
+    void blezl();
+    void bltzal();
+    void bltzall();
     void illegal_instruction();
     void stub_instruction();
 

@@ -380,7 +380,6 @@ void Interpreter::daddiu() {
 void Interpreter::sq() {
     u128 reg = ctx.GetReg<u128>(inst.rt);
     u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
-
     ctx.Write<u128>(addr, reg);
 }
 
@@ -464,6 +463,14 @@ void Interpreter::sdr() {
     ctx.Write<u64>(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
 }
 
+void Interpreter::bgtzl() {
+    BranchLikely(ctx.GetReg<s64>(inst.rs) > 0);
+}
+
+void Interpreter::blezl() {
+    BranchLikely(ctx.GetReg<s64>(inst.rs) <= 0);
+}
+
 // regimm instructions
 void Interpreter::bgez() {
     Branch(ctx.GetReg<s64>(inst.rs) >= 0);
@@ -483,13 +490,28 @@ void Interpreter::bgezl() {
 
 void Interpreter::bgezal() {
     ctx.SetReg<u64>(31, ctx.pc + 8);
+    Branch(ctx.GetReg<s64>(inst.rs) >= 0);
+}
+
+void Interpreter::bgezall() {
+    ctx.SetReg<u64>(31, ctx.pc + 8);
     BranchLikely(ctx.GetReg<s64>(inst.rs) >= 0);
+}
+
+void Interpreter::bltzal() {
+    ctx.SetReg<u64>(31, ctx.pc + 8);
+    Branch(ctx.GetReg<s64>(inst.rs) < 0);
+}
+
+void Interpreter::bltzall() {
+    ctx.SetReg<u64>(31, ctx.pc + 8);
+    BranchLikely(ctx.GetReg<s64>(inst.rs) < 0);
 }
 
 // secondary instructions
 void Interpreter::sll() {
     u32 result = ctx.GetReg<u32>(inst.rt) << inst.imm5;
-    ctx.SetReg<s64>(inst.rd, (s32)result);
+    ctx.SetReg<s64>(inst.rd, static_cast<s32>(result));
 }
 
 void Interpreter::jr() {

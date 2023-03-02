@@ -36,6 +36,8 @@ struct Decoder {
         RegisterOpcode(&D::lui, 15, InstructionType::Primary);
         RegisterOpcode(&D::beql, 20, InstructionType::Primary);
         RegisterOpcode(&D::bnel, 21, InstructionType::Primary);
+        RegisterOpcode(&D::blezl, 22, InstructionType::Primary);
+        RegisterOpcode(&D::bgtzl, 23, InstructionType::Primary);
         RegisterOpcode(&D::daddiu, 25, InstructionType::Primary);
         RegisterOpcode(&D::ldl, 26, InstructionType::Primary);
         RegisterOpcode(&D::ldr, 27, InstructionType::Primary);
@@ -106,7 +108,10 @@ struct Decoder {
         RegisterOpcode(&D::bgez, 1, InstructionType::RegImm);
         RegisterOpcode(&D::bltzl, 2, InstructionType::RegImm);
         RegisterOpcode(&D::bgezl, 3, InstructionType::RegImm);
+        RegisterOpcode(&D::bltzal, 16, InstructionType::RegImm);
         RegisterOpcode(&D::bgezal, 17, InstructionType::RegImm);
+        RegisterOpcode(&D::bltzall, 18, InstructionType::RegImm);
+        RegisterOpcode(&D::bgezall, 19, InstructionType::RegImm);
 
         // cop0 instructions
         RegisterOpcode(&D::mfc0, 0, InstructionType::COP0);
