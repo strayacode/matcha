@@ -136,6 +136,7 @@ struct Interpreter : public Executor {
     void swr();
     void pref();
     void multu();
+    void pcpyld();
     void illegal_instruction();
     void stub_instruction();
 

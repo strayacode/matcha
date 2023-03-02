@@ -154,6 +154,9 @@ struct Decoder {
         // mmi1 instructions
         RegisterOpcode(&D::padduw, 16, InstructionType::MMI1);
 
+        // mmi2 instructions
+        RegisterOpcode(&D::pcpyld, 14, InstructionType::MMI2);
+
         // mmi3 instructions
         RegisterOpcode(&D::por, 18, InstructionType::MMI3);
     }

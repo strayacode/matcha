@@ -274,6 +274,13 @@ void Interpreter::mtlo1() {
     ctx.lo1 = ctx.GetReg<u64>(inst.rs);
 }
 
+void Interpreter::pcpyld() {
+    u64 lower = ctx.GetReg<u64>(inst.rt);
+    u64 upper = ctx.GetReg<u64>(inst.rs);
+    ctx.SetReg<u64>(inst.rd, lower);
+    ctx.SetReg<u64>(inst.rd, upper, 1);
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < SignExtend<s64, 16>(inst.imm));
@@ -819,11 +826,11 @@ void Interpreter::ei() {
 }
 
 void Interpreter::illegal_instruction() {
-    common::Error("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
+    common::Error("[ee::Interpreter] %s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
 }
 
 void Interpreter::stub_instruction() {
-    common::Log("%s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt);
+    common::Log("[ee::Interpreter] %s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt);
 }
 
 } // namespace ee

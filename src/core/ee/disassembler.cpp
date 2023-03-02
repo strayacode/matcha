@@ -185,12 +185,23 @@ static std::map<int, DisassemblyInfo> tlb_table = {
 
 static std::map<int, DisassemblyInfo> mmi_table = {
     {4, DisassemblyInfo{"plzcw $rd, $rs", InstructionType::Register}},
+    {8, DisassemblyInfo{"mmi1", InstructionType::None}},
+    {9, DisassemblyInfo{"mmi2", InstructionType::None}},
     {16, DisassemblyInfo{"mfhi1 $rd", InstructionType::Register}},
     {17, DisassemblyInfo{"mthi1 $rs", InstructionType::Register}},
     {18, DisassemblyInfo{"mflo1 $rd", InstructionType::Register}},
     {19, DisassemblyInfo{"mtlo1 $rs", InstructionType::Register}},
     {24, DisassemblyInfo{"mult1 $rd, $rs, $rt", InstructionType::Register}},
     {27, DisassemblyInfo{"divu1 $rs, $rt", InstructionType::Register}},
+};
+
+static std::map<int, DisassemblyInfo> mmi1_table = {
+    {1, DisassemblyInfo{"pabsw $rd, $rt", InstructionType::Register}},
+};
+
+static std::map<int, DisassemblyInfo> mmi2_table = {
+    {0, DisassemblyInfo{"paddw $rd, $rs, $rt", InstructionType::Register}},
+    {14, DisassemblyInfo{"pcpyld $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, std::string> cop0_names = {
@@ -319,6 +330,12 @@ std::string DisassembleInstruction(Instruction inst, u32 pc) {
         }
     } else if (info.format.compare("mmi") == 0) {
         info = mmi_table[inst.func];
+
+        if (info.format.compare("mmi1") == 0) {
+            info = mmi1_table[inst.imm5];
+        } else if (info.format.compare("mmi2") == 0) {
+            info = mmi2_table[inst.imm5];
+        }
     } else if (info.format.compare("cop2") == 0) {
         info = cop2_table[inst.rs];
     }
