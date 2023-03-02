@@ -106,6 +106,7 @@ struct Decoder {
         RegisterOpcode(&D::bgez, 1, InstructionType::RegImm);
         RegisterOpcode(&D::bltzl, 2, InstructionType::RegImm);
         RegisterOpcode(&D::bgezl, 3, InstructionType::RegImm);
+        RegisterOpcode(&D::bgezal, 17, InstructionType::RegImm);
 
         // cop0 instructions
         RegisterOpcode(&D::mfc0, 0, InstructionType::COP0);

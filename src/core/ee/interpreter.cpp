@@ -19,15 +19,8 @@ void Interpreter::Reset() {
 void Interpreter::Run(int cycles) {
     while (cycles--) {
         inst = Instruction{ctx.Read<u32>(ctx.pc)};
-
-        if (ctx.pc == 0x113bc0) {
-            LogState();
-            // common::Error("good");
-        }
-
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
-
         ctx.pc += 4;
 
         if (branch_delay) {
@@ -122,6 +115,31 @@ void Interpreter::LogState() {
 
 void Interpreter::LogInstruction() {
     common::Log("[ee::Interpreter] %08x %08x %s", ctx.pc, inst.data, DisassembleInstruction(inst, ctx.pc).c_str());
+}
+
+void Interpreter::Branch(bool cond) {
+    s32 offset = inst.simm << 2;
+
+    if (cond) {
+        ctx.npc = ctx.pc + offset + 4;
+        branch_delay = true;
+    }
+}
+
+void Interpreter::BranchLikely(bool cond) {
+    s32 offset = inst.simm << 2;
+
+    if (cond) {
+        ctx.npc = ctx.pc + offset + 4;
+        branch_delay = true;
+    } else {
+        ctx.pc += 4;
+    }
+}
+
+void Interpreter::Jump(u32 target) {
+    ctx.npc = target;
+    branch_delay = true;
 }
 
 // COP0 instructions
@@ -262,12 +280,7 @@ void Interpreter::slti() {
 }
 
 void Interpreter::bne() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<u64>(inst.rs) != ctx.GetReg<u64>(inst.rt)) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<u64>(inst.rs) != ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::lui() {
@@ -293,8 +306,7 @@ void Interpreter::sd() {
 
 void Interpreter::jal() {
     ctx.SetReg<u64>(31, ctx.pc + 8);
-    ctx.npc = ((ctx.pc + 4) & 0xF0000000) + (inst.offset << 2);
-    branch_delay = true;
+    Jump(((ctx.pc + 4) & 0xf0000000) + (inst.offset << 2));
 }
 
 void Interpreter::andi() {
@@ -302,23 +314,11 @@ void Interpreter::andi() {
 }
 
 void Interpreter::beq() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<u64>(inst.rs) == ctx.GetReg<u64>(inst.rt)) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<u64>(inst.rs) == ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::beql() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<u64>(inst.rs) == ctx.GetReg<u64>(inst.rt)) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    } else {
-        ctx.pc += 4;
-    }
+    BranchLikely(ctx.GetReg<u64>(inst.rs) == ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::sltiu() {
@@ -326,14 +326,7 @@ void Interpreter::sltiu() {
 }
 
 void Interpreter::bnel() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<u64>(inst.rs) != ctx.GetReg<u64>(inst.rt)) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    } else {
-        ctx.pc += 4;
-    }
+    BranchLikely(ctx.GetReg<u64>(inst.rs) != ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::lb() {
@@ -349,8 +342,7 @@ void Interpreter::ld() {
 }
 
 void Interpreter::j() {
-    ctx.npc = ((ctx.pc + 4) & 0xF0000000) + (inst.offset << 2);
-    branch_delay = true;
+    Jump(((ctx.pc + 4) & 0xF0000000) + (inst.offset << 2));
 }
 
 void Interpreter::lw() {
@@ -362,12 +354,7 @@ void Interpreter::sb() {
 }
 
 void Interpreter::blez() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<s64>(inst.rs) <= 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<s64>(inst.rs) <= 0);
 }
 
 void Interpreter::lhu() {
@@ -375,12 +362,7 @@ void Interpreter::lhu() {
 }
 
 void Interpreter::bgtz() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<s64>(inst.rs) > 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<s64>(inst.rs) > 0);
 }
 
 void Interpreter::sh() {
@@ -484,43 +466,24 @@ void Interpreter::sdr() {
 
 // regimm instructions
 void Interpreter::bgez() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<s64>(inst.rs) >= 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<s64>(inst.rs) >= 0);
 }
 
 void Interpreter::bltz() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<s64>(inst.rs) < 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    }
+    Branch(ctx.GetReg<s64>(inst.rs) < 0);
 }
 
 void Interpreter::bltzl() {
-    s32 offset = inst.simm << 2;
-
-    if (ctx.GetReg<s64>(inst.rs) < 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    } else {
-        ctx.pc += 4;
-    }
+    BranchLikely(ctx.GetReg<s64>(inst.rs) < 0);
 }
 
 void Interpreter::bgezl() {
-    s32 offset = inst.simm << 2;
+    BranchLikely(ctx.GetReg<s64>(inst.rs) >= 0);
+}
 
-    if (ctx.GetReg<s64>(inst.rs) >= 0) {
-        ctx.npc = ctx.pc + offset + 4;
-        branch_delay = true;
-    } else {
-        ctx.pc += 4;
-    }
+void Interpreter::bgezal() {
+    ctx.SetReg<u64>(31, ctx.pc + 8);
+    BranchLikely(ctx.GetReg<s64>(inst.rs) >= 0);
 }
 
 // secondary instructions
@@ -530,8 +493,7 @@ void Interpreter::sll() {
 }
 
 void Interpreter::jr() {
-    ctx.npc = ctx.GetReg<u32>(inst.rs);
-    branch_delay = true;
+    Jump(ctx.GetReg<u32>(inst.rs));
 }
 
 void Interpreter::sync() {
@@ -540,8 +502,7 @@ void Interpreter::sync() {
 
 void Interpreter::jalr() {
     ctx.SetReg<u64>(inst.rd, ctx.pc + 8);
-    ctx.npc = ctx.GetReg<u32>(inst.rs);
-    branch_delay = true;
+    Jump(ctx.GetReg<u32>(inst.rs));
 }
 
 void Interpreter::daddu() {

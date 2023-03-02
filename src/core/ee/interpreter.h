@@ -124,10 +124,15 @@ struct Interpreter : public Executor {
     void dsra();
     void dsrlv();
     void xorr();
+    void bgezal();
     void illegal_instruction();
     void stub_instruction();
 
 private:
+    void Branch(bool cond);
+    void BranchLikely(bool cond);
+    void Jump(u32 target);
+
     bool branch_delay;
     bool branch;
 
