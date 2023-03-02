@@ -30,8 +30,11 @@ void Core::RunFrame() {
     system.RunFrame();
 }
 
-void Core::Boot(BootMode boot_mode, std::string path) {
-    Reset();
+void Core::SetBootParameters(BootMode boot_mode, std::string path) {
     system.SetBootParameters(boot_mode, path);
+}
+
+void Core::Boot() {
+    system.Reset();
     SetState(CoreState::Running);
 }

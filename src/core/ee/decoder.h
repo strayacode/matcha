@@ -15,10 +15,11 @@ struct Decoder {
         fpu_s_table.fill(&D::illegal_instruction);
         cop2_table.fill(&D::stub_instruction);
         tlb_table.fill(&D::illegal_instruction);
-        mmi_table.fill(&D::stub_instruction);
-        mmi1_table.fill(&D::stub_instruction);
-        mmi2_table.fill(&D::stub_instruction);
-        mmi3_table.fill(&D::stub_instruction);
+        mmi_table.fill(&D::illegal_instruction);
+        mmi0_table.fill(&D::illegal_instruction);
+        mmi1_table.fill(&D::illegal_instruction);
+        mmi2_table.fill(&D::illegal_instruction);
+        mmi3_table.fill(&D::illegal_instruction);
 
         // primary instructions
         RegisterOpcode(&D::j, 2, InstructionType::Primary);
@@ -151,6 +152,9 @@ struct Decoder {
         RegisterOpcode(&D::mult1, 24, InstructionType::MMI);
         RegisterOpcode(&D::divu1, 27, InstructionType::MMI);
 
+        // mmi0 instructions
+        RegisterOpcode(&D::psubb, 9, InstructionType::MMI0);
+
         // mmi1 instructions
         RegisterOpcode(&D::padduw, 16, InstructionType::MMI1);
 
@@ -159,6 +163,7 @@ struct Decoder {
 
         // mmi3 instructions
         RegisterOpcode(&D::por, 18, InstructionType::MMI3);
+        RegisterOpcode(&D::pnor, 19, InstructionType::MMI3);
     }
 
     Handler GetHandler(Instruction inst) {
@@ -185,6 +190,8 @@ struct Decoder {
             return cop2_table[inst.rs];
         case 28:
             switch (inst.func) {
+            case 8:
+                return mmi0_table[inst.imm5];
             case 9:
                 return mmi2_table[inst.imm5];
             case 40:
@@ -210,6 +217,7 @@ private:
         COP2,
         TLB,
         MMI,
+        MMI0,
         MMI1,
         MMI2,
         MMI3,
@@ -244,6 +252,9 @@ private:
         case InstructionType::MMI:
             mmi_table[index] = callback;
             break;
+        case InstructionType::MMI0:
+            mmi0_table[index] = callback;
+            break;
         case InstructionType::MMI1:
             mmi1_table[index] = callback;
             break;
@@ -265,6 +276,7 @@ private:
     std::array<Handler, 32> cop2_table;
     std::array<Handler, 64> tlb_table;
     std::array<Handler, 64> mmi_table;
+    std::array<Handler, 32> mmi0_table;
     std::array<Handler, 32> mmi1_table;
     std::array<Handler, 32> mmi2_table;
     std::array<Handler, 32> mmi3_table;

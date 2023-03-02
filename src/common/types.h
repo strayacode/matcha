@@ -35,6 +35,27 @@ union u128 {
         return data;
     }
 
+    u128 inline operator &(u128 value) {
+        u128 data;
+        data.lo = lo & value.lo;
+        data.hi = hi & value.hi;
+        return data;
+    }
+
+    u128 inline operator ^(u128 value) {
+        u128 data;
+        data.lo = lo ^ value.lo;
+        data.hi = hi ^ value.hi;
+        return data;
+    }
+
+    u128 inline operator ~() {
+        u128 data;
+        data.lo = ~lo;
+        data.hi = ~hi;
+        return data;
+    }
+
     u128& operator=(const int value) {
         uw[0] = value;
         return *this;

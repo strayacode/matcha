@@ -123,7 +123,8 @@ void HostInterface::RenderMenubar() {
             }
 
             if (ImGui::MenuItem("Boot BIOS")) {
-                core.Boot(BootMode::BIOS);
+                core.SetBootParameters(BootMode::BIOS);
+                core.Boot();
             }
 
             if (ImGui::MenuItem("Quit")) {
@@ -135,6 +136,10 @@ void HostInterface::RenderMenubar() {
         if (ImGui::BeginMenu("Emulator")) {
             if (ImGui::MenuItem(core.GetState() == CoreState::Running ? "Pause" : "Resume")) {
                 TogglePause();
+            }
+
+            if (ImGui::MenuItem("Restart")) {
+                core.Boot();
             }
 
             ImGui::EndMenu();
@@ -178,7 +183,8 @@ void HostInterface::RenderMenubar() {
 
     file_dialog.Display();
     if (file_dialog.HasSelected()) {
-        core.Boot(BootMode::Fast, file_dialog.GetSelected().string());
+        core.SetBootParameters(BootMode::Fast, file_dialog.GetSelected().string());
+        core.Boot();
         file_dialog.ClearSelected();
     }
 }

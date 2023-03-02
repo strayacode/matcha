@@ -185,7 +185,7 @@ static std::map<int, DisassemblyInfo> tlb_table = {
 
 static std::map<int, DisassemblyInfo> mmi_table = {
     {4, DisassemblyInfo{"plzcw $rd, $rs", InstructionType::Register}},
-    {8, DisassemblyInfo{"mmi1", InstructionType::None}},
+    {8, DisassemblyInfo{"mmi0", InstructionType::None}},
     {9, DisassemblyInfo{"mmi2", InstructionType::None}},
     {16, DisassemblyInfo{"mfhi1 $rd", InstructionType::Register}},
     {17, DisassemblyInfo{"mthi1 $rs", InstructionType::Register}},
@@ -193,6 +193,12 @@ static std::map<int, DisassemblyInfo> mmi_table = {
     {19, DisassemblyInfo{"mtlo1 $rs", InstructionType::Register}},
     {24, DisassemblyInfo{"mult1 $rd, $rs, $rt", InstructionType::Register}},
     {27, DisassemblyInfo{"divu1 $rs, $rt", InstructionType::Register}},
+    {40, DisassemblyInfo{"mmi1", InstructionType::None}},
+    {41, DisassemblyInfo{"mmi3", InstructionType::None}},
+};
+
+static std::map<int, DisassemblyInfo> mmi0_table = {
+    {9, DisassemblyInfo{"psubb $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi1_table = {
@@ -202,6 +208,11 @@ static std::map<int, DisassemblyInfo> mmi1_table = {
 static std::map<int, DisassemblyInfo> mmi2_table = {
     {0, DisassemblyInfo{"paddw $rd, $rs, $rt", InstructionType::Register}},
     {14, DisassemblyInfo{"pcpyld $rd, $rs, $rt", InstructionType::Register}},
+};
+
+static std::map<int, DisassemblyInfo> mmi3_table = {
+    {0, DisassemblyInfo{"pmadduw $rd, $rs, $rt", InstructionType::Register}},
+    {19, DisassemblyInfo{"pnor $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, std::string> cop0_names = {
@@ -331,10 +342,14 @@ std::string DisassembleInstruction(Instruction inst, u32 pc) {
     } else if (info.format.compare("mmi") == 0) {
         info = mmi_table[inst.func];
 
-        if (info.format.compare("mmi1") == 0) {
+        if (info.format.compare("mmi0") == 0) {
+            info = mmi0_table[inst.imm5];
+        } else if (info.format.compare("mmi1") == 0) {
             info = mmi1_table[inst.imm5];
         } else if (info.format.compare("mmi2") == 0) {
             info = mmi2_table[inst.imm5];
+        } else if (info.format.compare("mmi3") == 0) {
+            info = mmi3_table[inst.imm5];
         }
     } else if (info.format.compare("cop2") == 0) {
         info = cop2_table[inst.rs];

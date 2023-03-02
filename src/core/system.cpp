@@ -37,8 +37,9 @@ void System::Reset() {
     spu.Reset();
     spu2.Reset();
 
-    LoadBIOS();
     iop_ram->fill(0);
+    bios->fill(0);
+    LoadBIOS();
 
     fastboot_done = false;
 }

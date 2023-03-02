@@ -281,6 +281,16 @@ void Interpreter::pcpyld() {
     ctx.SetReg<u64>(inst.rd, upper, 1);
 }
 
+void Interpreter::psubb() {
+    for (int i = 0; i < 16; i++) {
+        ctx.SetReg<s8>(inst.rd, ctx.GetReg<s8>(inst.rs, i) - ctx.GetReg<s8>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::pnor() {
+    ctx.SetReg<u128>(inst.rd, ~(ctx.GetReg<u128>(inst.rs) | ctx.GetReg<u128>(inst.rt)));
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < SignExtend<s64, 16>(inst.imm));

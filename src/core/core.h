@@ -18,7 +18,8 @@ public:
     void SetState(CoreState new_state);
     CoreState GetState();
     void RunFrame();
-    void Boot(BootMode boot_mode, std::string path = "");
+    void SetBootParameters(BootMode boot_mode, std::string path = "");
+    void Boot();
 
     System system;
     
