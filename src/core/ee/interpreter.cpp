@@ -523,8 +523,9 @@ void Interpreter::sync() {
 }
 
 void Interpreter::jalr() {
-    ctx.SetReg<u64>(inst.rd, ctx.pc + 8);
+    u32 return_addr = ctx.pc + 8;
     Jump(ctx.GetReg<u32>(inst.rs));
+    ctx.SetReg<u64>(inst.rd, return_addr);
 }
 
 void Interpreter::daddu() {
