@@ -130,6 +130,12 @@ struct Interpreter : public Executor {
     void blezl();
     void bltzal();
     void bltzall();
+    void lwl();
+    void lwr();
+    void swl();
+    void swr();
+    void pref();
+    void multu();
     void illegal_instruction();
     void stub_instruction();
 

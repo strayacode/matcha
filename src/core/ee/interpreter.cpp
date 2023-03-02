@@ -330,7 +330,7 @@ void Interpreter::bnel() {
 }
 
 void Interpreter::lb() {
-    ctx.SetReg<s64>(inst.rt, (s8)ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, static_cast<s8>(ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm)));
 }
 
 void Interpreter::lbu() {
@@ -471,6 +471,51 @@ void Interpreter::blezl() {
     BranchLikely(ctx.GetReg<s64>(inst.rs) <= 0);
 }
 
+void Interpreter::lwl() {
+    u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xffffff >> shift;
+    ctx.SetReg<s64>(inst.rt, static_cast<s32>((ctx.GetReg<u32>(inst.rt) & mask) | (aligned_data << (24 - shift))));
+}
+
+void Interpreter::lwr() {
+    u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xffffff00 << (24 - shift);
+    u32 updated_data = (ctx.GetReg<u32>(inst.rt) & mask) | (aligned_data >> shift);
+
+    // sign extend to 64-bit bits when shift is 0
+    if (shift) {
+        ctx.SetReg<u32>(inst.rt, updated_data);
+    } else {
+        ctx.SetReg<s64>(inst.rt, static_cast<s32>(updated_data));
+    }
+}
+
+void Interpreter::swl() {
+    u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xffffff00 << shift;
+    u32 updated_data = (aligned_data & mask) | (ctx.GetReg<u32>(inst.rt) >> (24 - shift));
+    ctx.Write<u32>(addr & ~0x3, updated_data);
+}
+
+void Interpreter::swr() {
+    u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
+    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u8 shift = (addr & 0x3) * 8;
+    u32 mask = 0xffffff >> (24 - shift);
+    u32 updated_data = (aligned_data & mask) | (ctx.GetReg<u32>(inst.rt) << shift);
+    ctx.Write<u32>(addr & ~0x3, updated_data);
+}
+
+void Interpreter::pref() {
+    // prefetch
+}
+
 // regimm instructions
 void Interpreter::bgez() {
     Branch(ctx.GetReg<s64>(inst.rs) >= 0);
@@ -600,11 +645,16 @@ void Interpreter::subu() {
 }
 
 void Interpreter::div() {
-    if ((ctx.GetReg<s32>(inst.rs) == (s32)0x80000000) && (ctx.GetReg<s32>(inst.rt) == -1)) {
+    if ((ctx.GetReg<s32>(inst.rs) == static_cast<s32>(0x80000000)) && (ctx.GetReg<s32>(inst.rt) == -1)) {
         ctx.lo = 0x80000000;
         ctx.hi = 0;
     } else if (ctx.GetReg<s32>(inst.rt) == 0) {
-        common::Error("can't divide by 0");
+        if (ctx.GetReg<s32>(inst.rs) >= 0) {
+            ctx.lo = SignExtend<s64, 32>(0xffffffff);
+        } else {
+            ctx.lo = 1;
+        }
+        ctx.hi = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs));
     } else {
         ctx.lo = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) / ctx.GetReg<s32>(inst.rt));
         ctx.hi = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) % ctx.GetReg<s32>(inst.rt));
@@ -705,6 +755,13 @@ void Interpreter::dsrlv() {
 
 void Interpreter::xorr() {
     ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rs) ^ ctx.GetReg<u64>(inst.rt));
+}
+
+void Interpreter::multu() {
+    u64 result = static_cast<u64>(ctx.GetReg<u32>(inst.rs)) * static_cast<u64>(ctx.GetReg<u32>(inst.rt));
+    ctx.lo = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<u64>(inst.rd, ctx.lo);
 }
 
 // tlb instructions
