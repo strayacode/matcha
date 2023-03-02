@@ -11,18 +11,17 @@ struct VirtualPageTable {
         page_table.fill(nullptr);
     }
 
-    void Map(u8* data, VirtualAddress base, u32 size) {
-        for (VirtualAddress addr = base; addr < base + size; addr += PAGE_SIZE) {
-            int index = addr >> PAGE_BITS;
-            u32 mask = size - 1;
-            page_table[index] = &data[addr & mask];
+    void Map(u8* data, VirtualAddress base, u32 size, u32 mask) {
+        for (u32 offset = 0; offset < size; offset += PAGE_SIZE) {
+            VirtualAddress vaddr = base + offset;
+            int index = vaddr >> PAGE_BITS;
+            page_table[index] = &data[vaddr & mask];
         }
     }
 
     template <typename T>
     T* Lookup(VirtualAddress vaddr) {
         int index = vaddr >> PAGE_BITS;
-
         if (page_table[index] == nullptr) {
             return nullptr;
         }

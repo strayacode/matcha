@@ -76,14 +76,18 @@ void Context::Reset() {
 
     // do initial hardcoded mappings
     vtlb.Reset();
-    vtlb.Map(rdram->data(), 0x00000000, 0x2000000);
-    vtlb.Map(rdram->data(), 0x20000000, 0x2000000);
-    vtlb.Map(rdram->data(), 0x30100000, 0x2000000);
-    vtlb.Map(scratchpad.data(), 0x70000000, 0x4000);
-    vtlb.Map(rdram->data(), 0x80000000, 0x2000000);
-    vtlb.Map(system.bios->data(), 0x9fc00000, 0x400000);
-    vtlb.Map(rdram->data(), 0xa0000000, 0x2000000);
-    vtlb.Map(system.bios->data(), 0xbfc00000, 0x400000);
+    vtlb.Map(rdram->data(), 0x00000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(rdram->data(), 0x20000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(rdram->data(), 0x30100000, 0x2000000, 0x1ffffff);
+    vtlb.Map(scratchpad.data(), 0x70000000, 0x4000, 0x3fff);
+    vtlb.Map(rdram->data(), 0x80000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(system.bios->data(), 0x9fc00000, 0x400000, 0x3fffff);
+    vtlb.Map(rdram->data(), 0xa0000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(system.bios->data(), 0xbfc00000, 0x400000, 0x3fffff);
+
+    // deci2call tlb region which gets mapped in the bios
+    // later when we handle the tlb we can remove this mapping
+    vtlb.Map(rdram->data(), 0xffff8000, 0x8000, 0x7ffff);
 }
 
 void Context::Run(int cycles) {

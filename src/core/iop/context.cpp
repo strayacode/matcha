@@ -5,7 +5,7 @@
 
 namespace iop {
 
-Context::Context(System& system) : dmac(system), timers(system), intc(*this), sio2(intc), interpreter(*this), system(system) {}
+Context::Context(System& system) : dmac(system), timers(system), intc(*this), sio2(intc), system(system), interpreter(*this) {}
 
 void Context::Reset() {
     gpr.fill(0);
@@ -24,11 +24,11 @@ void Context::Reset() {
 
     // do initial hardcoded mappings
     vtlb.Reset();
-    vtlb.Map(system.iop_ram->data(), 0x00000000, 0x200000);
-    vtlb.Map(system.iop_ram->data(), 0x80000000, 0x200000);
-    vtlb.Map(system.bios->data(), 0x9fc00000, 0x400000);
-    vtlb.Map(system.iop_ram->data(), 0xa0000000, 0x200000);
-    vtlb.Map(system.bios->data(), 0xbfc00000, 0x400000);
+    vtlb.Map(system.iop_ram->data(), 0x00000000, 0x200000, 0x1fffff);
+    vtlb.Map(system.iop_ram->data(), 0x80000000, 0x200000, 0x1fffff);
+    vtlb.Map(system.bios->data(), 0x9fc00000, 0x400000, 0x3fffff);
+    vtlb.Map(system.iop_ram->data(), 0xa0000000, 0x200000, 0x1fffff);
+    vtlb.Map(system.bios->data(), 0xbfc00000, 0x400000, 0x3fffff);
 }
 
 void Context::Run(int cycles) {
