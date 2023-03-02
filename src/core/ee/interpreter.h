@@ -121,6 +121,9 @@ struct Interpreter : public Executor {
     void cfc1();
     void madd_s();
     void lwc1();
+    void dsra();
+    void dsrlv();
+    void xorr();
     void illegal_instruction();
     void stub_instruction();
 

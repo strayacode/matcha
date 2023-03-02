@@ -77,6 +77,7 @@ struct Decoder {
         RegisterOpcode(&D::mflo, 18, InstructionType::Secondary);
         RegisterOpcode(&D::mtlo, 19, InstructionType::Secondary);
         RegisterOpcode(&D::dsllv, 20, InstructionType::Secondary);
+        RegisterOpcode(&D::dsrlv, 22, InstructionType::Secondary);
         RegisterOpcode(&D::dsrav, 23, InstructionType::Secondary);
         RegisterOpcode(&D::mult, 24, InstructionType::Secondary);
         RegisterOpcode(&D::div, 26, InstructionType::Secondary);
@@ -85,6 +86,7 @@ struct Decoder {
         RegisterOpcode(&D::subu, 35, InstructionType::Secondary);
         RegisterOpcode(&D::andd, 36, InstructionType::Secondary);
         RegisterOpcode(&D::orr, 37, InstructionType::Secondary);
+        RegisterOpcode(&D::xorr, 38, InstructionType::Secondary);
         RegisterOpcode(&D::nor, 39, InstructionType::Secondary);
         RegisterOpcode(&D::mfsa, 40, InstructionType::Secondary);
         RegisterOpcode(&D::mtsa, 41, InstructionType::Secondary);
@@ -94,6 +96,7 @@ struct Decoder {
         RegisterOpcode(&D::dsubu, 47, InstructionType::Secondary);
         RegisterOpcode(&D::dsll, 56, InstructionType::Secondary);
         RegisterOpcode(&D::dsrl, 58, InstructionType::Secondary);
+        RegisterOpcode(&D::dsra, 59, InstructionType::Secondary);
         RegisterOpcode(&D::dsll32, 60, InstructionType::Secondary);
         RegisterOpcode(&D::dsrl32, 62, InstructionType::Secondary);
         RegisterOpcode(&D::dsra32, 63, InstructionType::Secondary);

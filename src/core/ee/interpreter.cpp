@@ -711,6 +711,18 @@ void Interpreter::mtsa() {
     ctx.sa = ctx.GetReg<u64>(inst.rs);
 }
 
+void Interpreter::dsra() {
+    ctx.SetReg<s64>(inst.rd, ctx.GetReg<s64>(inst.rt) >> inst.imm5);
+}
+
+void Interpreter::dsrlv() {
+    ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rt) >> (ctx.GetReg<u8>(inst.rs) & 0x3f));
+}
+
+void Interpreter::xorr() {
+    ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rs) ^ ctx.GetReg<u64>(inst.rt));
+}
+
 // tlb instructions
 void Interpreter::tlbwi() {
     common::Log("[ee::Interpreter] tlbwi entry %d", ctx.cop0.index);
