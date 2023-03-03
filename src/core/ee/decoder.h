@@ -144,13 +144,19 @@ struct Decoder {
         RegisterOpcode(&D::di, 57, InstructionType::TLB);
 
         // mmi instructions
+        RegisterOpcode(&D::madd, 0, InstructionType::MMI);
+        RegisterOpcode(&D::maddu, 1, InstructionType::MMI);
         RegisterOpcode(&D::plzcw, 4, InstructionType::MMI);
         RegisterOpcode(&D::mfhi1, 16, InstructionType::MMI);
         RegisterOpcode(&D::mthi1, 17, InstructionType::MMI);
         RegisterOpcode(&D::mflo1, 18, InstructionType::MMI);
         RegisterOpcode(&D::mtlo1, 19, InstructionType::MMI);
         RegisterOpcode(&D::mult1, 24, InstructionType::MMI);
+        RegisterOpcode(&D::multu1, 25, InstructionType::MMI);
+        RegisterOpcode(&D::div1, 26, InstructionType::MMI);
         RegisterOpcode(&D::divu1, 27, InstructionType::MMI);
+        RegisterOpcode(&D::madd1, 32, InstructionType::MMI);
+        RegisterOpcode(&D::maddu1, 33, InstructionType::MMI);
 
         // mmi0 instructions
         RegisterOpcode(&D::psubb, 9, InstructionType::MMI0);
@@ -166,6 +172,7 @@ struct Decoder {
         RegisterOpcode(&D::pcpyud, 14, InstructionType::MMI3);
         RegisterOpcode(&D::por, 18, InstructionType::MMI3);
         RegisterOpcode(&D::pnor, 19, InstructionType::MMI3);
+        RegisterOpcode(&D::pcpyh, 27, InstructionType::MMI3);
     }
 
     Handler GetHandler(Instruction inst) {

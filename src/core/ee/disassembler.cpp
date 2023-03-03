@@ -184,6 +184,8 @@ static std::map<int, DisassemblyInfo> tlb_table = {
 };
 
 static std::map<int, DisassemblyInfo> mmi_table = {
+    {0, DisassemblyInfo{"madd $rd, $rs, $rt", InstructionType::Register}},
+    {1, DisassemblyInfo{"maddu $rd, $rs, $rt", InstructionType::Register}},
     {4, DisassemblyInfo{"plzcw $rd, $rs", InstructionType::Register}},
     {8, DisassemblyInfo{"mmi0", InstructionType::None}},
     {9, DisassemblyInfo{"mmi2", InstructionType::None}},
@@ -192,7 +194,11 @@ static std::map<int, DisassemblyInfo> mmi_table = {
     {18, DisassemblyInfo{"mflo1 $rd", InstructionType::Register}},
     {19, DisassemblyInfo{"mtlo1 $rs", InstructionType::Register}},
     {24, DisassemblyInfo{"mult1 $rd, $rs, $rt", InstructionType::Register}},
+    {25, DisassemblyInfo{"multu1 $rd, $rs, $rt", InstructionType::Register}},
+    {26, DisassemblyInfo{"div1 $rs, $rt", InstructionType::Register}},
     {27, DisassemblyInfo{"divu1 $rs, $rt", InstructionType::Register}},
+    {32, DisassemblyInfo{"madd1 $rd, $rs, $rt", InstructionType::Register}},
+    {33, DisassemblyInfo{"maddu1 $rd, $rs, $rt", InstructionType::Register}},
     {40, DisassemblyInfo{"mmi1", InstructionType::None}},
     {41, DisassemblyInfo{"mmi3", InstructionType::None}},
 };
@@ -215,6 +221,7 @@ static std::map<int, DisassemblyInfo> mmi3_table = {
     {0, DisassemblyInfo{"pmadduw $rd, $rs, $rt", InstructionType::Register}},
     {14, DisassemblyInfo{"pcpyud $rd, $rs, $rt", InstructionType::Register}},
     {19, DisassemblyInfo{"pnor $rd, $rs, $rt", InstructionType::Register}},
+    {27, DisassemblyInfo{"pcpyh $rd, $rt", InstructionType::Register}},
 };
 
 static std::map<int, std::string> cop0_names = {

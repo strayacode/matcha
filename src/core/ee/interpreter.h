@@ -141,6 +141,13 @@ struct Interpreter : public Executor {
     void pnor();
     void pand();
     void pcpyud();
+    void pcpyh();
+    void div1();
+    void madd();
+    void maddu();
+    void madd1();
+    void maddu1();
+    void multu1();
     void illegal_instruction();
     void stub_instruction();
 

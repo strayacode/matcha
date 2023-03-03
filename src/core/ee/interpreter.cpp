@@ -234,7 +234,7 @@ void Interpreter::mflo1() {
 
 void Interpreter::mult1() {
     s64 result = ctx.GetReg<s32>(inst.rt) * ctx.GetReg<s32>(inst.rs);
-    ctx.lo1 = SignExtend<s64, 32>(result & 0xFFFFFFFF);
+    ctx.lo1 = SignExtend<s64, 32>(result & 0xffffffff);
     ctx.hi1 = SignExtend<s64, 32>(result >> 32);
     ctx.SetReg<u64>(inst.rd, ctx.lo1);
 }
@@ -298,6 +298,75 @@ void Interpreter::pand() {
 void Interpreter::pcpyud() {
     ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rs, 1));
     ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rt, 1), 1);
+}
+
+void Interpreter::pcpyh() {
+    u16 lower = ctx.GetReg<u16>(inst.rt);
+    u16 upper = ctx.GetReg<u16>(inst.rt, 4);
+    for (int i = 0; i < 4; i++) {
+        ctx.SetReg<u16>(inst.rd, lower, i);
+        ctx.SetReg<u16>(inst.rd, upper, 4 + i);
+    }
+}
+
+void Interpreter::div1() {
+    if ((ctx.GetReg<s32>(inst.rs) == static_cast<s32>(0x80000000)) && (ctx.GetReg<s32>(inst.rt) == -1)) {
+        ctx.lo1 = SignExtend<s64, 32>(0x80000000);
+        ctx.hi1 = 0;
+    } else if (ctx.GetReg<s32>(inst.rt) == 0) {
+        if (ctx.GetReg<s32>(inst.rs) >= 0) {
+            ctx.lo1 = SignExtend<s64, 32>(0xffffffff);
+        } else {
+            ctx.lo1 = 1;
+        }
+        ctx.hi1 = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs));
+    } else {
+        ctx.lo1 = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) / ctx.GetReg<s32>(inst.rt));
+        ctx.hi1 = SignExtend<s64, 32>(ctx.GetReg<s32>(inst.rs) % ctx.GetReg<s32>(inst.rt));
+    }
+}
+
+void Interpreter::madd() {
+    u64 lo = ctx.lo & 0xffffffff;
+    u64 hi = ctx.hi & 0xffffffff;
+    s64 result = ((hi << 32) | lo) + (static_cast<s64>(ctx.GetReg<s32>(inst.rs)) * static_cast<s64>(ctx.GetReg<s32>(inst.rt)));
+    ctx.lo = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<s64>(inst.rd, static_cast<s64>(ctx.lo));
+}
+
+void Interpreter::maddu() {
+    u64 lo = ctx.lo & 0xffffffff;
+    u64 hi = ctx.hi & 0xffffffff;
+    u64 result = ((hi << 32) | lo) + (static_cast<u64>(ctx.GetReg<u32>(inst.rs)) * static_cast<u64>(ctx.GetReg<u32>(inst.rt)));
+    ctx.lo = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<s64>(inst.rd, static_cast<s64>(ctx.lo));
+}
+
+void Interpreter::madd1() {
+    u64 lo1 = ctx.lo1 & 0xffffffff;
+    u64 hi1 = ctx.hi1 & 0xffffffff;
+    s64 result = ((hi1 << 32) | lo1) + (static_cast<s64>(ctx.GetReg<s32>(inst.rs)) * static_cast<s64>(ctx.GetReg<s32>(inst.rt)));
+    ctx.lo1 = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi1 = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<s64>(inst.rd, static_cast<s64>(ctx.lo1));
+}
+
+void Interpreter::maddu1() {
+    u64 lo1 = ctx.lo1 & 0xffffffff;
+    u64 hi1 = ctx.hi1 & 0xffffffff;
+    u64 result = ((hi1 << 32) | lo1) + (static_cast<u64>(ctx.GetReg<u32>(inst.rs)) * static_cast<u64>(ctx.GetReg<u32>(inst.rt)));
+    ctx.lo1 = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi1 = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<s64>(inst.rd, static_cast<s64>(ctx.lo1));
+}
+
+void Interpreter::multu1() {
+    u64 result = static_cast<u64>(ctx.GetReg<u32>(inst.rs)) * static_cast<u64>(ctx.GetReg<u32>(inst.rt));
+    ctx.lo1 = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi1 = SignExtend<s64, 32>(result >> 32);
+    ctx.SetReg<u64>(inst.rd, ctx.lo1);
 }
 
 // primary instructions
@@ -609,8 +678,8 @@ void Interpreter::orr() {
 
 void Interpreter::mult() {
     s64 result = ctx.GetReg<s32>(inst.rs) * ctx.GetReg<s32>(inst.rt);
-    ctx.lo = (s32)(result & 0xFFFFFFFF);
-    ctx.hi = (s32)(result >> 32);
+    ctx.lo = SignExtend<s64, 32>(result & 0xffffffff);
+    ctx.hi = SignExtend<s64, 32>(result >> 32);
     ctx.SetReg<u64>(inst.rd, ctx.lo);
 }
 
@@ -672,7 +741,7 @@ void Interpreter::subu() {
 
 void Interpreter::div() {
     if ((ctx.GetReg<s32>(inst.rs) == static_cast<s32>(0x80000000)) && (ctx.GetReg<s32>(inst.rt) == -1)) {
-        ctx.lo = 0x80000000;
+        ctx.lo = SignExtend<s64, 32>(0x80000000);
         ctx.hi = 0;
     } else if (ctx.GetReg<s32>(inst.rt) == 0) {
         if (ctx.GetReg<s32>(inst.rs) >= 0) {
