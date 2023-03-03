@@ -63,7 +63,7 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
         control = value;
 
         if (value & 0x1) {
-            intc.RequestInterrupt(IOPInterruptSource::SIO2);
+            intc.RequestInterrupt(InterruptSource::SIO2);
             control &= ~0x1;
         }
 

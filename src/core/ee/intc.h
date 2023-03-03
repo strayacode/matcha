@@ -3,7 +3,11 @@
 #include "common/types.h"
 #include "common/log.h"
 
-enum class EEInterruptSource : int {
+namespace ee {
+
+struct Context;
+
+enum class InterruptSource : int {
     GS = 0,
     SBUS = 1,
     VBlankStart = 2,
@@ -21,13 +25,11 @@ enum class EEInterruptSource : int {
     VUOWatchdog = 14,
 };
 
-struct System;
-
 // the intc deals with interrupt requests
 // and can send interrupts to the ee core via the int0 signal
-class EEINTC {
+class INTC {
 public:
-    EEINTC(System& system);
+    INTC(Context& ee);
 
     void Reset();
 
@@ -38,11 +40,12 @@ public:
     void WriteStat(u16 data);
 
     void CheckInterrupts();
-
-    void RequestInterrupt(EEInterruptSource interrupt);
+    void RequestInterrupt(InterruptSource interrupt);
 private:
     u16 mask;
     u16 stat;
 
-    System& system;
+    Context& ee;
 };
+
+} // namespace ee

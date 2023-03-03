@@ -7,6 +7,9 @@
 #include "common/virtual_page_table.h"
 #include "core/ee/cop0.h"
 #include "core/ee/cop1.h"
+#include "core/ee/dmac.h"
+#include "core/ee/timers.h"
+#include "core/ee/intc.h"
 #include "core/ee/interpreter.h"
 
 struct System;
@@ -52,7 +55,9 @@ struct Context {
 
     COP0 cop0;
     COP1 cop1;
-
+    DMAC dmac;
+    Timers timers;
+    INTC intc;
     System& system;
 
 private:

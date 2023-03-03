@@ -1,8 +1,9 @@
 #include "common/log.h"
 #include "core/ee/timers.h"
-#include "core/system.h"
 
-Timers::Timers(System& system) : system(system) {}
+namespace ee {
+
+Timers::Timers(INTC& intc) : intc(intc) {}
 
 void Timers::Reset() {
     for (int i = 0; i < 4; i++) {
@@ -146,18 +147,20 @@ void Timers::Increment(int index) {
 
             switch (index) {
             case 0:
-                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer0);
+                intc.RequestInterrupt(InterruptSource::Timer0);
                 break;
             case 1:
-                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer1);
+                intc.RequestInterrupt(InterruptSource::Timer1);
                 break;
             case 2:
-                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer2);
+                intc.RequestInterrupt(InterruptSource::Timer2);
                 break;
             case 3:
-                system.ee_intc.RequestInterrupt(EEInterruptSource::Timer3);
+                intc.RequestInterrupt(InterruptSource::Timer3);
                 break;
             }
         }
     }
 }
+
+} // namespace ee

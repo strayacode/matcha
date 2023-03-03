@@ -298,7 +298,7 @@ void DMAC::EndTransfer(int index) {
 
     if (dicr2.flags & dicr2.masks) {
         common::Log("[iop::DMAC %d] interrupt was requested", index);
-        system.iop.intc.RequestInterrupt(IOPInterruptSource::DMA);
+        system.iop.intc.RequestInterrupt(InterruptSource::DMA);
     }
 }
 

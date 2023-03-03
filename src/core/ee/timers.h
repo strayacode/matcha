@@ -2,21 +2,13 @@
 
 #include "common/types.h"
 #include "common/log.h"
+#include "core/ee/intc.h"
 
-struct TimerChannel {
-    u32 counter;
-    u16 control;
-    u16 compare;
-    u16 hold;
-    int cycles;
-    int cycles_per_tick;
-};
-
-struct System;
+namespace ee {
 
 class Timers {
 public:
-    Timers(System& system);
+    Timers(INTC& intc);
 
     void Reset();
     u32 ReadRegister(u32 addr);
@@ -28,6 +20,17 @@ public:
     void Run(int cycles);
     
 private:
-    TimerChannel channels[4];
-    System& system;
+    struct Channel {
+        u32 counter;
+        u16 control;
+        u16 compare;
+        u16 hold;
+        int cycles;
+        int cycles_per_tick;
+    };
+
+    Channel channels[4];
+    INTC& intc;
 };
+
+} // namespace ee

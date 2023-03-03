@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : ee(*this), iop(*this), ee_intc(*this), gif(*this), gs(*this), timers(*this), dmac(*this), elf_loader(*this) {
+System::System() : ee(*this), iop(*this), gif(*this), gs(*this), elf_loader(*this) {
     bios = std::make_unique<std::array<u8, 0x400000>>();
     iop_ram = std::make_unique<std::array<u8, 0x200000>>();
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
@@ -23,11 +23,8 @@ void System::Reset() {
     scheduler.Reset();
     ee.Reset();
     iop.Reset();
-    ee_intc.Reset();
     gif.Reset();
     gs.Reset();
-    timers.Reset();
-    dmac.Reset();
     vu0.Reset();
     vu1.Reset();
     vif0.Reset();
@@ -52,10 +49,6 @@ void System::RunFrame() {
 
     while (scheduler.GetCurrentTime() < end_timestamp) {
         ee.Run(cycles);
-        
-        // ee timers and dmac run at half the speed of the ee
-        timers.Run(cycles / 2);
-        dmac.Run(cycles / 2);
 
         // iop runs at 1 / 8 speed of the ee
         iop.Run(cycles / 8);
@@ -71,13 +64,13 @@ void System::SingleStep() {
 }
 
 void System::VBlankStart() {
-    ee_intc.RequestInterrupt(EEInterruptSource::VBlankStart);
-    iop.intc.RequestInterrupt(IOPInterruptSource::VBlankStart);
+    ee.intc.RequestInterrupt(ee::InterruptSource::VBlankStart);
+    iop.intc.RequestInterrupt(iop::InterruptSource::VBlankStart);
 }
 
 void System::VBlankFinish() {
-    ee_intc.RequestInterrupt(EEInterruptSource::VBlankFinish);
-    iop.intc.RequestInterrupt(IOPInterruptSource::VBlankFinish);
+    ee.intc.RequestInterrupt(ee::InterruptSource::VBlankFinish);
+    iop.intc.RequestInterrupt(iop::InterruptSource::VBlankFinish);
 }
 
 void System::SetBootParameters(BootMode boot_mode, std::string path = "") {

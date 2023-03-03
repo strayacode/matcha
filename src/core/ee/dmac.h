@@ -3,31 +3,9 @@
 #include "common/types.h"
 #include "common/log.h"
 
-enum class DMAChannelType : int {
-    VIF0 = 0,
-    VIF1 = 1,
-    GIF = 2,
-    IPUFrom = 3,
-    IPUTo = 4,
-    SIF0 = 5,
-    SIF1 = 6,
-    SIF2 = 7,
-    SPRFrom = 8,
-    SPRTo = 9,
-};
-
-struct DMAChannel {
-    u32 control;
-    u32 address;
-    u32 tag_address;
-    u32 quadword_count;
-    u32 saved_tag_address0;
-    u32 saved_tag_address1;
-    u32 scratchpad_address;
-    bool end_transfer;
-};
-
 struct System;
+
+namespace ee {
 
 class DMAC {
 public:
@@ -60,8 +38,6 @@ public:
 
     void DoSourceChain(int index);
 
-    DMAChannel channels[10];
-
     u32 control;
     u32 interrupt_status;
     u32 priority_control;
@@ -70,5 +46,33 @@ public:
     u32 ringbuffer_offset;
     u32 disabled_status;
 
+private:
+    struct Channel {
+        u32 control;
+        u32 address;
+        u32 tag_address;
+        u32 quadword_count;
+        u32 saved_tag_address0;
+        u32 saved_tag_address1;
+        u32 scratchpad_address;
+        bool end_transfer;
+    };
+
+    enum class ChannelType : int {
+        VIF0 = 0,
+        VIF1 = 1,
+        GIF = 2,
+        IPUFrom = 3,
+        IPUTo = 4,
+        SIF0 = 5,
+        SIF1 = 6,
+        SIF2 = 7,
+        SPRFrom = 8,
+        SPRTo = 9,
+    };
+
+    Channel channels[10];
     System& system;
 };
+
+} // namespace ee

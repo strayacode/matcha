@@ -49,7 +49,7 @@ static std::array<std::string, 256> syscall_info = {
     "Deci2Call", "PSMode", "MachineType", "GetMemorySize",
 };
 
-Context::Context(System& system) : system(system), interpreter(*this) {
+Context::Context(System& system) : dmac(system), timers(intc), intc(*this), system(system), interpreter(*this) {
     rdram = std::make_unique<std::array<u8, 0x2000000>>();
 }
 
@@ -72,6 +72,9 @@ void Context::Reset() {
 
     cop0.Reset();
     cop1.Reset();
+    dmac.Reset();
+    timers.Reset();
+    intc.Reset();
     interpreter.Reset();
 
     // do initial hardcoded mappings
@@ -92,6 +95,10 @@ void Context::Reset() {
 
 void Context::Run(int cycles) {
     interpreter.Run(cycles);
+
+    // timers and dmac run at half the speed of the ee (bus speed)
+    timers.Run(cycles / 2);
+    dmac.Run(cycles / 2);
 }
 
 template u8 Context::Read(VirtualAddress vaddr);
@@ -138,9 +145,9 @@ void Context::Write<u128>(VirtualAddress vaddr, u128 value) {
 
 u32 Context::ReadIO(u32 paddr) {
     if (paddr >= 0x10000000 && paddr < 0x10001840) {
-        return system.timers.ReadRegister(paddr);
+        return timers.ReadRegister(paddr);
     } else if (paddr >= 0x10008000 && paddr < 0x1000e000) {
-        return system.dmac.ReadChannel(paddr);
+        return dmac.ReadChannel(paddr);
     }
 
     switch (paddr) {
@@ -149,17 +156,17 @@ u32 Context::ReadIO(u32 paddr) {
     case 0x10003020:
         return system.gif.ReadStat();
     case 0x1000E000:
-        return system.dmac.ReadControl();
+        return dmac.ReadControl();
     case 0x1000E010:
-        return system.dmac.ReadInterruptStatus();
+        return dmac.ReadInterruptStatus();
     case 0x1000E020:
-        return system.dmac.ReadPriorityControl();
+        return dmac.ReadPriorityControl();
     case 0x1000E030:
-        return system.dmac.ReadPriorityControl();
+        return dmac.ReadPriorityControl();
     case 0x1000F000:
-        return system.ee_intc.ReadStat();
+        return intc.ReadStat();
     case 0x1000F010:
-        return system.ee_intc.ReadMask();
+        return intc.ReadMask();
     case 0x1000F130:
         return 0;
     case 0x1000F200:
@@ -192,7 +199,7 @@ u32 Context::ReadIO(u32 paddr) {
 
         break;
     case 0x1000f520:
-        return system.dmac.disabled_status;
+        return dmac.disabled_status;
     default:
         common::Log("[ee::Context] handle io read %08x", paddr);
     }
@@ -202,16 +209,16 @@ u32 Context::ReadIO(u32 paddr) {
 
 void Context::WriteIO(u32 paddr, u32 value) {
     if (paddr >= 0x10000000 && paddr < 0x10001840) {
-        system.timers.WriteRegister(paddr, value);
+        timers.WriteRegister(paddr, value);
         return;
     } if (paddr >= 0x12000000 && paddr < 0x12001084) {
         system.gs.WriteRegisterPrivileged(paddr, value);
         return;
     } else if (paddr >= 0x10008000 && paddr < 0x1000e054) {
-        system.dmac.WriteRegister(paddr, value);
+        dmac.WriteRegister(paddr, value);
         return;
     } else if (paddr >= 0x1000f520 && paddr < 0x1000f594) {
-        system.dmac.WriteRegister(paddr, value);
+        dmac.WriteRegister(paddr, value);
         return;
     } else if (paddr >= 0x11000000 && paddr < 0x11001000) {
         system.vu0.WriteCodeMemory(paddr, value);
@@ -253,10 +260,10 @@ void Context::WriteIO(u32 paddr, u32 value) {
         system.vif1.WriteFBRST(value);
         break;
     case 0x1000F000:
-        system.ee_intc.WriteStat(value);
+        intc.WriteStat(value);
         break;
     case 0x1000F010:
-        system.ee_intc.WriteMask(value);
+        intc.WriteMask(value);
         break;
     case 0x1000F180:
         // kputchar

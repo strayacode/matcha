@@ -7,9 +7,19 @@ static const char* channel_names[10] = {
     "SIF0", "SIF1", "SIF2", "SPR_FROM", "SPR_TO",
 };
 
+namespace ee {
+
 DMAC::DMAC(System& system) : system(system) {}
 
 void DMAC::Reset() {
+    control = 0;
+    interrupt_status = 0;
+    priority_control = 0;
+    skip_quadword = 0;
+    ringbuffer_size = 0;
+    ringbuffer_offset = 0;
+    disabled_status = 0x1201;
+
     for (int i = 0; i < 10; i++) {
         channels[i].control = 0;
         channels[i].address = 0;
@@ -20,14 +30,6 @@ void DMAC::Reset() {
         channels[i].scratchpad_address = 0;
         channels[i].end_transfer = false;
     }
-
-    control = 0;
-    interrupt_status = 0;
-    priority_control = 0;
-    skip_quadword = 0;
-    ringbuffer_size = 0;
-    ringbuffer_offset = 0;
-    disabled_status = 0x1201;
 }
 
 u32 DMAC::ReadChannel(u32 addr) {
@@ -44,7 +46,7 @@ u32 DMAC::ReadChannel(u32 addr) {
     case 0x30:
         return channels[index].tag_address;
     default:
-        common::Error("[DMAC] Handle %02x", addr & 0xFF);
+        common::Error("[ee::DMAC] Handle %02x", addr & 0xFF);
     }
 
     return 0;
@@ -53,11 +55,11 @@ u32 DMAC::ReadChannel(u32 addr) {
 void DMAC::WriteRegister(u32 addr, u32 data) {
     switch (addr) {
     case 0x1000e000:
-        common::Log("[DMAC] D_CTRL write %08x", data);
+        common::Log("[ee::DMAC] D_CTRL write %08x", data);
         control = data;
         break;
     case 0x1000e010:
-        common::Log("[DMAC] D_STAT write %08x", data);
+        common::Log("[ee::DMAC] D_STAT write %08x", data);
 
         // for bits (0..15) they get cleared if 1 is written
         interrupt_status &= ~(data & 0xffff);
@@ -68,28 +70,28 @@ void DMAC::WriteRegister(u32 addr, u32 data) {
         CheckInterruptSignal();
         break;
     case 0x1000e020:
-        common::Log("[DMAC] D_PCR write %08x", data);
+        common::Log("[ee::DMAC] D_PCR write %08x", data);
         priority_control = data;
         break;
     case 0x1000e030:
-        common::Log("[DMAC] D_SQWC write %08x", data);
+        common::Log("[ee::DMAC] D_SQWC write %08x", data);
         skip_quadword = data;
         break;
     case 0x1000e040:
-        common::Log("[DMAC] D_RBSR write %08x", data);
+        common::Log("[ee::DMAC] D_RBSR write %08x", data);
         ringbuffer_size = data;
         break;
     case 0x1000e050:
-        common::Log("[DMAC] D_RBOR write %08x", data);
+        common::Log("[ee::DMAC] D_RBOR write %08x", data);
         ringbuffer_offset = data;
         break;
     case 0x1000f590:
-        common::Log("[DMAC] D_ENABLE write %08x", data);
+        common::Log("[ee::DMAC] D_ENABLE write %08x", data);
         disabled_status = data;
         break;
     default:
         if (addr >= 0x1000e000) {
-            common::Error("[DMAC] handle write %08x = %08x", addr, data);
+            common::Error("[ee::DMAC] handle write %08x = %08x", addr, data);
         } else {
             WriteChannel(addr, data);
         }
@@ -104,38 +106,38 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
 
     switch (addr & 0xFF) {
     case 0x00:
-        common::Log("[DMAC] %s Dn_CHCR write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_CHCR write %08x", channel_name, data);
         channels[index].control = data;
 
         StartTransfer(index);
         break;
     case 0x10:
-        common::Log("[DMAC] %s Dn_MADR write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_MADR write %08x", channel_name, data);
         channels[index].address = data & ~0xF;
         break;
     case 0x20:
         // In normal and interleaved mode, the transfer ends when QWC reaches zero. Chain mode behaves differently
-        common::Log("[DMAC] %s Dn_QWC write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_QWC write %08x", channel_name, data);
         channels[index].quadword_count = data & 0xFFFF;
         break;
     case 0x30:
-        common::Log("[DMAC] %s Dn_TADR write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_TADR write %08x", channel_name, data);
         channels[index].tag_address = data & ~0xF;
         break;
     case 0x40:
-        common::Log("[DMAC] %s Dn_ASR0 write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_ASR0 write %08x", channel_name, data);
         channels[index].saved_tag_address0 = data & ~0xF;
         break;
     case 0x50:
-        common::Log("[DMAC] %s Dn_ASR1 write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_ASR1 write %08x", channel_name, data);
         channels[index].saved_tag_address1 = data & ~0xF;
         break;
     case 0x80:
-        common::Log("[DMAC] %s Dn_SADR write %08x", channel_name, data);
+        common::Log("[ee::DMAC] %s Dn_SADR write %08x", channel_name, data);
         channels[index].scratchpad_address = data & ~0xF;
         break;
     default:
-        common::Error("[DMAC] Handle channel with identifier %02x and data %08x", addr & 0xFF, data);
+        common::Error("[ee::DMAC] Handle channel with identifier %02x and data %08x", addr & 0xFF, data);
     }
 }
 
@@ -144,59 +146,59 @@ int DMAC::GetChannelIndex(u32 addr) {
 
     switch (channel) {
     case 0x80:
-        return static_cast<int>(DMAChannelType::VIF0);
+        return static_cast<int>(ChannelType::VIF0);
         break;
     case 0x90:
-        return static_cast<int>(DMAChannelType::VIF1);
+        return static_cast<int>(ChannelType::VIF1);
         break;
     case 0xA0:
-        return static_cast<int>(DMAChannelType::GIF);
+        return static_cast<int>(ChannelType::GIF);
         break;
     case 0xB0:
-        return static_cast<int>(DMAChannelType::IPUFrom);
+        return static_cast<int>(ChannelType::IPUFrom);
         break;
     case 0xB4:
-        return static_cast<int>(DMAChannelType::IPUTo);
+        return static_cast<int>(ChannelType::IPUTo);
         break;
     case 0xC0:
-        return static_cast<int>(DMAChannelType::SIF0);
+        return static_cast<int>(ChannelType::SIF0);
         break;
     case 0xC4:
-        return static_cast<int>(DMAChannelType::SIF1);
+        return static_cast<int>(ChannelType::SIF1);
         break;
     case 0xC8:
-        return static_cast<int>(DMAChannelType::SIF2);
+        return static_cast<int>(ChannelType::SIF2);
         break;
     case 0xD0:
-        return static_cast<int>(DMAChannelType::SPRFrom);
+        return static_cast<int>(ChannelType::SPRFrom);
         break;
     case 0xD4:
-        return static_cast<int>(DMAChannelType::SPRTo);
+        return static_cast<int>(ChannelType::SPRTo);
         break;
     default:
-        common::Error("[DMAC] Random behaviour!");
+        common::Error("[ee::DMAC] Random behaviour!");
     }
 
     return 0;
 }
 
 u32 DMAC::ReadInterruptStatus() {
-    common::Log("[DMAC] D_STAT read %08x", interrupt_status);
+    common::Log("[ee::DMAC] D_STAT read %08x", interrupt_status);
     return interrupt_status;
 }
 
 u32 DMAC::ReadControl() {
-    common::Log("[DMAC] read control %08x", control);
+    common::Log("[ee::DMAC] read control %08x", control);
     return control;
 }
 
 u32 DMAC::ReadPriorityControl() {
-    common::Log("[DMAC] read priority control %08x", priority_control);
+    common::Log("[ee::DMAC] read priority control %08x", priority_control);
     return priority_control;
 }
 
 u32 DMAC::ReadSkipQuadword() {
-    common::Log("[DMAC] read skip quadword %08x", skip_quadword);
+    common::Log("[ee::DMAC] read skip quadword %08x", skip_quadword);
     return skip_quadword;
 }
 
@@ -205,7 +207,7 @@ void DMAC::CheckInterruptSignal() {
 
     for (int i = 0; i < 10; i++) {
         if ((interrupt_status & (1 << i)) && (interrupt_status & (1 << (16 + i)))) {
-            common::Log("[DMAC] %s interrupt sent", channel_names[i]);
+            common::Log("[ee::DMAC] %s interrupt sent", channel_names[i]);
             irq = true;
             break;
         }
@@ -225,7 +227,7 @@ void DMAC::Run(int cycles) {
     while (cycles--) {
         // run each channel
         for (int i = 0; i < 10; i++) {
-            DMAChannel& channel = channels[i];
+            Channel& channel = channels[i];
 
             if (channel.control & (1 << 8)) {
                 Transfer(i);
@@ -235,14 +237,14 @@ void DMAC::Run(int cycles) {
 }
 
 void DMAC::Transfer(int index) {
-    switch (static_cast<DMAChannelType>(index)) {
-    case DMAChannelType::GIF:
+    switch (static_cast<ChannelType>(index)) {
+    case ChannelType::GIF:
         DoGIFTransfer();
         break;
-    case DMAChannelType::SIF0:
+    case ChannelType::SIF0:
         DoSIF0Transfer();
         break;
-    case DMAChannelType::SIF1:
+    case ChannelType::SIF1:
         DoSIF1Transfer();
         break;
     default:
@@ -251,7 +253,7 @@ void DMAC::Transfer(int index) {
 }
 
 void DMAC::DoGIFTransfer() {
-    DMAChannel& channel = channels[2];
+    Channel& channel = channels[2];
 
     if (channel.quadword_count) {
         u128 data = system.ee.Read<u128>(channel.address);
@@ -265,7 +267,7 @@ void DMAC::DoGIFTransfer() {
 }
 
 void DMAC::DoSIF0Transfer() {
-    DMAChannel& channel = channels[5];
+    Channel& channel = channels[5];
 
     if (channel.quadword_count) {
         // dmac can only transfer a quadword at a time
@@ -273,7 +275,7 @@ void DMAC::DoSIF0Transfer() {
             for (int i = 0; i < 4; i++) {
                 u32 data = system.sif.ReadSIF0FIFO();
 
-                common::Log("[DMAC] SIF0 reading data from fifo %08x", data);
+                common::Log("[ee::DMAC] SIF0 reading data from fifo %08x", data);
 
                 system.ee.Write<u32>(channel.address, data);
                 channel.address += 4;
@@ -291,7 +293,7 @@ void DMAC::DoSIF0Transfer() {
             dma_tag |= system.sif.ReadSIF0FIFO();
             dma_tag |= (u64)system.sif.ReadSIF0FIFO() << 32;
 
-            common::Log("[DMAC] SIF0 read DMATag %016lx", dma_tag);
+            common::Log("[ee::DMAC] SIF0 read DMATag %016lx", dma_tag);
 
             channel.quadword_count = dma_tag & 0xFFFF;
             channel.address = (dma_tag >> 32) & 0xFFFFFFF0;
@@ -309,13 +311,13 @@ void DMAC::DoSIF0Transfer() {
 }
 
 void DMAC::DoSIF1Transfer() {
-    DMAChannel& channel = channels[6];
+    Channel& channel = channels[6];
 
     if (channel.quadword_count) {
         // push data to the sif1 fifo
         u128 data = system.ee.Read<u128>(channel.address);
 
-        common::Log("[DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
+        common::Log("[ee::DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
 
         system.sif.WriteSIF1FIFO(data);
 
@@ -330,7 +332,7 @@ void DMAC::DoSIF1Transfer() {
 }
 
 void DMAC::StartTransfer(int index) {
-    common::Log("[DMAC] %s start transfer", channel_names[index]);
+    common::Log("[ee::DMAC] %s start transfer", channel_names[index]);
 
     // in normal mode we shouldn't worry about dmatag reading
     u8 mode = (channels[index].control >> 2) & 0x3;
@@ -338,7 +340,7 @@ void DMAC::StartTransfer(int index) {
 }
 
 void DMAC::EndTransfer(int index) {
-    common::Log("[DMAC] %s end transfer", channel_names[index]);
+    common::Log("[ee::DMAC] %s end transfer", channel_names[index]);
 
     channels[index].end_transfer = false;
     channels[index].control &= ~(1 << 8);
@@ -350,11 +352,11 @@ void DMAC::EndTransfer(int index) {
 }
 
 void DMAC::DoSourceChain(int index) {
-    DMAChannel& channel = channels[index];
+    Channel& channel = channels[index];
     u128 data = system.ee.Read<u128>(channel.tag_address);
     u64 dma_tag = data.lo;
 
-    common::Log("[DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);
+    common::Log("[ee::DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);
 
     channel.quadword_count = dma_tag & 0xFFFF;
     channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
@@ -386,7 +388,7 @@ void DMAC::DoSourceChain(int index) {
         channel.tag_address += 16;
         break;
     default:
-        common::Error("[DMAC] %s handle DMATag id %d", channel_names[index], id);
+        common::Error("[ee::DMAC] %s handle DMATag id %d", channel_names[index], id);
     }
 
     bool irq = (dma_tag >> 31) & 0x1;
@@ -396,3 +398,5 @@ void DMAC::DoSourceChain(int index) {
         channel.end_transfer = true;
     }
 }
+
+} // namespace ee

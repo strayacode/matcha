@@ -2,7 +2,11 @@
 
 #include "common/types.h"
 
-enum class IOPInterruptSource : u32 {
+namespace iop {
+
+struct Context;
+
+enum class InterruptSource : u32 {
     VBlankStart = 0,
     GPU = 1,
     CDVD = 2,
@@ -24,10 +28,6 @@ enum class IOPInterruptSource : u32 {
     USB = 22,
 };
 
-namespace iop {
-
-struct Context;
-
 class INTC {
 public:
     INTC(Context& ctx);
@@ -36,7 +36,7 @@ public:
 
     u32 ReadRegister(int offset);
     void WriteRegister(int offset, u32 data);
-    void RequestInterrupt(IOPInterruptSource source);
+    void RequestInterrupt(InterruptSource source);
     void UpdateInterrupts();
 
 private:

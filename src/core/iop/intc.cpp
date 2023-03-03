@@ -52,7 +52,7 @@ void INTC::WriteRegister(int offset, u32 data) {
     }
 }
 
-void INTC::RequestInterrupt(IOPInterruptSource source) {
+void INTC::RequestInterrupt(InterruptSource source) {
     interrupt_status |= 1 << static_cast<u32>(source);
     UpdateInterrupts();
 }
