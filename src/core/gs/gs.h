@@ -42,6 +42,9 @@ private:
     u64 trxreg;
     u8 trxdir;
     u64 prmodecont;
+    u64 prmode;
+    u64 fog;
+    u64 st;
 
     System& system;
 };

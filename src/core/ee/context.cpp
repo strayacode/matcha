@@ -104,7 +104,6 @@ void Context::Run(int cycles) {
 template u8 Context::Read(VirtualAddress vaddr);
 template u16 Context::Read(VirtualAddress vaddr);
 template u32 Context::Read(VirtualAddress vaddr);
-template u64 Context::Read(VirtualAddress vaddr);
 template <typename T>
 T Context::Read(VirtualAddress vaddr) {
     auto pointer = vtlb.Lookup<T>(vaddr);
@@ -116,19 +115,35 @@ T Context::Read(VirtualAddress vaddr) {
 }
 
 template <>
-u128 Context::Read<u128>(VirtualAddress vaddr) {
-    u128 value;
-    for (int i = 0; i < 4; i++) {
-        value.uw[i] = Read<u32>(vaddr + (i * 4));
+u64 Context::Read<u64>(VirtualAddress vaddr) {
+    auto pointer = vtlb.Lookup<u64>(vaddr);
+    if (pointer) {
+        return common::Read<u64>(pointer);
+    } else {
+        u32 paddr = vaddr & 0x1fffffff;
+        return (static_cast<u64>(ReadIO(paddr + 4)) << 32) | ReadIO(paddr);
     }
+}
 
-    return value;
+template <>
+u128 Context::Read<u128>(VirtualAddress vaddr) {
+    auto pointer = vtlb.Lookup<u128>(vaddr);
+    if (pointer) {
+        return common::Read<u128>(pointer);
+    } else {
+        u32 paddr = vaddr & 0x1fffffff;
+        u128 value;
+        for (int i = 0; i < 4; i++) {
+            value.uw[i] = ReadIO(paddr + (i * 4));
+        }
+
+        return value;
+    }
 }
 
 template void Context::Write(VirtualAddress vaddr, u8 value);
 template void Context::Write(VirtualAddress vaddr, u16 value);
 template void Context::Write(VirtualAddress vaddr, u32 value);
-template void Context::Write(VirtualAddress vaddr, u64 value);
 template <typename T>
 void Context::Write(VirtualAddress vaddr, T value) {
     auto pointer = vtlb.Lookup<T>(vaddr);
@@ -140,9 +155,27 @@ void Context::Write(VirtualAddress vaddr, T value) {
 }
 
 template <>
+void Context::Write<u64>(VirtualAddress vaddr, u64 value) {
+    auto pointer = vtlb.Lookup<u64>(vaddr);
+    if (pointer) {
+        return common::Write<u64>(pointer, value);
+    } else {
+        u32 paddr = vaddr & 0x1fffffff;
+        WriteIO(paddr, value & 0xffffffff);
+        WriteIO(paddr + 4, value >> 32);
+    }
+}
+
+template <>
 void Context::Write<u128>(VirtualAddress vaddr, u128 value) {
-    for (int i = 0; i < 4; i++) {
-        Write<u32>(vaddr + (i * 4), value.uw[i]);
+    auto pointer = vtlb.Lookup<u128>(vaddr);
+    if (pointer) {
+        return common::Write<u128>(pointer, value);
+    } else {
+        u32 paddr = vaddr & 0x1fffffff;
+        for (int i = 0; i < 4; i++) {
+            WriteIO(paddr + (i * 4), value.uw[i]);
+        }
     }
 }
 
