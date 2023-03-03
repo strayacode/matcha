@@ -27,6 +27,7 @@ void GS::Reset() {
     trxpos = 0;
     trxreg = 0;
     trxdir = 0;
+    prmodecont = 0;
 }
 
 void GS::SystemReset() {
@@ -136,6 +137,9 @@ void GS::WriteRegister(u32 addr, u64 value) {
         break;
     case 0x18:
         xyoffset1 = value;
+        break;
+    case 0x1a:
+        prmodecont = value;
         break;
     case 0x40:
         scissor1 = value;

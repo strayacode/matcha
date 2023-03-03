@@ -474,12 +474,12 @@ void Interpreter::daddiu() {
 
 void Interpreter::sq() {
     u128 reg = ctx.GetReg<u128>(inst.rt);
-    u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
+    u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xf;
     ctx.Write<u128>(addr, reg);
 }
 
 void Interpreter::lq() {
-    u32 vaddr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xF;
+    u32 vaddr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xf;
     u128 data = ctx.Read<u128>(vaddr);
     ctx.SetReg<u128>(inst.rt, data);
 }

@@ -50,6 +50,9 @@ void System::RunFrame() {
     while (scheduler.GetCurrentTime() < end_timestamp) {
         ee.Run(cycles);
 
+        // these components run at bus speed (1 / 2 speed of ee)
+        gif.Run(cycles / 2);
+
         // iop runs at 1 / 8 speed of the ee
         iop.Run(cycles / 8);
         

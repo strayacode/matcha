@@ -3,7 +3,7 @@
 #include <queue>
 #include "common/types.h"
 #include "common/log.h"
-#include "common/ring_buffer.h"
+#include "common/queue.h"
 
 class SIF {
 public:

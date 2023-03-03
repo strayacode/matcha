@@ -5,7 +5,7 @@
 #include "common/log.h"
 #include "core/ee/context.h"
 #include "core/scheduler.h"
-#include "core/gif/gif.h"
+#include "core/gif.h"
 #include "core/gs/gs.h"
 #include "core/vu/vu.h"
 #include "core/vif/vif.h"

@@ -41,6 +41,7 @@ private:
     u64 trxpos;
     u64 trxreg;
     u8 trxdir;
+    u64 prmodecont;
 
     System& system;
 };

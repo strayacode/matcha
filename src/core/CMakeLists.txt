@@ -26,7 +26,7 @@ add_library(core
     iop/executor.h
     iop/instruction.h
 
-    gif/gif.h gif/gif.cpp
+    gif.h gif.cpp
 
     gs/gs.h gs/gs.cpp
 

@@ -2,7 +2,7 @@
 
 #include "common/types.h"
 #include "common/log.h"
-#include <queue>
+#include "common/queue.h"
 
 struct System;
 
@@ -13,29 +13,33 @@ struct System;
 // PATH1: data is transferred via the vu1 using the xgkick instruction
 // PATH2: data is transferred via the vif1
 // PATH3: data is transferred using the ee via dmac
-class GIF {
-public:
+struct GIF {
     GIF(System& system);
 
     void Reset();
     void SystemReset();
+    void Run(int cycles);
 
-    u32 ReadStat();
+    u32 ReadRegister(u32 addr);
+    void WriteRegister(u32 addr, u32 value);
 
-    void WriteCTRL(u8 data);
-    void WriteFIFO(u128 data);
+    void WriteFIFO(u32 value);
 
-    void SendPath3(u128 data);
+    void SendPath3(u128 value);
     void ProcessPacked(u128 data);
     void ProcessImage(u128 data);
 
 private:
+    void StartTransfer();
+    void ProcessTag();
+
     u8 ctrl;
     u32 stat;
 
-    std::queue<u128> fifo;
-
-    struct GIFTag {
+    // the path3 fifo stores up to 16 quadwords (128-bit)
+    common::Queue<u32, 64> fifo;
+    
+    struct Tag {
         u32 nloop;
         bool eop;
         bool prim;

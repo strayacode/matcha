@@ -118,8 +118,10 @@ T Context::Read(VirtualAddress vaddr) {
 template <>
 u128 Context::Read<u128>(VirtualAddress vaddr) {
     u128 value;
-    value.lo = Read<u64>(vaddr);
-    value.hi = Read<u64>(vaddr + 8);
+    for (int i = 0; i < 4; i++) {
+        value.uw[i] = Read<u32>(vaddr + (i * 4));
+    }
+
     return value;
 }
 
@@ -139,8 +141,9 @@ void Context::Write(VirtualAddress vaddr, T value) {
 
 template <>
 void Context::Write<u128>(VirtualAddress vaddr, u128 value) {
-    Write<u64>(vaddr, value.lo);
-    Write<u64>(vaddr + 8, value.hi);
+    for (int i = 0; i < 4; i++) {
+        Write<u32>(vaddr + (i * 4), value.uw[i]);
+    }
 }
 
 u32 Context::ReadIO(u32 paddr) {
@@ -148,13 +151,13 @@ u32 Context::ReadIO(u32 paddr) {
         return timers.ReadRegister(paddr);
     } else if (paddr >= 0x10008000 && paddr < 0x1000e000) {
         return dmac.ReadChannel(paddr);
+    } else if (paddr >= 0x10003000 && paddr < 0x100030a4) {
+        return system.gif.ReadRegister(paddr);
     }
 
     switch (paddr) {
     case 0x10002010:
         return system.ipu.ReadControl();
-    case 0x10003020:
-        return system.gif.ReadStat();
     case 0x1000E000:
         return dmac.ReadControl();
     case 0x1000E010:
@@ -232,6 +235,12 @@ void Context::WriteIO(u32 paddr, u32 value) {
     } else if (paddr >= 0x1100c000 && paddr < 0x11010000) {
         system.vu1.WriteDataMemory(paddr, value);
         return;
+    } else if (paddr >= 0x10003000 && paddr < 0x100030a4) {
+        system.gif.WriteRegister(paddr, value);
+        return;
+    } else if (paddr >= 0x10006000 && paddr < 0x10006010) {
+        system.gif.WriteRegister(paddr, value);
+        return;
     }
 
     switch (paddr) {
@@ -240,9 +249,6 @@ void Context::WriteIO(u32 paddr, u32 value) {
         break;
     case 0x10002010:
         system.ipu.WriteControl(value);
-        break;
-    case 0x10003000:
-        system.gif.WriteCTRL(value);
         break;
     case 0x10003810:
         system.vif0.WriteFBRST(value);
