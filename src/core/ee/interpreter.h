@@ -139,6 +139,8 @@ struct Interpreter : public Executor {
     void pcpyld();
     void psubb();
     void pnor();
+    void pand();
+    void pcpyud();
     void illegal_instruction();
     void stub_instruction();
 

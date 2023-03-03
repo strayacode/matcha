@@ -291,6 +291,15 @@ void Interpreter::pnor() {
     ctx.SetReg<u128>(inst.rd, ~(ctx.GetReg<u128>(inst.rs) | ctx.GetReg<u128>(inst.rt)));
 }
 
+void Interpreter::pand() {
+    ctx.SetReg<u128>(inst.rd, ctx.GetReg<u128>(inst.rs) & ctx.GetReg<u128>(inst.rt));
+}
+
+void Interpreter::pcpyud() {
+    ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rs, 1));
+    ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rt, 1), 1);
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < SignExtend<s64, 16>(inst.imm));

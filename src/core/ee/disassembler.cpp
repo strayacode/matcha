@@ -208,10 +208,12 @@ static std::map<int, DisassemblyInfo> mmi1_table = {
 static std::map<int, DisassemblyInfo> mmi2_table = {
     {0, DisassemblyInfo{"paddw $rd, $rs, $rt", InstructionType::Register}},
     {14, DisassemblyInfo{"pcpyld $rd, $rs, $rt", InstructionType::Register}},
+    {18, DisassemblyInfo{"pand $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi3_table = {
     {0, DisassemblyInfo{"pmadduw $rd, $rs, $rt", InstructionType::Register}},
+    {14, DisassemblyInfo{"pcpyud $rd, $rs, $rt", InstructionType::Register}},
     {19, DisassemblyInfo{"pnor $rd, $rs, $rt", InstructionType::Register}},
 };
 
