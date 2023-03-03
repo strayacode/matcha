@@ -246,7 +246,7 @@ void HostInterface::SetupStyle() {
 void HostInterface::TogglePause() {
     if (core.GetState() == CoreState::Running) {
         core.SetState(CoreState::Paused);
-    } else {
+    } else if (core.GetState() == CoreState::Paused) {
         core.SetState(CoreState::Running);
     }
 }
