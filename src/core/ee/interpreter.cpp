@@ -233,7 +233,7 @@ void Interpreter::mflo1() {
 }
 
 void Interpreter::mult1() {
-    s64 result = ctx.GetReg<s32>(inst.rt) * ctx.GetReg<s32>(inst.rs);
+    s64 result = static_cast<s64>(ctx.GetReg<s32>(inst.rs)) * static_cast<s64>(ctx.GetReg<s32>(inst.rt));
     ctx.lo1 = SignExtend<s64, 32>(result & 0xffffffff);
     ctx.hi1 = SignExtend<s64, 32>(result >> 32);
     ctx.SetReg<u64>(inst.rd, ctx.lo1);
@@ -677,7 +677,7 @@ void Interpreter::orr() {
 }
 
 void Interpreter::mult() {
-    s64 result = ctx.GetReg<s32>(inst.rs) * ctx.GetReg<s32>(inst.rt);
+    s64 result = static_cast<s64>(ctx.GetReg<s32>(inst.rs)) * static_cast<s64>(ctx.GetReg<s32>(inst.rt));
     ctx.lo = SignExtend<s64, 32>(result & 0xffffffff);
     ctx.hi = SignExtend<s64, 32>(result >> 32);
     ctx.SetReg<u64>(inst.rd, ctx.lo);
