@@ -4,7 +4,7 @@ add_library(common
     memory_helpers.h
     emu_thread.h emu_thread.cpp
     arithmetic.h arithmetic.cpp
-    cpu_types.h ring_buffer.h
+    queue.h
     memory.h virtual_page_table.h
     string.h
 )

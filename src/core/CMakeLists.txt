@@ -28,7 +28,7 @@ add_library(core
 
     gif.h gif.cpp
 
-    gs/gs.h gs/gs.cpp
+    gs/context.h gs/context.cpp
 
     vu/vu.h vu/vu.cpp
 

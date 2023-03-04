@@ -6,7 +6,7 @@
 #include "core/ee/context.h"
 #include "core/scheduler.h"
 #include "core/gif.h"
-#include "core/gs/gs.h"
+#include "core/gs/context.h"
 #include "core/vu/vu.h"
 #include "core/vif/vif.h"
 #include "core/ipu/ipu.h"
@@ -37,7 +37,7 @@ struct System {
     iop::Context iop;
     
     GIF gif;
-    GS gs;
+    gs::Context gs;
     VU vu0;
     VU vu1;
     VIF vif0;

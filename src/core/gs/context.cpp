@@ -1,10 +1,12 @@
 #include "common/log.h"
-#include "core/gs/gs.h"
+#include "core/gs/context.h"
 #include "core/system.h"
 
-GS::GS(System& system) : system(system) {}
+namespace gs {
 
-void GS::Reset() {
+Context::Context(System& system) : system(system) {}
+
+void Context::Reset() {
     csr = 0;
     smode1 = 0;
     synch1 = 0;
@@ -18,10 +20,11 @@ void GS::Reset() {
     display2 = 0;
     bgcolour = 0;
     prim = 0;
-    frame1 = 0;
-    xyoffset1 = 0;
-    scissor1 = 0;
+    frame.fill(0);
+    xyoffset.fill(0);
+    scissor.fill(0);
     rgbaq = 0;
+    xyzf2 = 0;
     xyz2 = 0;
     bitbltbuf = 0;
     trxpos = 0;
@@ -31,24 +34,46 @@ void GS::Reset() {
     prmode = 0;
     fog = 0;
     st = 0;
+    uv = 0;
+    scanmsk = 0;
+    tex0.fill(0);
+    clamp.fill(0);
+    xyzf3 = 0;
+    xyz3 = 0;
+    tex1.fill(0);
+    tex2.fill(0);
+    texclut = 0;
+    miptbp1.fill(0);
+    miptbp2.fill(0);
+    texa = 0;
+    fogcol = 0;
+    texflush = 0;
+    alpha.fill(0);
+    test.fill(0);
+    pabe = 0;
+    dimx = 0;
+    dthe = 0;
+    colclamp = 0;
+    fba.fill(0);
+    zbuf.fill(0);
 }
 
-void GS::SystemReset() {
-    common::Log("[GS] system reset");
+void Context::SystemReset() {
+    common::Log("[gs::Context] system reset");
 }
 
-u64 GS::ReadRegisterPrivileged(u32 addr) {
+u32 Context::ReadRegisterPrivileged(u32 addr) {
     switch (addr) {
     case 0x12001000:
         return csr;
     default:
-        common::Error("[GS] handle privileged read %08x", addr);
+        common::Error("[gs::Context] handle privileged read %08x", addr);
     }
 
     return 0;
 }
 
-void GS::WriteRegisterPrivileged(u32 addr, u64 value) {
+void Context::WriteRegisterPrivileged(u32 addr, u32 value) {
     switch (addr) {
     case 0x12000000:
         pmode = value;
@@ -123,11 +148,11 @@ void GS::WriteRegisterPrivileged(u32 addr, u64 value) {
     case 0x12001014:
         break;
     default:
-        common::Error("[GS] handle privileged write %08x = %08x", addr, value);
+        common::Error("[gs::Context] handle privileged write %08x = %08x", addr, value);
     }
 }
 
-void GS::WriteRegister(u32 addr, u64 value) {
+void Context::WriteRegister(u32 addr, u64 value) {
     switch (addr) {
     case 0x00:
         prim = value;
@@ -138,14 +163,53 @@ void GS::WriteRegister(u32 addr, u64 value) {
     case 0x02:
         st = value;
         break;
+    case 0x03:
+        uv = value;
+        break;
+    case 0x04:
+        xyzf2 = value;
+        break;
     case 0x05:
         xyz2 = value;
+        break;
+    case 0x06:
+        tex0[0] = value;
+        break;
+    case 0x07:
+        tex0[1] = value;
+        break;
+    case 0x08:
+        clamp[0] = value;
+        break;
+    case 0x09:
+        clamp[1] = value;
         break;
     case 0x0a:
         fog = value;
         break;
+    case 0x0c:
+        xyzf3 = value;
+        break;
+    case 0x0d:
+        xyz3 = value;
+        break;
+    case 0x14:
+        tex1[0] = value;
+        break;
+    case 0x15:
+        tex1[1] = value;
+        break;
+    case 0x16:
+        tex2[0] = value;
+        break;
+    case 0x17:
+        tex2[1] = value;
+        break;
     case 0x18:
-        xyoffset1 = value;
+        xyoffset[0] = value;
+        break;
+    case 0x19:
+        xyoffset[1] = value;
         break;
     case 0x1a:
         prmodecont = value;
@@ -153,11 +217,80 @@ void GS::WriteRegister(u32 addr, u64 value) {
     case 0x1b:
         prmode = value;
         break;
-    case 0x40:
-        scissor1 = value;
+    case 0x1c:
+        texclut = value;
         break;
-    case 0x4C:
-        frame1 = value;
+    case 0x22:
+        scanmsk = value;
+        break;
+    case 0x34:
+        miptbp1[0] = value;
+        break;
+    case 0x35:
+        miptbp1[1] = value;
+        break;
+    case 0x36:
+        miptbp2[0] = value;
+        break;
+    case 0x37:
+        miptbp2[1] = value;
+        break;
+    case 0x3b:
+        texa = value;
+        break;
+    case 0x3d:
+        fogcol = value;
+        break;
+    case 0x3f:
+        texflush = value;
+        break;
+    case 0x40:
+        scissor[0] = value;
+        break;
+    case 0x41:
+        scissor[1] = value;
+        break;
+    case 0x42:
+        alpha[0] = value;
+        break;
+    case 0x43:
+        alpha[1] = value;
+        break;
+    case 0x44:
+        dimx = value;
+        break;
+    case 0x45:
+        dthe = value;
+        break;
+    case 0x46:
+        colclamp = value;
+        break;
+    case 0x47:
+        test[0] = value;
+        break;
+    case 0x48:
+        test[1] = value;
+        break;
+    case 0x49:
+        pabe = value;
+        break;
+    case 0x4a:
+        fba[0] = value;
+        break;
+    case 0x4b:
+        fba[1] = value;
+        break;
+    case 0x4c:
+        frame[0] = value;
+        break;
+    case 0x4d:
+        frame[1] = value;
+        break;
+    case 0x4e:
+        zbuf[0] = value;
+        break;
+    case 0x4f:
+        zbuf[1] = value;
         break;
     case 0x50:
         bitbltbuf = value;
@@ -172,6 +305,8 @@ void GS::WriteRegister(u32 addr, u64 value) {
         trxdir = value;
         break;
     default:
-        common::Error("[GS] handle write %08x = %016lx", addr, value);
+        common::Error("[gs::Context] handle write %08x = %016lx", addr, value);
     }
 }
+
+} // namespace gs
