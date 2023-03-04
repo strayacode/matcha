@@ -3,8 +3,7 @@
 #include "common/types.h"
 #include "common/log.h"
 #include "common/queue.h"
-
-struct System;
+#include "core/gs/context.h"
 
 // the gif, also known as the graphical interface, is a component of the ps2
 // which allows textures and geometry to be sent to the gs for rasterization.
@@ -14,7 +13,7 @@ struct System;
 // PATH2: data is transferred via the vif1
 // PATH3: data is transferred using the ee via dmac
 struct GIF {
-    GIF(System& system);
+    GIF(gs::Context& gs);
 
     void Reset();
     void SystemReset();
@@ -51,5 +50,5 @@ private:
         int transfers_left;
     } current_tag;
 
-    System& system;
+    gs::Context& gs;
 };

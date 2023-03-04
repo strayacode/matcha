@@ -14,9 +14,33 @@ public:
     u32 ReadRegisterPrivileged(u32 addr);
     void WriteRegisterPrivileged(u32 addr, u32 value);
     void WriteRegister(u32 addr, u64 value);
+    void WriteHWReg(u64 value);
 
     void Reset();
     void SystemReset();
+
+    union RGBAQ {
+        struct {
+            u8 r;
+            u8 g;
+            u8 b;
+            u8 a;
+            f32 q;
+        };
+
+        u64 data;
+    };
+
+    union TRXREG {
+        struct {
+            u32 width : 12;
+            u32 : 20;
+            u32 height : 12;
+            u32 : 20;
+        };
+
+        u64 data;
+    };
 
     u32 csr;
 
@@ -37,12 +61,12 @@ public:
     std::array<u64, 2> frame;
     std::array<u64, 2> xyoffset;
     std::array<u64, 2> scissor;
-    u64 rgbaq;
+    RGBAQ rgbaq;
     u64 xyzf2;
     u64 xyz2;
     u64 bitbltbuf;
     u64 trxpos;
-    u64 trxreg;
+    TRXREG trxreg;
     u8 trxdir;
     u64 prmodecont;
     u64 prmode;

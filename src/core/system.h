@@ -35,9 +35,9 @@ struct System {
 
     ee::Context ee;
     iop::Context iop;
-    
-    GIF gif;
     gs::Context gs;
+
+    GIF gif;
     VU vu0;
     VU vu1;
     VIF vif0;

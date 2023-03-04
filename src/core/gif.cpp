@@ -2,7 +2,7 @@
 #include "core/gif.h"
 #include "core/system.h"
 
-GIF::GIF(System& system) : system(system) {}
+GIF::GIF(gs::Context& gs) : gs(gs) {}
 
 void GIF::Reset() {
     ctrl = 0;
@@ -85,7 +85,7 @@ void GIF::ProcessPacked(u128 data) {
 
     switch (reg) {
     case 0x0:
-        system.gs.WriteRegister(0x00, data.uw[0] & 0x7ff);
+        gs.WriteRegister(0x00, data.uw[0] & 0x7ff);
         break;
     case 0x1:
         common::Log("[GIF] write rgbaq");
@@ -94,7 +94,7 @@ void GIF::ProcessPacked(u128 data) {
         common::Log("[GIF] write fog");
         break;
     case 0xe:
-        system.gs.WriteRegister(data.hi & 0xFF, data.lo);
+        gs.WriteRegister(data.hi & 0xFF, data.lo);
         break;
     default:
         common::Error("[GIF] handle register %02x", reg);
@@ -108,7 +108,8 @@ void GIF::ProcessPacked(u128 data) {
 }
 
 void GIF::ProcessImage(u128 data) {
-
+    gs.WriteHWReg(data.lo);
+    gs.WriteHWReg(data.hi);
 }
 
 void GIF::StartTransfer() {
@@ -123,24 +124,27 @@ void GIF::StartTransfer() {
     current_tag.reglist = data.hi;
     current_tag.reglist_offset = 0;
 
-    common::Log("[GIF] receive giftag %016lx%016lx format %d", data.hi, data.lo, current_tag.format);
+    common::Log("[GIF] start transfer %016lx%016lx format %d", data.hi, data.lo, current_tag.format);
 
     if (!current_tag.nregs) {
         current_tag.nregs = 16;
     }
 
     if (current_tag.prim) {
-        common::Error("[GIF] set prim in gs");
+        gs.prim = current_tag.prim_data;
     }
 
-    // TODO: initialise the Q register to 1.0f
+    gs.rgbaq.q = 1.0f;
 
     switch (current_tag.format) {
     case 0:
         current_tag.transfers_left = current_tag.nloop * current_tag.nregs;
         break;
+    case 2:
+        current_tag.transfers_left = current_tag.nloop;
+        break;
     default:
-        common::Error("[GIF] handle GIFTag format %d", current_tag.format);
+        common::Error("[GIF] handle giftag format start of transfer %d", current_tag.format);
     }
 }
 
@@ -151,8 +155,11 @@ void GIF::ProcessTag() {
     case 0:
         ProcessPacked(data);
         break;
+    case 2:
+        ProcessImage(data);
+        break;
     default:
-        common::Error("[GIF] handle GIFTag format %d", current_tag.format);
+        common::Error("[GIF] handle giftag in transfer format %d", current_tag.format);
     }
 
     current_tag.transfers_left--;

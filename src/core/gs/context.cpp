@@ -1,3 +1,4 @@
+#include <cassert>
 #include "common/log.h"
 #include "core/gs/context.h"
 #include "core/system.h"
@@ -23,12 +24,12 @@ void Context::Reset() {
     frame.fill(0);
     xyoffset.fill(0);
     scissor.fill(0);
-    rgbaq = 0;
+    rgbaq.data = 0;
     xyzf2 = 0;
     xyz2 = 0;
     bitbltbuf = 0;
     trxpos = 0;
-    trxreg = 0;
+    trxreg.data = 0;
     trxdir = 0;
     prmodecont = 0;
     prmode = 0;
@@ -158,7 +159,7 @@ void Context::WriteRegister(u32 addr, u64 value) {
         prim = value;
         break;
     case 0x01:
-        rgbaq = value;
+        rgbaq.data = value;
         break;
     case 0x02:
         st = value;
@@ -299,14 +300,22 @@ void Context::WriteRegister(u32 addr, u64 value) {
         trxpos = value;
         break;
     case 0x52:
-        trxreg = value;
+        trxreg.data = value;
         break;
     case 0x53:
         trxdir = value;
         break;
+    case 0x54:
+        WriteHWReg(value);
+        break;
     default:
         common::Error("[gs::Context] handle write %08x = %016lx", addr, value);
     }
+}
+
+void Context::WriteHWReg(u64 value) {
+    assert(trxdir == 0);
+    common::Log("[gs::Context] hwreg write %016llx direction %d width %d height %d", value, trxdir, trxreg.width, trxreg.height);
 }
 
 } // namespace gs

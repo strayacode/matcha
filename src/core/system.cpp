@@ -1,6 +1,6 @@
 #include <core/system.h>
 
-System::System() : ee(*this), iop(*this), gif(*this), gs(*this), elf_loader(*this) {
+System::System() : ee(*this), iop(*this), gs(*this), gif(gs), elf_loader(*this) {
     bios = std::make_unique<std::array<u8, 0x400000>>();
     iop_ram = std::make_unique<std::array<u8, 0x200000>>();
     VBlankStartEvent = std::bind(&System::VBlankStart, this);
@@ -23,8 +23,8 @@ void System::Reset() {
     scheduler.Reset();
     ee.Reset();
     iop.Reset();
-    gif.Reset();
     gs.Reset();
+    gif.Reset();
     vu0.Reset();
     vu1.Reset();
     vif0.Reset();
