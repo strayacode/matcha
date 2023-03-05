@@ -43,6 +43,14 @@ bool HostInterface::Initialise() {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    // initialise texture stuff
+    glGenTextures(1, &screen_texture);
+    glBindTexture(GL_TEXTURE_2D, screen_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 13.0f);
     io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
@@ -61,6 +69,8 @@ void HostInterface::Run() {
         ImGui::NewFrame();
 
         RenderMenubar();
+
+        RenderDisplayWindow();
 
         // show demo window
         if (show_demo_window) {
@@ -249,4 +259,39 @@ void HostInterface::TogglePause() {
     } else if (core.GetState() == CoreState::Paused) {
         core.SetState(CoreState::Running);
     }
+}
+
+void HostInterface::RenderDisplayWindow() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+
+    // TODO: provide an abstraction for this in the video namespace
+    glBindTexture(GL_TEXTURE_2D, screen_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, core.system.gs.GetVRAM());
+
+    const double scale_x = static_cast<double>(window_width) / 640;
+    const double scale_y = static_cast<double>(window_height - menubar_height) / 480;
+    const double scale = scale_x < scale_y ? scale_x : scale_y;
+
+    ImVec2 scaled_dimensions = ImVec2(640 * scale, 480 * scale);
+    ImVec2 center_pos = ImVec2(
+        (static_cast<double>(window_width) - scaled_dimensions.x) / 2,
+        (static_cast<double>(window_height - menubar_height) - scaled_dimensions.y) / 2
+    );
+  
+    ImGui::GetBackgroundDrawList()->AddImage(
+        (void*)(intptr_t)screen_texture,
+        ImVec2(center_pos.x, menubar_height + center_pos.y),
+        ImVec2(center_pos.x + scaled_dimensions.x, menubar_height + center_pos.y + scaled_dimensions.y),
+        ImVec2(0, 0),
+        ImVec2(1, 1),
+        IM_COL32_WHITE
+    );
+
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
 }

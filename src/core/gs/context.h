@@ -28,6 +28,8 @@ public:
     void Reset();
     void SystemReset();
 
+    u8* GetVRAM();
+
     union RGBAQ {
         struct {
             u8 r;
@@ -161,7 +163,8 @@ private:
 
     int pixels_transferred;
     
-    std::array<Page, 512> vram;
+    // std::array<Page, 512> vram;
+    std::array<u32, 0x100000> vram;
 
     System& system;
 };

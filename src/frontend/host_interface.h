@@ -46,6 +46,7 @@ private:
     void HandleInput();
     void RenderMenubar();
     void Boot(const std::string& path);
+    void RenderDisplayWindow();
     
     const char* glsl_version = "#version 330";
 
@@ -60,6 +61,9 @@ private:
 
     int window_width;
     int window_height;
+
+    static constexpr int menubar_height = 18;
+    GLuint screen_texture;
 
     float fps;
 };

@@ -60,13 +60,19 @@ void Context::Reset() {
 
     pixels_transferred = 0;
     
-    for (int i = 0; i < 512; i++) {
-        vram[i].Reset();
-    }
+    // for (int i = 0; i < 512; i++) {
+    //     vram[i].Reset();
+    // }
+
+    vram.fill(0);
 }
 
 void Context::SystemReset() {
     common::Log("[gs::Context] system reset");
+}
+
+u8* Context::GetVRAM() {
+    return reinterpret_cast<u8*>(&vram[0]);
 }
 
 u32 Context::ReadRegisterPrivileged(u32 addr) {
@@ -374,19 +380,23 @@ int Context::GetPixelsToTransfer(PixelFormat format) {
     return 0;
 }
 
+int i = 0;
+
 void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value) {
-    // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
-    // so / 8192 will give us the current page
-    int page = base / 8192;
-    int width_in_pages = width / 64;
+    vram[i] = value;
+    i++;
+    // // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
+    // // so / 8192 will give us the current page
+    // int page = base / 8192;
+    // int width_in_pages = width / 64;
 
-    // add the horizontal increment from x to page
-    page += (x / 64) % width_in_pages;
+    // // add the horizontal increment from x to page
+    // page += (x / 64) % width_in_pages;
 
-    // add the vertical increment from y to page
-    page += (y / 32) * width_in_pages;
+    // // add the vertical increment from y to page
+    // page += (y / 32) * width_in_pages;
 
-    vram[page].WritePSMCT32Pixel(x, y, value);
+    // vram[page].WritePSMCT32Pixel(x, y, value);
 }
 
 } // namespace gs
