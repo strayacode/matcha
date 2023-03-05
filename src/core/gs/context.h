@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 #include "common/types.h"
+#include "core/gs/page.h"
 
 struct System;
 
@@ -156,7 +157,7 @@ private:
     };
 
     int GetPixelsToTransfer(PixelFormat format);
-    void WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 pixel);
+    void WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value);
 
     int pixels_transferred;
     

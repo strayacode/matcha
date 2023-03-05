@@ -5,9 +5,7 @@
 
 namespace gs {
 
-Context::Context(System& system) : system(system) {
-    vram = std::make_unique<std::array<u8, 0x400000>>();
-}
+Context::Context(System& system) : system(system) {}
 
 void Context::Reset() {
     csr = 0;
@@ -330,14 +328,14 @@ void Context::WriteHWReg(u64 value) {
     // (in pixels)
     u32 dst_width = bitbltbuf.dst_width * 64;
 
-    common::Log("[gs::Context] hwreg write %016llx direction %d transmission width %d transmission height %d %08x %d", value, trxdir, trxreg.width, trxreg.height, dst_base, dst_width);
-    common::Log("[gs::Context] hwreg write offset x %d offset y %d", trxpos.dst_x, trxpos.dst_y);
+    // common::Log("[gs::Context] hwreg write %016llx direction %d transmission width %d transmission height %d %08x %d", value, trxdir, trxreg.width, trxreg.height, dst_base, dst_width);
+    // common::Log("[gs::Context] hwreg write offset x %d offset y %d", trxpos.dst_x, trxpos.dst_y);
 
     int pixels_to_transfer = GetPixelsToTransfer(static_cast<PixelFormat>(bitbltbuf.dst_format));
     for (int i = 0; i < pixels_to_transfer; i++) {
         int x = (pixels_transferred % trxreg.width) + trxpos.dst_x;
         int y = (pixels_transferred / trxreg.width) + trxpos.dst_y;
-        common::Log("[gs::Context] x %d y %d", x, y);
+        // common::Log("[gs::Context] x %d y %d", x, y);
 
         if (x >= 2048) {
             common::Error("[gs::Context] handle x >= 2048");
@@ -376,7 +374,7 @@ int Context::GetPixelsToTransfer(PixelFormat format) {
     return 0;
 }
 
-void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 pixel) {
+void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value) {
     // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
     // so / 8192 will give us the current page
     int page = base / 8192;
@@ -388,7 +386,7 @@ void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 pixel) {
     // add the vertical increment from y to page
     page += (y / 32) * width_in_pages;
 
-    vram[page].WritePSMCT32Pixel(x, y, pixel);
+    vram[page].WritePSMCT32Pixel(x, y, value);
 }
 
 } // namespace gs

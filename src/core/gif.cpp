@@ -47,7 +47,6 @@ u32 GIF::ReadRegister(u32 addr) {
 
 void GIF::WriteRegister(u32 addr, u32 value) {
     if (addr >= 0x10006000 && addr < 0x10006010) {
-        common::Log("[GIF] write fifo %08x %08x", addr, value);
         WriteFIFO(value);
         return;
     }
@@ -69,14 +68,14 @@ void GIF::WriteRegister(u32 addr, u32 value) {
 
 void GIF::WriteFIFO(u32 value) {
     fifo.Push<u32>(value);
-    common::Log("[GIF] push to fifo %08x", value);
+    // common::Log("[GIF] push to fifo %08x", value);
     if (fifo.GetLength() == fifo.GetSize()) {
         common::Error("[GIF] no more space left in fifo");
     }
 }
 
 void GIF::SendPath3(u128 value) {
-    common::Log("[GIF] send path3 %016lx%016lx format %d", value.hi, value.lo);
+    // common::Log("[GIF] send path3 %016lx%016lx format %d", value.hi, value.lo);
     fifo.Push<u128>(value);
 }
 
@@ -124,7 +123,7 @@ void GIF::StartTransfer() {
     current_tag.reglist = data.hi;
     current_tag.reglist_offset = 0;
 
-    common::Log("[GIF] start transfer %016lx%016lx format %d", data.hi, data.lo, current_tag.format);
+    // common::Log("[GIF] start transfer %016lx%016lx format %d", data.hi, data.lo, current_tag.format);
 
     if (!current_tag.nregs) {
         current_tag.nregs = 16;
@@ -150,7 +149,7 @@ void GIF::StartTransfer() {
 
 void GIF::ProcessTag() {
     u128 data = fifo.Pop<u128>();
-    common::Log("[GIF] receive giftag in transfer %016lx%016lx", data.hi, data.lo);
+    // common::Log("[GIF] receive giftag in transfer %016lx%016lx", data.hi, data.lo);
     switch (current_tag.format) {
     case 0:
         ProcessPacked(data);
