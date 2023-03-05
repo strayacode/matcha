@@ -5,7 +5,9 @@
 
 namespace gs {
 
-Context::Context(System& system) : system(system) {}
+Context::Context(System& system) : system(system) {
+    vram = std::make_unique<std::array<u8, 0x400000>>();
+}
 
 void Context::Reset() {
     csr = 0;
@@ -27,8 +29,8 @@ void Context::Reset() {
     rgbaq.data = 0;
     xyzf2 = 0;
     xyz2 = 0;
-    bitbltbuf = 0;
-    trxpos = 0;
+    bitbltbuf.data = 0;
+    trxpos.data = 0;
     trxreg.data = 0;
     trxdir = 0;
     prmodecont = 0;
@@ -57,6 +59,12 @@ void Context::Reset() {
     colclamp = 0;
     fba.fill(0);
     zbuf.fill(0);
+
+    pixels_transferred = 0;
+    
+    for (int i = 0; i < 512; i++) {
+        vram[i].Reset();
+    }
 }
 
 void Context::SystemReset() {
@@ -294,10 +302,10 @@ void Context::WriteRegister(u32 addr, u64 value) {
         zbuf[1] = value;
         break;
     case 0x50:
-        bitbltbuf = value;
+        bitbltbuf.data = value;
         break;
     case 0x51:
-        trxpos = value;
+        trxpos.data = value;
         break;
     case 0x52:
         trxreg.data = value;
@@ -315,7 +323,72 @@ void Context::WriteRegister(u32 addr, u64 value) {
 
 void Context::WriteHWReg(u64 value) {
     assert(trxdir == 0);
-    common::Log("[gs::Context] hwreg write %016llx direction %d width %d height %d", value, trxdir, trxreg.width, trxreg.height);
+
+    // (in bytes)
+    u32 dst_base = bitbltbuf.dst_base * 64 * 4;
+
+    // (in pixels)
+    u32 dst_width = bitbltbuf.dst_width * 64;
+
+    common::Log("[gs::Context] hwreg write %016llx direction %d transmission width %d transmission height %d %08x %d", value, trxdir, trxreg.width, trxreg.height, dst_base, dst_width);
+    common::Log("[gs::Context] hwreg write offset x %d offset y %d", trxpos.dst_x, trxpos.dst_y);
+
+    int pixels_to_transfer = GetPixelsToTransfer(static_cast<PixelFormat>(bitbltbuf.dst_format));
+    for (int i = 0; i < pixels_to_transfer; i++) {
+        int x = (pixels_transferred % trxreg.width) + trxpos.dst_x;
+        int y = (pixels_transferred / trxreg.width) + trxpos.dst_y;
+        common::Log("[gs::Context] x %d y %d", x, y);
+
+        if (x >= 2048) {
+            common::Error("[gs::Context] handle x >= 2048");
+        }
+
+        if (y >= 2048) {
+            common::Error("[gs::Context] handle y >= 2048");
+        }
+
+        switch (static_cast<PixelFormat>(bitbltbuf.dst_format)) {
+        case PixelFormat::PSMCT32:
+            WritePSMCT32Pixel(dst_base, x, y, dst_width, (value >> (32 * i)) & 0xffffffff);
+            break;
+        default:
+            common::Error("[gs::Context] handle destination format %d", bitbltbuf.dst_format);
+        }
+
+        pixels_transferred++;
+    }
+
+    if (pixels_transferred >= (trxreg.width * trxreg.height)) {
+        common::Log("[gs::Context] end of gif->vram transfer");
+        pixels_transferred = 0;
+        trxdir = 3;
+    }
+}
+
+int Context::GetPixelsToTransfer(PixelFormat format) {
+    switch (format) {
+    case PixelFormat::PSMCT32:
+        return 2;
+    default:
+        common::Error("[gs::Context] handle destination format %d", static_cast<int>(format));
+    }
+
+    return 0;
+}
+
+void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 pixel) {
+    // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
+    // so / 8192 will give us the current page
+    int page = base / 8192;
+    int width_in_pages = width / 64;
+
+    // add the horizontal increment from x to page
+    page += (x / 64) % width_in_pages;
+
+    // add the vertical increment from y to page
+    page += (y / 32) * width_in_pages;
+
+    vram[page].WritePSMCT32Pixel(x, y, pixel);
 }
 
 } // namespace gs
