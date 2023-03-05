@@ -51,7 +51,7 @@ bool HostInterface::Initialise() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 13.0f);
+    io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 14.0f);
     io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
 

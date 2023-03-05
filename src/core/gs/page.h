@@ -2,6 +2,7 @@
 
 #include "common/types.h"
 #include "common/memory.h"
+#include "common/log.h"
 
 namespace gs {
 
@@ -14,7 +15,16 @@ struct Page {
         }
     }
 
+    u32 ReadPSMCT32Pixel(int x, int y) {
+        return common::Read<u32>(GetPSMCT32Pointer(x, y));
+    }
+
     void WritePSMCT32Pixel(int x, int y, u32 value) {
+        common::Write<u32>(GetPSMCT32Pointer(x, y), value);
+    }
+
+private:
+    u8* GetPSMCT32Pointer(int x, int y) {
         // get block coordinates
         int block_x = (x / 8) % 8;
         int block_y = (y / 8) % 4;
@@ -46,10 +56,9 @@ struct Page {
         // each pixel is 32 bits, and each column is 16 pixels
         // hence each column is 64 bytes
         int offset = (column * 64) + (pixel * 4);
-        common::Write<u32>(&blocks[block][offset], value);
+        return &blocks[block][offset];
     }
 
-private:
     // each page contains 32 blocks, with each block being 256 bytes
     u8 blocks[32][256];
 };

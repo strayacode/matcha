@@ -67,6 +67,7 @@ void System::SingleStep() {
 }
 
 void System::VBlankStart() {
+    gs.RenderCRTC();
     ee.intc.RequestInterrupt(ee::InterruptSource::VBlankStart);
     iop.intc.RequestInterrupt(iop::InterruptSource::VBlankStart);
 }

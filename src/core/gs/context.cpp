@@ -16,9 +16,9 @@ void Context::Reset() {
     smode2 = 0;
     srfsh = 0;
     imr = 0;
-    pmode = 0;
-    dispfb2 = 0;
-    display2 = 0;
+    pmode.data = 0;
+    dispfb2.data = 0;
+    display2.data = 0;
     bgcolour = 0;
     prim = 0;
     frame.fill(0);
@@ -60,19 +60,51 @@ void Context::Reset() {
 
     pixels_transferred = 0;
     
-    // for (int i = 0; i < 512; i++) {
-    //     vram[i].Reset();
-    // }
+    for (int i = 0; i < 512; i++) {
+        vram[i].Reset();
+    }
 
-    vram.fill(0);
+    for (int y = 0; y < 480; y++) {
+        for (int x = 0; x < 640; x++) {
+            framebuffer[y][x] = 0;
+        }
+    }
 }
 
 void Context::SystemReset() {
     common::Log("[gs::Context] system reset");
 }
 
+void Context::RenderCRTC() {
+    int width = 0;
+    int height = 0;
+    int dx = 0;
+    int dy = 0;
+    if (pmode.en1 && pmode.en2) {
+        common::Error("[gs::Context] read circuit 1 and read circuit 2 enabled");
+    } else if (pmode.en1) {
+        common::Error("[gs::Context] read circuit 1 enabled");
+    } else if (pmode.en2) {
+        width = (display2.dw + 1) / (display2.magh + 1);
+        height = (display2.dh + 1) / (display2.magv + 1);
+        dx = display2.dx / (display2.magh + 1);
+        dy = display2.dy / (display2.magv + 1);
+        common::Warn("[gs::Context] width %d height %d x %d y %d", width, height, dx, dy);
+    }
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            assert(pmode.en2 && !pmode.en1);
+            int coord_x = x + dispfb2.dbx;
+            int coord_y = y + dispfb2.dby;
+            u32 pixel = GetCRTCPixel(dispfb2.fbp * 2048 * 4, coord_x, coord_y, dispfb2.fbw * 64, static_cast<PixelFormat>(dispfb2.psm));
+            framebuffer[coord_y][coord_x] = pixel;
+        }
+    }
+}
+
 u8* Context::GetVRAM() {
-    return reinterpret_cast<u8*>(&vram[0]);
+    return reinterpret_cast<u8*>(&framebuffer);
 }
 
 u32 Context::ReadRegisterPrivileged(u32 addr) {
@@ -89,7 +121,7 @@ u32 Context::ReadRegisterPrivileged(u32 addr) {
 void Context::WriteRegisterPrivileged(u32 addr, u32 value) {
     switch (addr) {
     case 0x12000000:
-        pmode = value;
+        pmode.data = value;
         break;
     case 0x12000004:
         break;
@@ -130,16 +162,16 @@ void Context::WriteRegisterPrivileged(u32 addr, u32 value) {
         syncv = ((u64)value << 32) | (syncv & 0xFFFFFFFF);
         break;
     case 0x12000090:
-        dispfb2 = (dispfb2 & ~0xFFFFFFFF) | value;
+        dispfb2.data = (dispfb2.data & ~0xFFFFFFFF) | value;
         break;
     case 0x12000094:
-        dispfb2 = ((u64)value << 32) | (dispfb2 & 0xFFFFFFFF);
+        dispfb2.data = ((u64)value << 32) | (dispfb2.data & 0xFFFFFFFF);
         break;
     case 0x120000A0:
-        display2 = (display2 & ~0xFFFFFFFF) | value;
+        display2.data = (display2.data & ~0xFFFFFFFF) | value;
         break;
     case 0x120000A4:
-        display2 = ((u64)value << 32) | (display2 & 0xFFFFFFFF);
+        display2.data = ((u64)value << 32) | (display2.data & 0xFFFFFFFF);
         break;
     case 0x120000E0:
         bgcolour = value;
@@ -380,23 +412,46 @@ int Context::GetPixelsToTransfer(PixelFormat format) {
     return 0;
 }
 
-int i = 0;
+u32 Context::GetCRTCPixel(u32 base, int x, int y, u32 width, PixelFormat format) {
+    switch (format) {
+    case PixelFormat::PSMCT32:
+        return ReadPSMCT32Pixel(base, x, y, width);
+    default:
+        common::Error("[gs::Context] handle crtc pixel format %d", static_cast<int>(format));
+    }
+
+    return 0;
+}
+
+u32 Context::ReadPSMCT32Pixel(u32 base, int x, int y, u32 width) {
+    // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
+    // so / 8192 will give us the current page
+    int page = base / 8192;
+    int width_in_pages = width / 64;
+
+    // add the horizontal increment from x to page
+    page += (x / 64) % width_in_pages;
+
+    // add the vertical increment from y to page
+    page += (y / 32) * width_in_pages;
+
+    return vram[page].ReadPSMCT32Pixel(x, y);
+}
 
 void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value) {
-    vram[i] = value;
-    i++;
-    // // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
-    // // so / 8192 will give us the current page
-    // int page = base / 8192;
-    // int width_in_pages = width / 64;
+    common::Log("[gs::Context] write pixel in rectangle base %08x x %d y %d width %d value %08x", base, x, y, width, value);
+    // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
+    // so / 8192 will give us the current page
+    int page = base / 8192;
+    int width_in_pages = width / 64;
 
-    // // add the horizontal increment from x to page
-    // page += (x / 64) % width_in_pages;
+    // add the horizontal increment from x to page
+    page += (x / 64) % width_in_pages;
 
-    // // add the vertical increment from y to page
-    // page += (y / 32) * width_in_pages;
+    // add the vertical increment from y to page
+    page += (y / 32) * width_in_pages;
 
-    // vram[page].WritePSMCT32Pixel(x, y, value);
+    vram[page].WritePSMCT32Pixel(x, y, value);
 }
 
 } // namespace gs
