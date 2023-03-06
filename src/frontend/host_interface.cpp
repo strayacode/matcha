@@ -166,7 +166,9 @@ void HostInterface::RenderMenubar() {
             }
 
             if (ImGui::MenuItem("Restart")) {
-                core.Boot();
+                if (core.GetState() != CoreState::Idle) {
+                    core.Boot();
+                }
             }
 
             ImGui::EndMenu();
