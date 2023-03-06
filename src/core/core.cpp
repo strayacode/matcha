@@ -35,6 +35,7 @@ void Core::SetBootParameters(BootMode boot_mode, std::string path) {
 }
 
 void Core::Boot() {
+    SetState(CoreState::Idle);
     system.Reset();
     SetState(CoreState::Running);
 }

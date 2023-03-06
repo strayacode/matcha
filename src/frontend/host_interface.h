@@ -1,8 +1,9 @@
 #pragma once
 
-#include <common/types.h>
-#include <common/log.h>
-#include <core/core.h>
+#include "common/types.h"
+#include "common/log.h"
+#include "common/games_list.h"
+#include "core/core.h"
 #include <string.h>
 #include <stdlib.h>
 #include "imgui/imgui.h"
@@ -47,7 +48,11 @@ private:
     void RenderMenubar();
     void Boot(const std::string& path);
     void RenderDisplayWindow();
+    void RenderLibraryWindow();
     
+    void BeginFullscreenWindow(const char *name, ImVec2 padding = ImVec2(0.0f, 0.0f));
+    void EndFullscreenWindow();
+
     const char* glsl_version = "#version 330";
 
     SDL_Window* window;
@@ -64,6 +69,14 @@ private:
 
     static constexpr int menubar_height = 18;
     GLuint screen_texture;
+
+    enum class WindowState {
+        Library,
+        Display,
+    };
+
+    WindowState window_state = WindowState::Library;
+    common::GamesList games_list;
 
     float fps;
 };

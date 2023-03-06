@@ -1,5 +1,6 @@
 #include "common/string.h"
 #include "frontend/host_interface.h"
+#include "imgui/imgui_internal.h"
 
 HostInterface::HostInterface() :
     core([this](float fps) {
@@ -56,6 +57,8 @@ bool HostInterface::Initialise() {
     io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
 
+    games_list.Initialise();
+
     return true;
 }
 
@@ -71,7 +74,14 @@ void HostInterface::Run() {
 
         RenderMenubar();
 
-        RenderDisplayWindow();
+        switch (window_state) {
+        case WindowState::Library:
+            RenderLibraryWindow();
+            break;
+        case WindowState::Display:
+            RenderDisplayWindow();
+            break;
+        }
 
         // show demo window
         if (show_demo_window) {
@@ -136,6 +146,12 @@ void HostInterface::RenderMenubar() {
             if (ImGui::MenuItem("Boot BIOS")) {
                 core.SetBootParameters(BootMode::BIOS);
                 core.Boot();
+                window_state = WindowState::Display;
+            }
+
+            if (ImGui::MenuItem("Power Off")) {
+                window_state = WindowState::Library;
+                core.SetState(CoreState::Idle);
             }
 
             if (ImGui::MenuItem("Quit")) {
@@ -197,6 +213,7 @@ void HostInterface::RenderMenubar() {
     if (file_dialog.HasSelected()) {
         core.SetBootParameters(BootMode::Fast, file_dialog.GetSelected().string());
         core.Boot();
+        window_state = WindowState::Display;
         file_dialog.ClearSelected();
     }
 }
@@ -294,6 +311,65 @@ void HostInterface::RenderDisplayWindow() {
         IM_COL32_WHITE
     );
 
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
+}
+
+void HostInterface::RenderLibraryWindow() {
+    BeginFullscreenWindow("Library");
+    static ImGuiTableFlags flags =
+        ImGuiTableFlags_Resizable
+        | ImGuiTableFlags_RowBg
+        | ImGuiTableFlags_BordersOuterV
+        | ImGuiTableFlags_SizingStretchProp;
+
+    float min_row_height = 20.0f;
+
+    if (ImGui::BeginTable("Library", 1, flags)) {
+        ImGui::TableSetupColumn("Title");
+        ImGui::TableHeadersRow();
+
+        int row = 0;
+        for (const common::GamesList::Entry& entry : games_list.GetEntries()) {
+            ImGui::TableNextRow(ImGuiTableRowFlags_None);
+            ImGui::PushID(row);
+            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.0f, 0.5f));
+            ImGui::TableSetColumnIndex(0);
+
+            if (ImGui::Selectable(entry.name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap, ImVec2(0.0f, min_row_height))) {
+                core.SetBootParameters(BootMode::Fast, entry.path);
+                core.Boot();
+                window_state = WindowState::Display;
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::PopID();
+            row++;
+        }
+
+        ImGui::EndTable();
+    }
+
+    EndFullscreenWindow();
+}
+
+void HostInterface::BeginFullscreenWindow(const char *name, ImVec2 padding) {
+    ImGui::SetNextWindowPos(ImVec2(0, menubar_height));
+    ImGui::SetNextWindowSize(ImVec2(window_width, window_height - menubar_height));
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+    ImGui::Begin(
+        name,
+        nullptr,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoBringToFrontOnFocus
+    );
+}
+
+void HostInterface::EndFullscreenWindow() {
+    ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
 }

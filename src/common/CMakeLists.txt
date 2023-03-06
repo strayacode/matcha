@@ -6,7 +6,9 @@ add_library(common
     arithmetic.h arithmetic.cpp
     queue.h
     memory.h virtual_page_table.h
-    string.h
+    string.h string.cpp
+    filesystem.h filesystem.cpp
+    games_list.h games_list.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

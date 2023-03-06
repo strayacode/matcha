@@ -5,6 +5,8 @@
 
 namespace common {
 
+std::string ToLower(std::string str);
+
 template<typename ...Args>
 std::string format(const std::string& format, Args ...args) {
     int size = std::snprintf(nullptr, 0, format.c_str(), args...) + 1;
