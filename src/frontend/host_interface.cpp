@@ -192,7 +192,7 @@ void HostInterface::RenderMenubar() {
         }
 
         if (core.GetState() == CoreState::Running && fps != 0.0f) {
-            std::string fps_string = common::format("%.0f FPS | %.2f ms", fps, 1000.0f / fps);\
+            std::string fps_string = common::Format("%.0f FPS | %.2f ms", fps, 1000.0f / fps);\
             auto pos = window_width - ImGui::CalcTextSize(fps_string.c_str()).x - ImGui::GetStyle().ItemSpacing.x;
 
             ImGui::SetCursorPosX(pos);
@@ -327,8 +327,10 @@ void HostInterface::RenderLibraryWindow() {
 
     float min_row_height = 20.0f;
 
-    if (ImGui::BeginTable("Library", 1, flags)) {
+    if (ImGui::BeginTable("Library", 3, flags)) {
         ImGui::TableSetupColumn("Title");
+        ImGui::TableSetupColumn("Type");
+        ImGui::TableSetupColumn("Size");
         ImGui::TableHeadersRow();
 
         int row = 0;
@@ -339,6 +341,22 @@ void HostInterface::RenderLibraryWindow() {
             ImGui::TableSetColumnIndex(0);
 
             if (ImGui::Selectable(entry.name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap, ImVec2(0.0f, min_row_height))) {
+                core.SetBootParameters(BootMode::Fast, entry.path);
+                core.Boot();
+                window_state = WindowState::Display;
+            }
+
+            ImGui::TableSetColumnIndex(1);
+
+            if (ImGui::Selectable(entry.type.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap, ImVec2(0.0f, min_row_height))) {
+                core.SetBootParameters(BootMode::Fast, entry.path);
+                core.Boot();
+                window_state = WindowState::Display;
+            }
+
+            ImGui::TableSetColumnIndex(2);
+
+            if (ImGui::Selectable(entry.size.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap, ImVec2(0.0f, min_row_height))) {
                 core.SetBootParameters(BootMode::Fast, entry.path);
                 core.Boot();
                 window_state = WindowState::Display;

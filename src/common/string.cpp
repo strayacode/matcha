@@ -12,4 +12,12 @@ std::string ToLower(std::string str) {
     return str;
 }
 
+std::string ToUpper(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](char c) {
+        return std::toupper(c);
+    });
+
+    return str;
+}
+
 } // namespace common

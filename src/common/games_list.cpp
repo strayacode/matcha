@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <algorithm>
+#include <fstream>
 #include "common/games_list.h"
 #include "common/filesystem.h"
 #include "common/string.h"
@@ -21,7 +22,16 @@ void GamesList::Initialise() {
 void GamesList::AddEntry(const std::string& path) {
     Entry entry;
     entry.path = path;
+
+    std::ifstream file(path, std::ios::binary);
+
+    file.unsetf(std::ios::skipws);
+    file.seekg(0, std::ios::end);
+
+    entry.size = common::GetFormattedSize(file.tellg());
+
     entry.name = std::filesystem::path(path).stem();
+    entry.type = common::ToUpper(std::string(std::filesystem::path(path).extension()).substr(1));
     entries.push_back(entry);
 }
 

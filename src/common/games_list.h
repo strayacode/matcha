@@ -13,6 +13,8 @@ public:
     struct Entry {
         std::string path;
         std::string name;
+        std::string type;
+        std::string size;
     };
 
     using Entries = std::vector<Entry>;
