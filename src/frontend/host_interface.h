@@ -32,7 +32,7 @@ public:
     static constexpr ImVec4 colour_darker_blue = ImVec4(0.100f, 0.400f, 0.750f, 1.000f);
     static constexpr ImVec4 colour_clearer_blue = ImVec4(0.000f, 0.471f, 0.843f, 0.780f);
     static constexpr ImVec4 colour_black = ImVec4(0.075f, 0.075f, 0.075f, 1.000f);
-    static constexpr ImVec4 colour_white = ImVec4(0.857f, 0.857f, 0.857f, 1.000f);
+    static constexpr ImVec4 colour_white = ImVec4(0.720f, 0.720f, 0.720f, 1.000f);
     static constexpr ImVec4 colour_green = ImVec4(0.405f, 0.776f, 0.421f, 1.000f);
     static constexpr ImVec4 colour_yellow = ImVec4(1.000f, 0.933f, 0.345f, 1.000f);
     static constexpr ImVec4 colour_lighter_lighter_lighter_lighter_grey = ImVec4(0.300f, 0.300f, 0.300f, 1.000f);

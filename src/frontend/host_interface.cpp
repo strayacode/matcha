@@ -51,7 +51,8 @@ bool HostInterface::Initialise() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 14.0f);
+    // io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 14.0f);
+    io.Fonts->AddFontFromFileTTF("../data/fonts/OpenSans-Regular.ttf", 15.0f);
     io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
     SetupStyle();
 
@@ -168,6 +169,7 @@ void HostInterface::RenderMenubar() {
                 ImGui::EndMenu();
             }
 
+            ImGui::MenuItem("Demo Window", nullptr, &show_demo_window);
             ImGui::EndMenu();
         }
 
@@ -271,7 +273,7 @@ void HostInterface::RenderDisplayWindow() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, core.system.gs.GetVRAM());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, core.system.gs.GetFramebuffer());
 
     const double scale_x = static_cast<double>(window_width) / 640;
     const double scale_y = static_cast<double>(window_height - menubar_height) / 480;

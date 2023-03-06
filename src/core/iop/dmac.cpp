@@ -38,6 +38,9 @@ void DMAC::Run(int cycles) {
             case 10:
                 DoSIF1Transfer();
                 break;
+            case 11:
+                DoSIO2InTransfer();
+                break;
             default:
                 common::Error("[iop::DMAC] handle transfer for channel %d", i);
             }
@@ -280,6 +283,11 @@ void DMAC::DoSPU2Transfer() {
     } else {
         EndTransfer(7);
     }
+}
+
+void DMAC::DoSIO2InTransfer() {
+    Channel& channel = channels[11];
+    common::Error("[iop::DMAC sio2in] address %08x size %d", channel.address, channel.block_size * channel.block_count * 4);
 }
 
 void DMAC::EndTransfer(int index) {

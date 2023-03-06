@@ -47,7 +47,7 @@ public:
     void Reset();
     void SystemReset();
 
-    u8* GetVRAM();
+    u8* GetFramebuffer();
 
     union RGBAQ {
         struct {

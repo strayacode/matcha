@@ -21,6 +21,7 @@ public:
     void DoSIF0Transfer();
     void DoSIF1Transfer();
     void DoSPU2Transfer();
+    void DoSIO2InTransfer();
     void EndTransfer(int index);
 
     // dma priority/enable

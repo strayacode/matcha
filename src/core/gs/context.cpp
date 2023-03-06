@@ -89,7 +89,6 @@ void Context::RenderCRTC() {
         height = (display2.dh + 1) / (display2.magv + 1);
         dx = display2.dx / (display2.magh + 1);
         dy = display2.dy / (display2.magv + 1);
-        common::Warn("[gs::Context] width %d height %d x %d y %d", width, height, dx, dy);
     }
 
     for (int y = 0; y < height; y++) {
@@ -103,7 +102,7 @@ void Context::RenderCRTC() {
     }
 }
 
-u8* Context::GetVRAM() {
+u8* Context::GetFramebuffer() {
     return reinterpret_cast<u8*>(&framebuffer);
 }
 
@@ -366,9 +365,6 @@ void Context::WriteHWReg(u64 value) {
     // (in pixels)
     u32 dst_width = bitbltbuf.dst_width * 64;
 
-    // common::Log("[gs::Context] hwreg write %016llx direction %d transmission width %d transmission height %d %08x %d", value, trxdir, trxreg.width, trxreg.height, dst_base, dst_width);
-    // common::Log("[gs::Context] hwreg write offset x %d offset y %d", trxpos.dst_x, trxpos.dst_y);
-
     int pixels_to_transfer = GetPixelsToTransfer(static_cast<PixelFormat>(bitbltbuf.dst_format));
     for (int i = 0; i < pixels_to_transfer; i++) {
         int x = (pixels_transferred % trxreg.width) + trxpos.dst_x;
@@ -439,7 +435,6 @@ u32 Context::ReadPSMCT32Pixel(u32 base, int x, int y, u32 width) {
 }
 
 void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value) {
-    common::Log("[gs::Context] write pixel in rectangle base %08x x %d y %d width %d value %08x", base, x, y, width, value);
     // base is a byte address, and pages are stored as units of 8192 bytes sequentially,
     // so / 8192 will give us the current page
     int page = base / 8192;
