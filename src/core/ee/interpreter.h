@@ -148,6 +148,14 @@ struct Interpreter : public Executor {
     void madd1();
     void maddu1();
     void multu1();
+    void mov_s();
+    void abs_s();
+    void add_s();
+    void max_s();
+    void min_s();
+    void neg_s();
+    void sub_s();
+    void suba_s();
     void illegal_instruction();
     void stub_instruction();
 

@@ -14,6 +14,14 @@ union Instruction {
         u32 opcode : 6;
     };
 
+    struct {
+        u32 : 6;
+        u32 fd : 5;
+        u32 fs : 5;
+        u32 ft : 5;
+        u32 : 11;
+    };
+
     u32 data;
     s16 simm;
     u16 imm;

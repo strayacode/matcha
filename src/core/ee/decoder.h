@@ -12,7 +12,9 @@ struct Decoder {
         regimm_table.fill(&D::illegal_instruction);
         cop0_table.fill(&D::illegal_instruction);
         cop1_table.fill(&D::illegal_instruction);
+        bc1_table.fill(&D::illegal_instruction);
         fpu_s_table.fill(&D::illegal_instruction);
+        fpu_w_table.fill(&D::illegal_instruction);
         cop2_table.fill(&D::stub_instruction);
         tlb_table.fill(&D::illegal_instruction);
         mmi_table.fill(&D::illegal_instruction);
@@ -130,8 +132,16 @@ struct Decoder {
         RegisterOpcode(&D::ctc1, 6, InstructionType::COP1);
 
         // fpu_s instructions
+        RegisterOpcode(&D::add_s, 0, InstructionType::FPUS);
+        RegisterOpcode(&D::sub_s, 1, InstructionType::FPUS);
+        RegisterOpcode(&D::abs_s, 5, InstructionType::FPUS);
+        RegisterOpcode(&D::mov_s, 6, InstructionType::FPUS);
+        RegisterOpcode(&D::neg_s, 7, InstructionType::FPUS);
         RegisterOpcode(&D::adda_s, 24, InstructionType::FPUS);
+        RegisterOpcode(&D::suba_s, 25, InstructionType::FPUS);
         RegisterOpcode(&D::madd_s, 28, InstructionType::FPUS);
+        RegisterOpcode(&D::max_s, 40, InstructionType::FPUS);
+        RegisterOpcode(&D::min_s, 41, InstructionType::FPUS);
 
         // cop2 instructions
         RegisterOpcode(&D::cfc2, 2, InstructionType::COP2);
@@ -190,8 +200,12 @@ struct Decoder {
             return cop0_table[inst.rs];
         case 17:
             switch (inst.rs) {
+            case 8:
+                return bc1_table[inst.rt];
             case 16:
                 return fpu_s_table[inst.func];
+            case 20:
+                return fpu_w_table[inst.func];
             }
 
             return cop1_table[inst.rs];
@@ -222,7 +236,9 @@ private:
         RegImm,
         COP0,
         COP1,
+        BC1,
         FPUS,
+        FPUW,
         COP2,
         TLB,
         MMI,
@@ -249,8 +265,14 @@ private:
         case InstructionType::COP1:
             cop1_table[index] = callback;
             break;
+        case InstructionType::BC1:
+            bc1_table[index] = callback;
+            break;
         case InstructionType::FPUS:
             fpu_s_table[index] = callback;
+            break;
+        case InstructionType::FPUW:
+            fpu_w_table[index] = callback;
             break;
         case InstructionType::COP2:
             cop2_table[index] = callback;
@@ -281,7 +303,9 @@ private:
     std::array<Handler, 32> regimm_table;
     std::array<Handler, 32> cop0_table;
     std::array<Handler, 32> cop1_table;
+    std::array<Handler, 32> bc1_table;
     std::array<Handler, 64> fpu_s_table;
+    std::array<Handler, 64> fpu_w_table;
     std::array<Handler, 32> cop2_table;
     std::array<Handler, 64> tlb_table;
     std::array<Handler, 64> mmi_table;

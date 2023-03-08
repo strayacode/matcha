@@ -172,6 +172,40 @@ static std::map<int, DisassemblyInfo> cop0_table = {
     {16, DisassemblyInfo{"tlb", InstructionType::None}},
 };
 
+static std::map<int, DisassemblyInfo> cop1_table = {
+    {0, DisassemblyInfo{"mfc1", InstructionType::Register}},
+    {2, DisassemblyInfo{"cfc1", InstructionType::Register}},
+    {4, DisassemblyInfo{"mtc1", InstructionType::Register}},
+    {6, DisassemblyInfo{"ctc1", InstructionType::Register}},
+    {8, DisassemblyInfo{"bc1", InstructionType::None}},
+    {16, DisassemblyInfo{"fpu_s", InstructionType::None}},
+    {20, DisassemblyInfo{"fpu_w", InstructionType::None}},
+};
+
+static std::map<int, DisassemblyInfo> bc1_table = {
+    {0, DisassemblyInfo{"bc1f", InstructionType::Register}},
+    {1, DisassemblyInfo{"bc1t", InstructionType::Register}},
+    {2, DisassemblyInfo{"bc1fl", InstructionType::Register}},
+    {3, DisassemblyInfo{"bc1tl", InstructionType::Register}},
+};
+
+static std::map<int, DisassemblyInfo> fpu_s_table = {
+    {0, DisassemblyInfo{"add.s $fd, $fs, $ft", InstructionType::Register}},
+    {1, DisassemblyInfo{"sub.s $fd, $fs, $ft", InstructionType::Register}},
+    {5, DisassemblyInfo{"abs.s $fd, $fs", InstructionType::Register}},
+    {6, DisassemblyInfo{"mov.s $fd, $fs", InstructionType::Register}},
+    {7, DisassemblyInfo{"neg.s $fd, $fs", InstructionType::Register}},
+    {24, DisassemblyInfo{"adda.s $fs, $ft", InstructionType::Register}},
+    {25, DisassemblyInfo{"suba.s $fs, $ft", InstructionType::Register}},
+    {28, DisassemblyInfo{"madd.s $fd, $fs, $ft", InstructionType::Register}},
+    {40, DisassemblyInfo{"max.s $fd, $fs, $ft", InstructionType::Register}},
+    {41, DisassemblyInfo{"min.s $fd, $fs, $ft", InstructionType::Register}},
+};
+
+static std::map<int, DisassemblyInfo> fpu_w_table = {
+    // {2, DisassemblyInfo{"cfc2 $rt, $rd", InstructionType::Register}},
+};
+
 static std::map<int, DisassemblyInfo> cop2_table = {
     {2, DisassemblyInfo{"cfc2 $rt, $rd", InstructionType::Register}},
 };
@@ -321,6 +355,15 @@ static std::string DisassembleRegister(Instruction inst, u32 pc, std::string for
         } else if (format.compare(i, 3, "$rs") == 0) {
             disassembled += "$" + reg_names[inst.rs];
             i += 3;
+        } else if (format.compare(i, 3, "$fd") == 0) {
+            disassembled += "$f" + std::to_string(inst.fd);
+            i += 3;
+        } else if (format.compare(i, 3, "$fs") == 0) {
+            disassembled += "$f" + std::to_string(inst.fs);
+            i += 3;
+        } else if (format.compare(i, 3, "$ft") == 0) {
+            disassembled += "$f" + std::to_string(inst.ft);
+            i += 3;
         } else if (format.compare(i, 3, "$sa") == 0) {
             disassembled += ConvertHex<u16>(inst.imm5);
             i += 3;
@@ -359,6 +402,16 @@ std::string DisassembleInstruction(Instruction inst, u32 pc) {
             info = mmi2_table[inst.imm5];
         } else if (info.format.compare("mmi3") == 0) {
             info = mmi3_table[inst.imm5];
+        }
+    } else if (info.format.compare("cop1") == 0) {
+        info = cop1_table[inst.rs];
+
+        if (info.format.compare("bc1") == 0) {
+            info = bc1_table[inst.rt];
+        } else if (info.format.compare("fpu_s") == 0) {
+            info = fpu_s_table[inst.func];
+        } else if (info.format.compare("fpu_w") == 0) {
+            info = fpu_w_table[inst.func];
         }
     } else if (info.format.compare("cop2") == 0) {
         info = cop2_table[inst.rs];

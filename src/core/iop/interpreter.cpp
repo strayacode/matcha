@@ -1,5 +1,5 @@
 #include "common/log.h"
-#include "common/arithmetic.h"
+#include "common/bits.h"
 #include "core/iop/interpreter.h"
 #include "core/iop/disassembler.h"
 #include "core/iop/context.h"
@@ -199,11 +199,11 @@ void Interpreter::IOPPuts() {
 
 // primary
 void Interpreter::slti() {
-    ctx.SetReg(inst.rt, (s32)ctx.GetReg(inst.rs) < SignExtend<s32, 16>(inst.imm));
+    ctx.SetReg(inst.rt, (s32)ctx.GetReg(inst.rs) < common::SignExtend<s32, 16>(inst.imm));
 }
 
 void Interpreter::bne() {
-    s32 offset = SignExtend<s32, 16>(inst.imm) << 2;
+    s32 offset = common::SignExtend<s32, 16>(inst.imm) << 2;
 
     if (ctx.GetReg(inst.rs) != ctx.GetReg(inst.rt)) {
         ctx.npc = ctx.pc + offset + 4;
@@ -220,7 +220,7 @@ void Interpreter::ori() {
 }
 
 void Interpreter::beq() {
-    s32 offset = SignExtend<s32, 16>(inst.imm) << 2;
+    s32 offset = common::SignExtend<s32, 16>(inst.imm) << 2;
 
     if (ctx.GetReg(inst.rs) == ctx.GetReg(inst.rt)) {
         ctx.npc = ctx.pc + offset + 4;
@@ -230,7 +230,7 @@ void Interpreter::beq() {
 
 void Interpreter::lw() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, ctx.Read<u32>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
+        ctx.SetReg(inst.rt, ctx.Read<u32>(ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm)));
     }
 }
 
@@ -239,28 +239,28 @@ void Interpreter::andi() {
 }
 
 void Interpreter::addiu() {
-    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm));
+    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm));
 }
 
 void Interpreter::addi() {
-    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm));
+    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm));
 }
 
 void Interpreter::sw() {
     if (!ctx.cop0.status.isc) {
-        ctx.Write<u32>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
+        ctx.Write<u32>(ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
     }
 }
 
 void Interpreter::sb() {
     if (!ctx.cop0.status.isc) {
-        ctx.Write<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
+        ctx.Write<u8>(ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm), ctx.GetReg(inst.rt));
     }
 }
 
 void Interpreter::lb() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, SignExtend<s32, 8>(ctx.Read<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm))));
+        ctx.SetReg(inst.rt, common::SignExtend<s32, 8>(ctx.Read<u8>(ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm))));
     }
 }
 
@@ -272,9 +272,9 @@ void Interpreter::jal() {
 
 void Interpreter::lh() {
     if (!ctx.cop0.status.isc) {
-        u32 addr = ctx.gpr[inst.rs] + SignExtend<s32, 16>(inst.imm);
+        u32 addr = ctx.gpr[inst.rs] + common::SignExtend<s32, 16>(inst.imm);
 
-        ctx.SetReg(inst.rt, SignExtend<s32, 16>(ctx.Read<u16>(addr)));
+        ctx.SetReg(inst.rt, common::SignExtend<s32, 16>(ctx.Read<u16>(addr)));
     }
 }
 
@@ -285,17 +285,17 @@ void Interpreter::j() {
 
 void Interpreter::lbu() {
     if (!ctx.cop0.status.isc) {
-        ctx.SetReg(inst.rt, ctx.Read<u8>(ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm)));
+        ctx.SetReg(inst.rt, ctx.Read<u8>(ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm)));
     }
 }
 
 void Interpreter::sltiu() {
-    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) < (u32)SignExtend<s32, 16>(inst.imm));
+    ctx.SetReg(inst.rt, ctx.GetReg(inst.rs) < (u32)common::SignExtend<s32, 16>(inst.imm));
 }
 
 void Interpreter::lhu() {
     if (!ctx.cop0.status.isc) {
-        u32 addr = ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm);
+        u32 addr = ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm);
 
         ctx.SetReg(inst.rt, ctx.Read<u16>(addr));
     }
@@ -303,21 +303,21 @@ void Interpreter::lhu() {
 
 void Interpreter::blez() {
     if (static_cast<s32>(ctx.GetReg(inst.rs)) <= 0) {
-        ctx.npc = ctx.pc + (SignExtend<s32, 16>(inst.imm) << 2) + 4;
+        ctx.npc = ctx.pc + (common::SignExtend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 }
 
 void Interpreter::bgtz() {
     if (static_cast<s32>(ctx.GetReg(inst.rs)) > 0) {
-        ctx.npc = ctx.pc + (SignExtend<s32, 16>(inst.imm) << 2) + 4;
+        ctx.npc = ctx.pc + (common::SignExtend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 }
 
 void Interpreter::sh() {
     if (!ctx.cop0.status.isc) {
-        u32 addr = ctx.GetReg(inst.rs) + SignExtend<s32, 16>(inst.imm);
+        u32 addr = ctx.GetReg(inst.rs) + common::SignExtend<s32, 16>(inst.imm);
         ctx.Write<u16>(addr, ctx.GetReg(inst.rt));
     }
 }
@@ -328,7 +328,7 @@ void Interpreter::bcondz() {
     bool branch = (static_cast<s32>(ctx.GetReg(inst.rs)) < 0) ^ ge;
 
     if (branch) {
-        ctx.npc = ctx.pc + (SignExtend<s32, 16>(inst.imm) << 2) + 4;
+        ctx.npc = ctx.pc + (common::SignExtend<s32, 16>(inst.imm) << 2) + 4;
         branch_delay = true;
     }
 

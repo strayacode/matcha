@@ -1,4 +1,6 @@
-#include "common/arithmetic.h"
+#include "common/bits.h"
+
+namespace common {
 
 u32 CountLeadingSignBits(s32 value) {
     if (value < 0) {
@@ -12,3 +14,5 @@ u32 CountLeadingSignBits(s32 value) {
 
     return __builtin_clz(value);
 }
+
+} // namespace common

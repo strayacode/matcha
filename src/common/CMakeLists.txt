@@ -3,7 +3,7 @@ add_library(common
     log.h log.cpp
     memory_helpers.h
     emu_thread.h emu_thread.cpp
-    arithmetic.h arithmetic.cpp
+    bits.h bits.cpp
     queue.h
     memory.h virtual_page_table.h
     string.h string.cpp
