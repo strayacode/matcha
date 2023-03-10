@@ -393,6 +393,58 @@ void Interpreter::multu1() {
     ctx.SetReg<u64>(inst.rd, ctx.lo1);
 }
 
+void Interpreter::pabsh() {
+    for (int i = 0; i < 8; i++) {
+        s16 signed_data = ctx.GetReg<s16>(inst.rt, i);
+        u16 data = ctx.GetReg<u16>(inst.rt, i);
+        if (data == 0x8000) {
+            ctx.SetReg<u16>(inst.rd, 0x7fff);
+        } else if (signed_data < 0) {
+            ctx.SetReg<u16>(inst.rd, -signed_data);
+        } else {
+            ctx.SetReg<u16>(inst.rd, data);
+        }
+    }
+}
+
+void Interpreter::pabsw() {
+    for (int i = 0; i < 4; i++) {
+        s32 signed_data = ctx.GetReg<s32>(inst.rt, i);
+        u32 data = ctx.GetReg<u32>(inst.rt, i);
+        if (data == 0x80000000) {
+            ctx.SetReg<u32>(inst.rd, 0x7fffffff);
+        } else if (signed_data < 0) {
+            ctx.SetReg<u32>(inst.rd, -signed_data);
+        } else {
+            ctx.SetReg<u32>(inst.rd, data);
+        }
+    }
+}
+
+void Interpreter::paddb() {
+    for (int i = 0; i < 16; i++) {
+        ctx.SetReg<s8>(inst.rd, ctx.GetReg<s8>(inst.rs, i) + ctx.GetReg<s8>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::paddh() {
+    for (int i = 0; i < 8; i++) {
+        ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i) + ctx.GetReg<s16>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::paddsb() {
+    for (int i = 0; i < 16; i++) {
+        s16 result = static_cast<s16>(ctx.GetReg<s8>(inst.rs, i)) + static_cast<s16>(ctx.GetReg<s8>(inst.rt, i));
+        if (result > 0x7f) {
+            result = 0x7f;
+        } else if (result < -0x80) {
+            result = -0x80;
+        }
+        ctx.SetReg<s8>(inst.rd, result & 0xff, i);
+    }
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < common::SignExtend<s64, 16>(inst.imm));

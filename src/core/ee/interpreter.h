@@ -156,6 +156,11 @@ struct Interpreter : public Executor {
     void neg_s();
     void sub_s();
     void suba_s();
+    void pabsh();
+    void pabsw();
+    void paddb();
+    void paddh();
+    void paddsb();
     void illegal_instruction();
     void stub_instruction();
 

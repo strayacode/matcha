@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "common/log.h"
 #include "common/bits.h"
 #include "core/ee/cop1.h"
@@ -52,15 +53,15 @@ void COP1::SetControlReg(int reg, u32 value) {
 // to one that conforms to IEEE 754 floats
 f32 COP1::AsFloat(u32 value) {
     // we must handle the cases when exponent == 255 or 0
-    switch (value & 0x7F800000) {
+    switch (value & 0x7f800000) {
     case 0:
         // denormals automatically get set to 0, while preserving their sign
         value &= 0x80000000;
         return common::BitCast<f32>(value);
-    case 0x7F800000:
+    case 0x7f800000:
         // ps2 floats with the exponent as 255 can have numbers larger than what is possible
         // with IEEE 754, so we just set to the highest possible float
-        value = (value & 0x80000000) | 0x7F7FFFFF;
+        value = (value & 0x80000000) | 0x7f7fffff;
         return common::BitCast<f32>(value);
     default:
         return common::BitCast<f32>(value);
@@ -74,6 +75,7 @@ bool COP1::IsInfinity(const Register& fpr) {
 void COP1::CheckOverflow(Register& fpr, bool set_flags) {
     if (IsInfinity(fpr)) {
         fpr.u = (fpr.u & 0x80000000) | 0x7f7fffff;
+        
         if (set_flags) {
             fcr31.o = true;
             fcr31.so = true;

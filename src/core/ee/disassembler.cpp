@@ -238,11 +238,15 @@ static std::map<int, DisassemblyInfo> mmi_table = {
 };
 
 static std::map<int, DisassemblyInfo> mmi0_table = {
+    {4, DisassemblyInfo{"paddh $rd, $rs, $rt", InstructionType::Register}},
+    {8, DisassemblyInfo{"paddb $rd, $rs, $rt", InstructionType::Register}},
     {9, DisassemblyInfo{"psubb $rd, $rs, $rt", InstructionType::Register}},
+    {24, DisassemblyInfo{"paddsb $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi1_table = {
     {1, DisassemblyInfo{"pabsw $rd, $rt", InstructionType::Register}},
+    {5, DisassemblyInfo{"pabsh $rd, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi2_table = {
