@@ -130,7 +130,7 @@ void GIF::StartTransfer() {
     }
 
     if (current_tag.prim) {
-        gs.prim = current_tag.prim_data;
+        gs.prim.data = current_tag.prim_data;
     }
 
     gs.rgbaq.q = 1.0f;

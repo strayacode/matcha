@@ -12,7 +12,6 @@ public:
         read_index = 0;
         write_index = 0;
         length = 0;
-        buffer.fill(0);
     }
 
     template <typename T>

@@ -8,7 +8,11 @@ namespace gs {
 Context::Context(System& system) : system(system) {}
 
 void Context::Reset() {
-    csr = 0;
+    csr.data = 0;
+
+    // vertex queue is initially empty
+    csr.fifo = 1;
+
     smode1 = 0;
     synch1 = 0;
     synch2 = 0;
@@ -20,13 +24,11 @@ void Context::Reset() {
     dispfb2.data = 0;
     display2.data = 0;
     bgcolour = 0;
-    prim = 0;
+    prim.data = 0;
     frame.fill(0);
     xyoffset.fill(0);
     scissor.fill(0);
     rgbaq.data = 0;
-    xyzf2 = 0;
-    xyz2 = 0;
     bitbltbuf.data = 0;
     trxpos.data = 0;
     trxreg.data = 0;
@@ -39,8 +41,6 @@ void Context::Reset() {
     scanmsk = 0;
     tex0.fill(0);
     clamp.fill(0);
-    xyzf3 = 0;
-    xyz3 = 0;
     tex1.fill(0);
     tex2.fill(0);
     texclut = 0;
@@ -69,6 +69,18 @@ void Context::Reset() {
             framebuffer[y][x] = 0;
         }
     }
+
+    current_vertex.x = 0;
+    current_vertex.y = 0;
+    current_vertex.z = 0;
+    current_vertex.r = 0;
+    current_vertex.g = 0;
+    current_vertex.b = 0;
+    current_vertex.a = 0;
+    current_vertex.q = 0.0f;
+    current_vertex.fog = 0;
+
+    vertex_queue.Reset();
 }
 
 void Context::SystemReset() {
@@ -111,7 +123,9 @@ Framebuffer Context::GetFramebuffer() {
 u32 Context::ReadRegisterPrivileged(u32 addr) {
     switch (addr) {
     case 0x12001000:
-        return csr;
+        return csr.data;
+    case 0x12001004:
+        return 0;
     default:
         common::Error("[gs::Context] handle privileged read %08x", addr);
     }
@@ -180,11 +194,12 @@ void Context::WriteRegisterPrivileged(u32 addr, u32 value) {
     case 0x120000E4:
         break;
     case 0x12001000:
-        if (value & 0x200) {
+        csr.data = value;
+
+        if (csr.reset) {
             SystemReset();
         }
 
-        csr = value;
         break;
     case 0x12001004:
         break;
@@ -201,7 +216,8 @@ void Context::WriteRegisterPrivileged(u32 addr, u32 value) {
 void Context::WriteRegister(u32 addr, u64 value) {
     switch (addr) {
     case 0x00:
-        prim = value;
+        prim.data = value;
+        common::Log("[gs::Context] primitive type is now %d", prim.prim);
         break;
     case 0x01:
         rgbaq.data = value;
@@ -213,10 +229,21 @@ void Context::WriteRegister(u32 addr, u64 value) {
         uv = value;
         break;
     case 0x04:
-        xyzf2 = value;
+        common::Log("[gs::Context] xyzf2 write %016llx", value);
+        current_vertex.x = value & 0xffff;
+        current_vertex.y = (value >> 16) & 0xffff;
+        current_vertex.z = (value >> 32) & 0xffffff;
+        current_vertex.fog = (value >> 56) & 0xff;
+        VertexKick();
+        DrawingKick();
         break;
     case 0x05:
-        xyz2 = value;
+        common::Log("[gs::Context] xyz2 write %016llx", value);
+        current_vertex.x = value & 0xffff;
+        current_vertex.y = (value >> 16) & 0xffff;
+        current_vertex.z = (value >> 32) & 0xffffffff;
+        VertexKick();
+        DrawingKick();
         break;
     case 0x06:
         tex0[0] = value;
@@ -234,10 +261,19 @@ void Context::WriteRegister(u32 addr, u64 value) {
         fog = value;
         break;
     case 0x0c:
-        xyzf3 = value;
+        common::Log("[gs::Context] xyzf3 write %016llx", value);
+        current_vertex.x = value & 0xffff;
+        current_vertex.y = (value >> 16) & 0xffff;
+        current_vertex.z = (value >> 32) & 0xffffff;
+        current_vertex.fog = (value >> 56) & 0xff;
+        VertexKick();
         break;
     case 0x0d:
-        xyz3 = value;
+        common::Log("[gs::Context] xyz3 write %016llx", value);
+        current_vertex.x = value & 0xffff;
+        current_vertex.y = (value >> 16) & 0xffff;
+        current_vertex.z = (value >> 32) & 0xffffffff;
+        VertexKick();
         break;
     case 0x14:
         tex1[0] = value;
@@ -259,6 +295,7 @@ void Context::WriteRegister(u32 addr, u64 value) {
         break;
     case 0x1a:
         prmodecont = value;
+        common::Log("[gs::Context] prmodecont write %016llx", prmodecont);
         break;
     case 0x1b:
         prmode = value;
@@ -473,6 +510,14 @@ void Context::WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value) {
     page += (y / 32) * width_in_pages;
 
     vram[page].WritePSMCT32Pixel(x, y, value);
+}
+
+void Context::VertexKick() {
+    common::Log("[gs::Context] do vertex kick for primitive %d", prim.prim);
+}
+
+void Context::DrawingKick() {
+    common::Log("[gs::Context] do drawing kick for primitive %d", prim.prim);
 }
 
 } // namespace gs

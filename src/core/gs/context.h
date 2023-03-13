@@ -2,6 +2,7 @@
 
 #include <array>
 #include <memory>
+#include "common/queue.h"
 #include "common/types.h"
 #include "core/gs/page.h"
 
@@ -32,6 +33,12 @@ namespace gs {
 // dy: y offset on screen
 // dw + 1: width on screen
 // dy + 1: height on screen
+
+// vertex kick is done when writes to specific gs registers are done. this will cause a vertex to be
+// added to the vertex queue
+
+// drawing kick is done when writes to specific gs registers are done. this will cause all
+// the vertices in the vertex queue to be combined together to draw a primitive
 
 struct Framebuffer {
     u8* data;
@@ -157,7 +164,55 @@ public:
         u64 data;
     };
 
-    u32 csr;
+    enum PrimitiveType : int {
+        Point = 0,
+        Line = 1,
+        LineStrip = 2,
+        Triangle = 3,
+        TriangleStrip = 4,
+        TriangleFan = 5,
+        Sprite = 6,
+    };
+
+    union PRIM {
+        struct {
+            u32 prim : 3;
+            bool iip : 1;
+            bool tme : 1;
+            bool fge : 1;
+            bool abe : 1;
+            bool aa1 : 1;
+            bool fst : 1;
+            bool ctxt : 1;
+            bool fix : 1;
+            u32 : 21;
+        };
+
+        u32 data;
+    };
+
+    union CSR {
+        struct {
+            bool signal : 1;
+            bool finish : 1;
+            bool hsint : 1;
+            bool vsint : 1;
+            bool edwint : 1;
+            u32 : 3;
+            bool flush : 1;
+            bool reset : 1;
+            u32 : 2;
+            bool nfield : 1;
+            bool field : 1;
+            u32 fifo : 2;
+            u32 rev : 8;
+            u32 id : 8;
+        };
+
+        u32 data;
+    };
+
+    CSR csr;
 
     // these registers seem to be undocumented
     u64 smode1;
@@ -172,13 +227,11 @@ public:
     DISPFB dispfb2;
     DISPLAY display2;
     u32 bgcolour;
-    u32 prim;
+    PRIM prim;
     std::array<u64, 2> frame;
     std::array<u64, 2> xyoffset;
     std::array<u64, 2> scissor;
     RGBAQ rgbaq;
-    u64 xyzf2;
-    u64 xyz2;
     BITBLTBUF bitbltbuf;
     TRXPOS trxpos;
     TRXREG trxreg;
@@ -191,8 +244,6 @@ public:
     u64 scanmsk;
     std::array<u64, 2> tex0;
     std::array<u64, 2> clamp;
-    u64 xyzf3;
-    u64 xyz3;
     std::array<u64, 2> tex1;
     std::array<u64, 2> tex2;
     u64 texclut;
@@ -227,6 +278,24 @@ private:
         PSMZ16S = 0x3a,
     };
 
+    struct Vertex {
+        // these are fixed point integers,
+        // with 12 bits for integer and 4 bits for decimal
+        u16 x;
+        u16 y;
+
+        u32 z;
+
+        // colour values
+        u8 r;
+        u8 g;
+        u8 b;
+        u8 a;
+        f32 q;
+
+        u8 fog;
+    };
+
     int GetPixelsToTransfer(PixelFormat format);
     u32 GetCRTCPixel(u32 base, int x, int y, u32 width, PixelFormat format);
     int GetCRTCWidth();
@@ -234,11 +303,15 @@ private:
     u32 ReadPSMCT32Pixel(u32 base, int x, int y, u32 width);
     void WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value);
 
+    void VertexKick();
+    void DrawingKick();
+
     int pixels_transferred;
     
     std::array<Page, 512> vram;
     u32 framebuffer[480][640];
-    
+    Vertex current_vertex;
+    common::Queue<Vertex, 3> vertex_queue;
     System& system;
 };
 

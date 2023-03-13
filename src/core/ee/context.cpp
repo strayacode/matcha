@@ -182,6 +182,8 @@ void Context::Write<u128>(VirtualAddress vaddr, u128 value) {
 u32 Context::ReadIO(u32 paddr) {
     if (paddr >= 0x10000000 && paddr < 0x10001840) {
         return timers.ReadRegister(paddr);
+    } else if (paddr >= 0x12000000 && paddr < 0x12001084) {
+        return system.gs.ReadRegisterPrivileged(paddr);
     } else if (paddr >= 0x10008000 && paddr < 0x1000e000) {
         return dmac.ReadChannel(paddr);
     } else if (paddr >= 0x10003000 && paddr < 0x100030a4) {
@@ -247,7 +249,7 @@ void Context::WriteIO(u32 paddr, u32 value) {
     if (paddr >= 0x10000000 && paddr < 0x10001840) {
         timers.WriteRegister(paddr, value);
         return;
-    } if (paddr >= 0x12000000 && paddr < 0x12001084) {
+    } else if (paddr >= 0x12000000 && paddr < 0x12001084) {
         system.gs.WriteRegisterPrivileged(paddr, value);
         return;
     } else if (paddr >= 0x10008000 && paddr < 0x1000e054) {
