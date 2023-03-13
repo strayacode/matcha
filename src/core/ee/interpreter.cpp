@@ -1167,7 +1167,7 @@ void Interpreter::illegal_instruction() {
 }
 
 void Interpreter::stub_instruction() {
-    common::Log("[ee::Interpreter] %s = %08x at %08x (primary = %d, secondary = %d, regimm = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt);
+    common::Log("[ee::Interpreter] %s = %08x at %08x (primary = %d, secondary = %d, regimm = %d, rs = %d, imm5 = %d) is undefined", DisassembleInstruction(inst, ctx.pc).c_str(), inst.data, ctx.pc, inst.opcode, inst.func, inst.rt, inst.rs, inst.imm5);
 }
 
 } // namespace ee
