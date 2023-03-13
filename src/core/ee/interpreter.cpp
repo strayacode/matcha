@@ -497,9 +497,9 @@ void Interpreter::padsbh() {
 void Interpreter::pmaxh() {
     for (int i = 0; i < 8; i++) {
         if (ctx.GetReg<s16>(inst.rs, i) > ctx.GetReg<s16>(inst.rt, i)) {
-            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i));
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i), i);
         } else {
-            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i));
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i), i);
         }
     }
 }
@@ -507,9 +507,9 @@ void Interpreter::pmaxh() {
 void Interpreter::pmaxw() {
     for (int i = 0; i < 4; i++) {
         if (ctx.GetReg<s32>(inst.rs, i) > ctx.GetReg<s32>(inst.rt, i)) {
-            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i));
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i), i);
         } else {
-            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i));
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i), i);
         }
     }
 }
@@ -517,9 +517,9 @@ void Interpreter::pmaxw() {
 void Interpreter::pminh() {
     for (int i = 0; i < 8; i++) {
         if (ctx.GetReg<s16>(inst.rs, i) > ctx.GetReg<s16>(inst.rt, i)) {
-            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i));
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i), i);
         } else {
-            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i));
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i), i);
         }
     }
 }
@@ -527,9 +527,9 @@ void Interpreter::pminh() {
 void Interpreter::pminw() {
     for (int i = 0; i < 4; i++) {
         if (ctx.GetReg<s32>(inst.rs, i) > ctx.GetReg<s32>(inst.rt, i)) {
-            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i));
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i), i);
         } else {
-            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i));
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i), i);
         }
     }
 }
@@ -575,10 +575,10 @@ void Interpreter::psubsw() {
         s64 result = static_cast<s64>(ctx.GetReg<s32>(inst.rs, i)) - static_cast<s64>(ctx.GetReg<s32>(inst.rt, i));
         if (result > 0x7fffffff) {
             result = 0x7fffffff;
-        } else if (result < -0x80000000) {
-            result = -0x80000000;
+        } else if (result < static_cast<s32>(0x80000000)) {
+            result = static_cast<s32>(0x80000000);
         }
-        ctx.SetReg<s32>(inst.rd, result & 0xffffffff, i);
+        ctx.SetReg<s32>(inst.rd, static_cast<s32>(result), i);
     }
 }
 
@@ -586,7 +586,7 @@ void Interpreter::psubub() {
     for (int i = 0; i < 16; i++) {
         u16 result = static_cast<u16>(ctx.GetReg<u8>(inst.rs, i)) - static_cast<u16>(ctx.GetReg<u8>(inst.rt, i));
         if (result > 0xff) {
-            result = 0xff;
+            result = 0;
         }
         ctx.SetReg<u8>(inst.rd, result & 0xff, i);
     }
@@ -596,7 +596,7 @@ void Interpreter::psubuh() {
     for (int i = 0; i < 8; i++) {
         u32 result = static_cast<u32>(ctx.GetReg<u16>(inst.rs, i)) - static_cast<u32>(ctx.GetReg<u16>(inst.rt, i));
         if (result > 0xffff) {
-            result = 0xffff;
+            result = 0;
         }
         ctx.SetReg<u16>(inst.rd, result & 0xffff, i);
     }
@@ -606,7 +606,7 @@ void Interpreter::psubuw() {
     for (int i = 0; i < 4; i++) {
         u64 result = static_cast<u64>(ctx.GetReg<u32>(inst.rs, i)) - static_cast<u64>(ctx.GetReg<u32>(inst.rt, i));
         if (result > 0xffffffff) {
-            result = 0xffffffff;
+            result = 0;
         }
         ctx.SetReg<u32>(inst.rd, result & 0xffffffff, i);
     }
