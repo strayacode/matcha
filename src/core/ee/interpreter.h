@@ -99,7 +99,6 @@ struct Interpreter : public Executor {
     void dsrl();
     void srlv();
     void dsrl32();
-    void padduw();
     void di();
     void eret();
     void syscall_exception();
@@ -137,7 +136,6 @@ struct Interpreter : public Executor {
     void pref();
     void multu();
     void pcpyld();
-    void psubb();
     void pnor();
     void pand();
     void pcpyud();
@@ -162,6 +160,25 @@ struct Interpreter : public Executor {
     void paddh();
     void paddsb();
     void paddsh();
+    void paddsw();
+    void paddub();
+    void padduh();
+    void padduw();
+    void paddw();
+    void padsbh();
+    void pmaxh();
+    void pmaxw();
+    void pminh();
+    void pminw();
+    void psubb();
+    void psubh();
+    void psubsb();
+    void psubsh();
+    void psubsw();
+    void psubub();
+    void psubuh();
+    void psubuw();
+    void psubw();
     void illegal_instruction();
     void stub_instruction();
 

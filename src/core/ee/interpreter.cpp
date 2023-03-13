@@ -267,18 +267,6 @@ void Interpreter::por() {
     ctx.SetReg<u128>(inst.rd, ctx.GetReg<u128>(inst.rs) | ctx.GetReg<u128>(inst.rt));
 }
 
-void Interpreter::padduw() {
-    for (int i = 0; i < 4; i++) {
-        u64 result = ctx.GetReg<u32>(inst.rs, i) + ctx.GetReg<u32>(inst.rt, i);
-
-        if (result > 0xFFFFFFFF) {
-            ctx.SetReg<u32>(inst.rd, 0xFFFFFFFF, i);
-        } else {
-            ctx.SetReg<u32>(inst.rd, result);
-        }
-    }
-}
-
 void Interpreter::mfhi1() {
     ctx.SetReg<u64>(inst.rd, ctx.hi1);
 }
@@ -303,12 +291,6 @@ void Interpreter::pcpyld() {
     u64 upper = ctx.GetReg<u64>(inst.rs);
     ctx.SetReg<u64>(inst.rd, lower);
     ctx.SetReg<u64>(inst.rd, upper, 1);
-}
-
-void Interpreter::psubb() {
-    for (int i = 0; i < 16; i++) {
-        ctx.SetReg<s8>(inst.rd, ctx.GetReg<s8>(inst.rs, i) - ctx.GetReg<s8>(inst.rt, i), i);
-    }
 }
 
 void Interpreter::pnor() {
@@ -398,11 +380,11 @@ void Interpreter::pabsh() {
         s16 signed_data = ctx.GetReg<s16>(inst.rt, i);
         u16 data = ctx.GetReg<u16>(inst.rt, i);
         if (data == 0x8000) {
-            ctx.SetReg<u16>(inst.rd, 0x7fff);
+            ctx.SetReg<u16>(inst.rd, 0x7fff, i);
         } else if (signed_data < 0) {
-            ctx.SetReg<u16>(inst.rd, -signed_data);
+            ctx.SetReg<u16>(inst.rd, -signed_data, i);
         } else {
-            ctx.SetReg<u16>(inst.rd, data);
+            ctx.SetReg<u16>(inst.rd, data, i);
         }
     }
 }
@@ -412,11 +394,11 @@ void Interpreter::pabsw() {
         s32 signed_data = ctx.GetReg<s32>(inst.rt, i);
         u32 data = ctx.GetReg<u32>(inst.rt, i);
         if (data == 0x80000000) {
-            ctx.SetReg<u32>(inst.rd, 0x7fffffff);
+            ctx.SetReg<u32>(inst.rd, 0x7fffffff, i);
         } else if (signed_data < 0) {
-            ctx.SetReg<u32>(inst.rd, -signed_data);
+            ctx.SetReg<u32>(inst.rd, -signed_data, i);
         } else {
-            ctx.SetReg<u32>(inst.rd, data);
+            ctx.SetReg<u32>(inst.rd, data, i);
         }
     }
 }
@@ -454,6 +436,185 @@ void Interpreter::paddsh() {
             result = -0x8000;
         }
         ctx.SetReg<s16>(inst.rd, result & 0xffff, i);
+    }
+}
+
+void Interpreter::paddsw() {
+    for (int i = 0; i < 4; i++) {
+        s64 result = static_cast<s64>(ctx.GetReg<s32>(inst.rs, i)) + static_cast<s64>(ctx.GetReg<s32>(inst.rt, i));
+        if (result > 0x7fffffff) {
+            result = 0x7fffffff;
+        } else if (result < static_cast<s32>(0x80000000)) {
+            result = static_cast<s32>(0x80000000);
+        }
+        ctx.SetReg<s32>(inst.rd, static_cast<s32>(result), i);
+    }
+}
+
+void Interpreter::paddub() {
+    for (int i = 0; i < 16; i++) {
+        u16 result = static_cast<u16>(ctx.GetReg<u8>(inst.rs, i)) + static_cast<u16>(ctx.GetReg<u8>(inst.rt, i));
+        if (result > 0xff) {
+            result = 0xff;
+        }
+        ctx.SetReg<u8>(inst.rd, result & 0xff, i);
+    }
+}
+
+void Interpreter::padduh() {
+    for (int i = 0; i < 8; i++) {
+        u32 result = static_cast<u32>(ctx.GetReg<u16>(inst.rs, i)) + static_cast<u32>(ctx.GetReg<u16>(inst.rt, i));
+        if (result > 0xffff) {
+            result = 0xffff;
+        }
+        ctx.SetReg<u16>(inst.rd, result & 0xffff, i);
+    }
+}
+
+void Interpreter::padduw() {
+    for (int i = 0; i < 4; i++) {
+        u64 result = static_cast<u64>(ctx.GetReg<u32>(inst.rs, i)) + static_cast<u64>(ctx.GetReg<u32>(inst.rt, i));
+        if (result > 0xffffffff) {
+            result = 0xffffffff;
+        }
+        ctx.SetReg<u32>(inst.rd, result & 0xffffffff, i);
+    }
+}
+
+void Interpreter::paddw() {
+    for (int i = 0; i < 4; i++) {
+        ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i) + ctx.GetReg<s32>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::padsbh() {
+    for (int i = 0; i < 4; i++) {
+        ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i) - ctx.GetReg<s16>(inst.rt, i), i);
+        ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i + 4) + ctx.GetReg<s16>(inst.rt, i + 4), i + 4);
+    }
+}
+
+void Interpreter::pmaxh() {
+    for (int i = 0; i < 8; i++) {
+        if (ctx.GetReg<s16>(inst.rs, i) > ctx.GetReg<s16>(inst.rt, i)) {
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i));
+        } else {
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i));
+        }
+    }
+}
+
+void Interpreter::pmaxw() {
+    for (int i = 0; i < 4; i++) {
+        if (ctx.GetReg<s32>(inst.rs, i) > ctx.GetReg<s32>(inst.rt, i)) {
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i));
+        } else {
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i));
+        }
+    }
+}
+
+void Interpreter::pminh() {
+    for (int i = 0; i < 8; i++) {
+        if (ctx.GetReg<s16>(inst.rs, i) > ctx.GetReg<s16>(inst.rt, i)) {
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rt, i));
+        } else {
+            ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i));
+        }
+    }
+}
+
+void Interpreter::pminw() {
+    for (int i = 0; i < 4; i++) {
+        if (ctx.GetReg<s32>(inst.rs, i) > ctx.GetReg<s32>(inst.rt, i)) {
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rt, i));
+        } else {
+            ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i));
+        }
+    }
+}
+
+void Interpreter::psubb() {
+    for (int i = 0; i < 16; i++) {
+        ctx.SetReg<s8>(inst.rd, ctx.GetReg<s8>(inst.rs, i) - ctx.GetReg<s8>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::psubh() {
+    for (int i = 0; i < 8; i++) {
+        ctx.SetReg<s16>(inst.rd, ctx.GetReg<s16>(inst.rs, i) - ctx.GetReg<s16>(inst.rt, i), i);
+    }
+}
+
+void Interpreter::psubsb() {
+    for (int i = 0; i < 16; i++) {
+        s16 result = static_cast<s16>(ctx.GetReg<s8>(inst.rs, i)) - static_cast<s16>(ctx.GetReg<s8>(inst.rt, i));
+        if (result > 0x7f) {
+            result = 0x7f;
+        } else if (result < -0x80) {
+            result = -0x80;
+        }
+        ctx.SetReg<s8>(inst.rd, result & 0xff, i);
+    }
+}
+
+void Interpreter::psubsh() {
+    for (int i = 0; i < 8; i++) {
+        s32 result = static_cast<s32>(ctx.GetReg<s16>(inst.rs, i)) - static_cast<s32>(ctx.GetReg<s16>(inst.rt, i));
+        if (result > 0x7fff) {
+            result = 0x7fff;
+        } else if (result < -0x8000) {
+            result = -0x8000;
+        }
+        ctx.SetReg<s16>(inst.rd, result & 0xffff, i);
+    }
+}
+
+void Interpreter::psubsw() {
+    for (int i = 0; i < 4; i++) {
+        s64 result = static_cast<s64>(ctx.GetReg<s32>(inst.rs, i)) - static_cast<s64>(ctx.GetReg<s32>(inst.rt, i));
+        if (result > 0x7fffffff) {
+            result = 0x7fffffff;
+        } else if (result < -0x80000000) {
+            result = -0x80000000;
+        }
+        ctx.SetReg<s32>(inst.rd, result & 0xffffffff, i);
+    }
+}
+
+void Interpreter::psubub() {
+    for (int i = 0; i < 16; i++) {
+        u16 result = static_cast<u16>(ctx.GetReg<u8>(inst.rs, i)) - static_cast<u16>(ctx.GetReg<u8>(inst.rt, i));
+        if (result > 0xff) {
+            result = 0xff;
+        }
+        ctx.SetReg<u8>(inst.rd, result & 0xff, i);
+    }
+}
+
+void Interpreter::psubuh() {
+    for (int i = 0; i < 8; i++) {
+        u32 result = static_cast<u32>(ctx.GetReg<u16>(inst.rs, i)) - static_cast<u32>(ctx.GetReg<u16>(inst.rt, i));
+        if (result > 0xffff) {
+            result = 0xffff;
+        }
+        ctx.SetReg<u16>(inst.rd, result & 0xffff, i);
+    }
+}
+
+void Interpreter::psubuw() {
+    for (int i = 0; i < 4; i++) {
+        u64 result = static_cast<u64>(ctx.GetReg<u32>(inst.rs, i)) - static_cast<u64>(ctx.GetReg<u32>(inst.rt, i));
+        if (result > 0xffffffff) {
+            result = 0xffffffff;
+        }
+        ctx.SetReg<u32>(inst.rd, result & 0xffffffff, i);
+    }
+}
+
+void Interpreter::psubw() {
+    for (int i = 0; i < 4; i++) {
+        ctx.SetReg<s32>(inst.rd, ctx.GetReg<s32>(inst.rs, i) - ctx.GetReg<s32>(inst.rt, i), i);
     }
 }
 

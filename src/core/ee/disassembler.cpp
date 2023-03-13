@@ -238,16 +238,34 @@ static std::map<int, DisassemblyInfo> mmi_table = {
 };
 
 static std::map<int, DisassemblyInfo> mmi0_table = {
+    {0, DisassemblyInfo{"paddw $rd, $rs, $rt", InstructionType::Register}},
+    {1, DisassemblyInfo{"psubw $rd, $rs, $rt", InstructionType::Register}},
+    {3, DisassemblyInfo{"pmaxw $rd, $rs, $rt", InstructionType::Register}},
     {4, DisassemblyInfo{"paddh $rd, $rs, $rt", InstructionType::Register}},
+    {5, DisassemblyInfo{"psubh $rd, $rs, $rt", InstructionType::Register}},
+    {7, DisassemblyInfo{"pmaxh $rd, $rs, $rt", InstructionType::Register}},
     {8, DisassemblyInfo{"paddb $rd, $rs, $rt", InstructionType::Register}},
     {9, DisassemblyInfo{"psubb $rd, $rs, $rt", InstructionType::Register}},
+    {16, DisassemblyInfo{"paddsw $rd, $rs, $rt", InstructionType::Register}},
+    {17, DisassemblyInfo{"psubsw $rd, $rs, $rt", InstructionType::Register}},
     {20, DisassemblyInfo{"paddsh $rd, $rs, $rt", InstructionType::Register}},
+    {21, DisassemblyInfo{"psubsh $rd, $rs, $rt", InstructionType::Register}},
     {24, DisassemblyInfo{"paddsb $rd, $rs, $rt", InstructionType::Register}},
+    {25, DisassemblyInfo{"psubsb $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi1_table = {
     {1, DisassemblyInfo{"pabsw $rd, $rt", InstructionType::Register}},
+    {3, DisassemblyInfo{"pminw $rd, $rs, $rt", InstructionType::Register}},
+    {4, DisassemblyInfo{"padsbh $rd, $rs, $rt", InstructionType::Register}},
     {5, DisassemblyInfo{"pabsh $rd, $rt", InstructionType::Register}},
+    {7, DisassemblyInfo{"pminh $rd, $rt", InstructionType::Register}},
+    {16, DisassemblyInfo{"padduw $rd, $rs, $rt", InstructionType::Register}},
+    {17, DisassemblyInfo{"psubuw $rd, $rs, $rt", InstructionType::Register}},
+    {20, DisassemblyInfo{"padduh $rd, $rs, $rt", InstructionType::Register}},
+    {21, DisassemblyInfo{"psubuh $rd, $rs, $rt", InstructionType::Register}},
+    {24, DisassemblyInfo{"paddub $rd, $rs, $rt", InstructionType::Register}},
+    {25, DisassemblyInfo{"psubub $rd, $rs, $rt", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> mmi2_table = {

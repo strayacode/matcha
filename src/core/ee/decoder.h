@@ -169,16 +169,33 @@ struct Decoder {
         RegisterOpcode(&D::maddu1, 33, InstructionType::MMI);
 
         // mmi0 instructions
+        RegisterOpcode(&D::paddw, 0, InstructionType::MMI0);
+        RegisterOpcode(&D::psubw, 1, InstructionType::MMI0);
+        RegisterOpcode(&D::pmaxw, 3, InstructionType::MMI0);
         RegisterOpcode(&D::paddh, 4, InstructionType::MMI0);
+        RegisterOpcode(&D::psubh, 5, InstructionType::MMI0);
         RegisterOpcode(&D::paddb, 8, InstructionType::MMI0);
+        RegisterOpcode(&D::pmaxh, 7, InstructionType::MMI0);
         RegisterOpcode(&D::psubb, 9, InstructionType::MMI0);
+        RegisterOpcode(&D::paddsw, 16, InstructionType::MMI0);
+        RegisterOpcode(&D::psubsw, 17, InstructionType::MMI0);
         RegisterOpcode(&D::paddsh, 20, InstructionType::MMI0);
+        RegisterOpcode(&D::psubsh, 21, InstructionType::MMI0);
         RegisterOpcode(&D::paddsb, 24, InstructionType::MMI0);
+        RegisterOpcode(&D::psubsb, 25, InstructionType::MMI0);
 
         // mmi1 instructions
         RegisterOpcode(&D::pabsw, 1, InstructionType::MMI1);
+        RegisterOpcode(&D::pminw, 3, InstructionType::MMI1);
+        RegisterOpcode(&D::padsbh, 4, InstructionType::MMI1);
         RegisterOpcode(&D::pabsh, 5, InstructionType::MMI1);
+        RegisterOpcode(&D::pminh, 7, InstructionType::MMI1);
         RegisterOpcode(&D::padduw, 16, InstructionType::MMI1);
+        RegisterOpcode(&D::psubuw, 17, InstructionType::MMI1);
+        RegisterOpcode(&D::padduh, 20, InstructionType::MMI1);
+        RegisterOpcode(&D::psubuh, 21, InstructionType::MMI1);
+        RegisterOpcode(&D::paddub, 24, InstructionType::MMI1);
+        RegisterOpcode(&D::psubub, 25, InstructionType::MMI1);
 
         // mmi2 instructions
         RegisterOpcode(&D::pcpyld, 14, InstructionType::MMI2);
