@@ -445,6 +445,18 @@ void Interpreter::paddsb() {
     }
 }
 
+void Interpreter::paddsh() {
+    for (int i = 0; i < 8; i++) {
+        s32 result = static_cast<s32>(ctx.GetReg<s16>(inst.rs, i)) + static_cast<s32>(ctx.GetReg<s16>(inst.rt, i));
+        if (result > 0x7fff) {
+            result = 0x7fff;
+        } else if (result < -0x8000) {
+            result = -0x8000;
+        }
+        ctx.SetReg<s16>(inst.rd, result & 0xffff, i);
+    }
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < common::SignExtend<s64, 16>(inst.imm));

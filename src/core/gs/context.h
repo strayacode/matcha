@@ -33,6 +33,12 @@ namespace gs {
 // dw + 1: width on screen
 // dy + 1: height on screen
 
+struct Framebuffer {
+    u8* data;
+    int width;
+    int height;
+};
+
 class Context {
 public:
     Context(System& system);
@@ -47,7 +53,7 @@ public:
     void Reset();
     void SystemReset();
 
-    u8* GetFramebuffer();
+    Framebuffer GetFramebuffer();
 
     union RGBAQ {
         struct {
@@ -223,6 +229,8 @@ private:
 
     int GetPixelsToTransfer(PixelFormat format);
     u32 GetCRTCPixel(u32 base, int x, int y, u32 width, PixelFormat format);
+    int GetCRTCWidth();
+    int GetCRTCHeight();
     u32 ReadPSMCT32Pixel(u32 base, int x, int y, u32 width);
     void WritePSMCT32Pixel(u32 base, int x, int y, u32 width, u32 value);
 

@@ -76,8 +76,8 @@ void Context::SystemReset() {
 }
 
 void Context::RenderCRTC() {
-    int width = 0;
-    int height = 0;
+    int width = GetCRTCWidth();
+    int height = GetCRTCHeight();
     int dx = 0;
     int dy = 0;
     if (pmode.en1 && pmode.en2) {
@@ -85,8 +85,6 @@ void Context::RenderCRTC() {
     } else if (pmode.en1) {
         common::Error("[gs::Context] read circuit 1 enabled");
     } else if (pmode.en2) {
-        width = (display2.dw + 1) / (display2.magh + 1);
-        height = (display2.dh + 1) / (display2.magv + 1);
         dx = display2.dx / (display2.magh + 1);
         dy = display2.dy / (display2.magv + 1);
     }
@@ -102,8 +100,12 @@ void Context::RenderCRTC() {
     }
 }
 
-u8* Context::GetFramebuffer() {
-    return reinterpret_cast<u8*>(&framebuffer);
+Framebuffer Context::GetFramebuffer() {
+    return {
+        .data = reinterpret_cast<u8*>(&framebuffer),
+        .width = GetCRTCWidth(),
+        .height = GetCRTCHeight()
+    };
 }
 
 u32 Context::ReadRegisterPrivileged(u32 addr) {
@@ -414,6 +416,30 @@ u32 Context::GetCRTCPixel(u32 base, int x, int y, u32 width, PixelFormat format)
         return ReadPSMCT32Pixel(base, x, y, width);
     default:
         common::Error("[gs::Context] handle crtc pixel format %d", static_cast<int>(format));
+    }
+
+    return 0;
+}
+
+int Context::GetCRTCWidth() {
+    if (pmode.en1 && pmode.en2) {
+        common::Error("[gs::Context] read circuit 1 and read circuit 2 enabled");
+    } else if (pmode.en1) {
+        common::Error("[gs::Context] read circuit 1 enabled");
+    } else if (pmode.en2) {
+        return (display2.dw + 1) / (display2.magh + 1);
+    }
+
+    return 0;
+}
+
+int Context::GetCRTCHeight() {
+    if (pmode.en1 && pmode.en2) {
+        common::Error("[gs::Context] read circuit 1 and read circuit 2 enabled");
+    } else if (pmode.en1) {
+        common::Error("[gs::Context] read circuit 1 enabled");
+    } else if (pmode.en2) {
+        return (display2.dh + 1) / (display2.magv + 1);
     }
 
     return 0;

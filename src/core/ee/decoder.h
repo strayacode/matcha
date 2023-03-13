@@ -172,6 +172,7 @@ struct Decoder {
         RegisterOpcode(&D::paddh, 4, InstructionType::MMI0);
         RegisterOpcode(&D::paddb, 8, InstructionType::MMI0);
         RegisterOpcode(&D::psubb, 9, InstructionType::MMI0);
+        RegisterOpcode(&D::paddsh, 20, InstructionType::MMI0);
         RegisterOpcode(&D::paddsb, 24, InstructionType::MMI0);
 
         // mmi1 instructions

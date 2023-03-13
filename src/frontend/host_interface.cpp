@@ -286,19 +286,21 @@ void HostInterface::RenderDisplayWindow() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
 
+    gs::Framebuffer framebuffer = core.system.gs.GetFramebuffer();
+
     // TODO: provide an abstraction for this in the video namespace
     glBindTexture(GL_TEXTURE_2D, screen_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, core.system.gs.GetFramebuffer());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, framebuffer.width, framebuffer.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, framebuffer.data);
 
-    const double scale_x = static_cast<double>(window_width) / 640;
-    const double scale_y = static_cast<double>(window_height - menubar_height) / 480;
+    const double scale_x = static_cast<double>(window_width) / framebuffer.width;
+    const double scale_y = static_cast<double>(window_height - menubar_height) / framebuffer.height;
     const double scale = scale_x < scale_y ? scale_x : scale_y;
 
-    ImVec2 scaled_dimensions = ImVec2(640 * scale, 480 * scale);
+    ImVec2 scaled_dimensions = ImVec2(framebuffer.width * scale, framebuffer.height * scale);
     ImVec2 center_pos = ImVec2(
         (static_cast<double>(window_width) - scaled_dimensions.x) / 2,
         (static_cast<double>(window_height - menubar_height) - scaled_dimensions.y) / 2

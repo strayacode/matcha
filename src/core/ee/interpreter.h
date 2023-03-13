@@ -161,6 +161,7 @@ struct Interpreter : public Executor {
     void paddb();
     void paddh();
     void paddsb();
+    void paddsh();
     void illegal_instruction();
     void stub_instruction();
 
