@@ -152,7 +152,6 @@ void Interpreter::mtc0() {
 }
 
 // COP1 instructions
-// TODO: do instruction execution in the cop1
 void Interpreter::swc1() {
     u32 vaddr = ctx.GetReg<u32>(inst.rs) + inst.simm;
 
@@ -160,11 +159,11 @@ void Interpreter::swc1() {
         common::Error("[ee::Interpreter] handle unaligned swc1 vaddr %08x", vaddr);
     }
     
-    ctx.Write<u32>(vaddr, ctx.cop1.GetReg(inst.rt));
+    ctx.Write<u32>(vaddr, ctx.cop1.GetReg(inst.ft));
 }
 
 void Interpreter::mtc1() {
-    ctx.cop1.SetReg(inst.rd, ctx.GetReg<u32>(inst.rt));
+    ctx.cop1.SetReg(inst.fs, ctx.GetReg<u32>(inst.rt));
 }
 
 void Interpreter::adda_s() {
@@ -172,18 +171,11 @@ void Interpreter::adda_s() {
 }
 
 void Interpreter::ctc1() {
-    ctx.cop1.SetControlReg(inst.rd, ctx.GetReg<u32>(inst.rt));
+    ctx.cop1.SetControlReg(inst.fs, ctx.GetReg<u32>(inst.rt));
 }
 
 void Interpreter::cfc1() {
-    switch (inst.rd) {
-    case 0:
-    case 31:
-        ctx.SetReg<u64>(inst.rt, static_cast<s32>(ctx.cop1.GetControlReg(inst.rd)));
-        break;
-    default:
-        common::Error("[ee::Interpreter] operation where fs != 0 or fs != 31 is undefined");
-    }
+    ctx.SetReg<u64>(inst.rt, static_cast<s32>(ctx.cop1.GetControlReg(inst.fs)));
 }
 
 void Interpreter::madd_s() {
@@ -197,7 +189,7 @@ void Interpreter::lwc1() {
         common::Error("[ee::Interpreter] handle unaligned lwc1 vaddr", vaddr);
     }
 
-    ctx.cop1.SetReg(inst.rt, ctx.Read<u32>(vaddr));
+    ctx.cop1.SetReg(inst.ft, ctx.Read<u32>(vaddr));
 }
 
 void Interpreter::mov_s() {
