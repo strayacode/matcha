@@ -610,6 +610,66 @@ void Interpreter::psubw() {
     }
 }
 
+void Interpreter::pceqb() {
+    for (int i = 0; i < 16; i++) {
+        if (ctx.GetReg<u8>(inst.rs, i) == ctx.GetReg<u8>(inst.rt, i)) {
+            ctx.SetReg<u8>(inst.rd, 0xff, i);
+        } else {
+            ctx.SetReg<u8>(inst.rd, 0, i);
+        }
+    }
+}
+
+void Interpreter::pceqh() {
+    for (int i = 0; i < 8; i++) {
+        if (ctx.GetReg<u16>(inst.rs, i) == ctx.GetReg<u16>(inst.rt, i)) {
+            ctx.SetReg<u16>(inst.rd, 0xffff, i);
+        } else {
+            ctx.SetReg<u16>(inst.rd, 0, i);
+        }
+    }
+}
+
+void Interpreter::pceqw() {
+    for (int i = 0; i < 4; i++) {
+        if (ctx.GetReg<u32>(inst.rs, i) == ctx.GetReg<u32>(inst.rt, i)) {
+            ctx.SetReg<u32>(inst.rd, 0xffffffff, i);
+        } else {
+            ctx.SetReg<u32>(inst.rd, 0, i);
+        }
+    }
+}
+
+void Interpreter::pcgtb() {
+    for (int i = 0; i < 16; i++) {
+        if (ctx.GetReg<s8>(inst.rs, i) > ctx.GetReg<s8>(inst.rt, i)) {
+            ctx.SetReg<u8>(inst.rd, 0xff, i);
+        } else {
+            ctx.SetReg<u8>(inst.rd, 0, i);
+        }
+    }
+}
+
+void Interpreter::pcgth() {
+    for (int i = 0; i < 8; i++) {
+        if (ctx.GetReg<s16>(inst.rs, i) > ctx.GetReg<s16>(inst.rt, i)) {
+            ctx.SetReg<u16>(inst.rd, 0xffff, i);
+        } else {
+            ctx.SetReg<u16>(inst.rd, 0, i);
+        }
+    }
+}
+
+void Interpreter::pcgtw() {
+    for (int i = 0; i < 4; i++) {
+        if (ctx.GetReg<s32>(inst.rs, i) > ctx.GetReg<s32>(inst.rt, i)) {
+            ctx.SetReg<u32>(inst.rd, 0xffffffff, i);
+        } else {
+            ctx.SetReg<u32>(inst.rd, 0, i);
+        }
+    }
+}
+
 // primary instructions
 void Interpreter::slti() {
     ctx.SetReg<u64>(inst.rt, ctx.GetReg<s64>(inst.rs) < common::SignExtend<s64, 16>(inst.imm));

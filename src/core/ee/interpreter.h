@@ -179,6 +179,12 @@ struct Interpreter : public Executor {
     void psubuh();
     void psubuw();
     void psubw();
+    void pceqb();
+    void pceqh();
+    void pceqw();
+    void pcgtb();
+    void pcgth();
+    void pcgtw();
     void illegal_instruction();
     void stub_instruction();
 
