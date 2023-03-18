@@ -30,8 +30,23 @@ u32 CDVD::ReadRegister(u32 addr) {
 
 void CDVD::WriteRegister(u32 addr, u32 value) {
     switch (addr) {
+    case 0x1f402016:
+        s_command = value;
+        DoSCommand();
+        break;
     default:
         common::Error("[iop::CDVD] handle write %08x = %08x", addr, value);
+    }
+}
+
+void CDVD::DoSCommand() {
+    // TODO: handle s command results
+    switch (s_command) {
+    case 0x15:
+        common::Log("[iop::CDVD] ForbidDVD");
+        break;
+    default:
+        common::Error("[iop::CDVD] handle s command %02x", s_command);
     }
 }
 

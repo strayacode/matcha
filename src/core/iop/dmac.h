@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/types.h"
+#include "core/iop/sio2.h"
 
 struct System;
 
@@ -8,7 +9,7 @@ namespace iop {
 
 class DMAC {
 public:
-    DMAC(System& system);
+    DMAC(System& system, SIO2& sio2);
 
     void Reset();
     void Run(int cycles);
@@ -22,6 +23,7 @@ public:
     void DoSIF1Transfer();
     void DoSPU2Transfer();
     void DoSIO2InTransfer();
+    void DoSIO2OutTransfer();
     void EndTransfer(int index);
 
     // dma priority/enable
@@ -74,6 +76,7 @@ public:
 
 private:
     System& system;
+    SIO2& sio2;
 };
 
 } // namespace iop

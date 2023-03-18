@@ -5,7 +5,7 @@
 
 namespace iop {
 
-DMAC::DMAC(System& system) : system(system) {}
+DMAC::DMAC(System& system, SIO2& sio2) : system(system), sio2(sio2) {}
 
 void DMAC::Reset() {
     for (int i = 0; i < 13; i++) {
@@ -40,6 +40,9 @@ void DMAC::Run(int cycles) {
                 break;
             case 11:
                 DoSIO2InTransfer();
+                break;
+            case 12:
+                DoSIO2OutTransfer();
                 break;
             default:
                 common::Error("[iop::DMAC] handle transfer for channel %d", i);
@@ -287,11 +290,46 @@ void DMAC::DoSPU2Transfer() {
 
 void DMAC::DoSIO2InTransfer() {
     Channel& channel = channels[11];
-    common::Error("[iop::DMAC sio2in] address %08x size %d", channel.address, channel.block_size * channel.block_count * 4);
+    int length = channel.block_size * channel.block_count * 4;
+
+    for (int i = 0; i < length; i++) {
+        u8 data = system.iop.Read<u8>(channel.address);
+        sio2.WriteDMA(data);
+        channel.address++;
+    }
+    
+    channel.block_count = 0;
+    if (channel.block_count == 0) {
+        EndTransfer(11);
+    }
+
+    common::Log("[iop::DMAC sio2in] end transfer flags %08x masks %08x", dicr2.flags, dicr2.masks);
+}
+
+void DMAC::DoSIO2OutTransfer() {
+    Channel& channel = channels[12];
+    int length = channel.block_size * channel.block_count * 4;
+
+    for (int i = 0; i < length; i++) {
+        u8 data = sio2.ReadDMA();
+        system.iop.Write<u8>(channel.address, data);
+        channel.address++;
+    }
+
+    channel.block_count = 0;
+    if (channel.block_count == 0) {
+        EndTransfer(12);
+    }
+
+    common::Log("[iop::DMAC sio2out] end transfer flags %08x masks %08x", dicr2.flags, dicr2.masks);
 }
 
 void DMAC::EndTransfer(int index) {
     common::Log("[iop::DMAC %d] end transfer", index);
+
+    if (index < 7) {
+        common::Error("[iop::DMAC] handle index < 7, %d", index);
+    }
 
     // hack for now for spu2 status register to be updated
     if (index == 7) {

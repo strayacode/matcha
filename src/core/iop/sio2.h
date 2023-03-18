@@ -13,6 +13,8 @@ struct SIO2 {
 
     u32 ReadRegister(u32 addr);
     void WriteRegister(u32 addr, u32 value);
+    u8 ReadDMA();
+    void WriteDMA(u8 data);
 
 private:
     u8 control;

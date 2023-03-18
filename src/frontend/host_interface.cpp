@@ -288,13 +288,12 @@ void HostInterface::RenderDisplayWindow() {
 
     gs::Framebuffer framebuffer = core.system.gs.GetFramebuffer();
 
-    // TODO: provide an abstraction for this in the video namespace
     glBindTexture(GL_TEXTURE_2D, screen_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, framebuffer.width, framebuffer.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, framebuffer.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, framebuffer.width, framebuffer.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer.data);
 
     const double scale_x = static_cast<double>(window_width) / framebuffer.width;
     const double scale_y = static_cast<double>(window_height - menubar_height) / framebuffer.height;

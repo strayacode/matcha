@@ -28,6 +28,9 @@ u32 SIO2::ReadRegister(u32 addr) {
     case 0x1f808274:
         // response status 3
         return 0;
+    case 0x1f808280:
+        // istat
+        return 0;
     default:
         common::Error("[iop::SIO2] handle read %08x", addr);
     }
@@ -75,10 +78,21 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
             common::Log("[iop::SIO2] reset sio2");
         }
 
-        break; 
+        break;
+    case 0x1f808280:
+        break;
     default:
         common::Error("[iop::SIO2] handle write %08x = %08x", addr, value);
     }
+}
+
+u8 SIO2::ReadDMA() {
+    common::Log("[iop::SIO2] dma read");
+    return 0;
+}
+
+void SIO2::WriteDMA(u8 data) {
+    common::Log("[iop::SIO2] dma data %02x", data);
 }
 
 } // namespace iop
