@@ -19,6 +19,11 @@ void HostInterface::render_debugger_window() {
             render_iop_debugger();
             ImGui::EndTabItem();
         }
+
+        if (ImGui::BeginTabItem("Library")) {
+            render_library_window();
+            ImGui::EndTabItem();
+        }
         
         ImGui::EndTabBar();
     }

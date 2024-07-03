@@ -29,7 +29,7 @@ private:
     void RenderMenubar();
     void Boot(const std::string& path);
     void RenderDisplayWindow();
-    void RenderLibraryWindow();
+    void render_library_window();
     
     void BeginFullscreenWindow(const char *name, ImVec2 padding = ImVec2(0.0f, 0.0f));
     void EndFullscreenWindow();
@@ -62,7 +62,7 @@ private:
     common::GamesList games_list;
 
     float fps;
-    bool m_show_debugger_window{false};
+    bool m_show_debugger_window{true};
     bool m_show_demo_window{false};
     int m_ee_disassembly_size{15};
     int m_iop_disassembly_size{15};

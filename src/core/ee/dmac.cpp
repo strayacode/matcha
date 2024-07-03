@@ -1,4 +1,6 @@
+#include <cassert>
 #include "common/log.h"
+#include "common/memory.h"
 #include "core/ee/dmac.h"
 #include "core/system.h"
 
@@ -21,7 +23,7 @@ void DMAC::Reset() {
     disabled_status = 0x1201;
 
     for (int i = 0; i < 10; i++) {
-        channels[i].control = 0;
+        channels[i].control.data = 0;
         channels[i].address = 0;
         channels[i].tag_address = 0;
         channels[i].quadword_count = 0;
@@ -38,7 +40,7 @@ u32 DMAC::ReadChannel(u32 addr) {
     switch (addr & 0xFF) {
     case 0x00:
         // common::Log("[DMAC %d] control read %08x", index, channels[index].control);
-        return channels[index].control;
+        return channels[index].control.data;
     case 0x10:
         return channels[index].address;
     case 0x20:
@@ -104,40 +106,40 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
     int index = GetChannelIndex(addr);
     const char* channel_name = channel_names[index];
 
-    switch (addr & 0xFF) {
+    switch (addr & 0xff) {
     case 0x00:
         common::Log("[ee::DMAC] %s Dn_CHCR write %08x", channel_name, data);
-        channels[index].control = data;
+        channels[index].control.data = data;
 
         StartTransfer(index);
         break;
     case 0x10:
         common::Log("[ee::DMAC] %s Dn_MADR write %08x", channel_name, data);
-        channels[index].address = data & ~0xF;
+        channels[index].address = data & ~0xf;
         break;
     case 0x20:
         // In normal and interleaved mode, the transfer ends when QWC reaches zero. Chain mode behaves differently
         common::Log("[ee::DMAC] %s Dn_QWC write %08x", channel_name, data);
-        channels[index].quadword_count = data & 0xFFFF;
+        channels[index].quadword_count = data & 0xffff;
         break;
     case 0x30:
         common::Log("[ee::DMAC] %s Dn_TADR write %08x", channel_name, data);
-        channels[index].tag_address = data & ~0xF;
+        channels[index].tag_address = data & ~0xf;
         break;
     case 0x40:
         common::Log("[ee::DMAC] %s Dn_ASR0 write %08x", channel_name, data);
-        channels[index].saved_tag_address0 = data & ~0xF;
+        channels[index].saved_tag_address0 = data & ~0xf;
         break;
     case 0x50:
         common::Log("[ee::DMAC] %s Dn_ASR1 write %08x", channel_name, data);
-        channels[index].saved_tag_address1 = data & ~0xF;
+        channels[index].saved_tag_address1 = data & ~0xf;
         break;
     case 0x80:
         common::Log("[ee::DMAC] %s Dn_SADR write %08x", channel_name, data);
-        channels[index].scratchpad_address = data & ~0xF;
+        channels[index].scratchpad_address = data & ~0xf;
         break;
     default:
-        common::Error("[ee::DMAC] Handle channel with identifier %02x and data %08x", addr & 0xFF, data);
+        common::Error("[ee::DMAC] Handle channel with identifier %02x and data %08x", addr & 0xff, data);
     }
 }
 
@@ -161,9 +163,9 @@ int DMAC::GetChannelIndex(u32 addr) {
     case 0xC8:
         return static_cast<int>(ChannelType::SIF2);
     case 0xD0:
-        return static_cast<int>(ChannelType::SPRFrom);
+        return static_cast<int>(ChannelType::FromSPR);
     case 0xD4:
-        return static_cast<int>(ChannelType::SPRTo);
+        return static_cast<int>(ChannelType::ToSPR);
     default:
         common::Error("[ee::DMAC] Random behaviour!");
     }
@@ -215,7 +217,7 @@ void DMAC::Run(int cycles) {
     while (cycles--) {
         for (int i = 0; i < 10; i++) {
             auto& channel = channels[i];
-            if (channel.control & (1 << 8)) {
+            if (channel.control.busy) {
                 Transfer(i);
             }
         }
@@ -233,8 +235,11 @@ void DMAC::Transfer(int index) {
     case ChannelType::SIF1:
         do_sif1_transfer();
         break;
+    case ChannelType::ToSPR:
+        do_to_spr_transfer();
+        break;
     default:
-        common::Error("handle %d", index);
+        common::Error("handle dma transfer with channel %d", index);
     }
 }
 
@@ -284,12 +289,12 @@ void DMAC::do_sif0_transfer() {
             channel.quadword_count = dma_tag & 0xFFFF;
             channel.address = (dma_tag >> 32) & 0xFFFFFFF0;
             channel.tag_address += 16;
-            channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
+
+            // Update upper 16 bits of control with upper 16 bits of dma tag.
+            channel.control.dmatag_upper = (dma_tag >> 16) & 0xffff;
 
             bool irq = (dma_tag >> 31) & 0x1;
-            bool tie = (channel.control >> 7) & 0x1;
-
-            if (irq && tie) {
+            if (irq && channel.control.dmatag_irq) {
                 channel.end_transfer = true;
             }
         }
@@ -316,19 +321,54 @@ void DMAC::do_sif1_transfer() {
     }
 }
 
+void DMAC::do_to_spr_transfer() {
+    // This channel will transfer in a burst.
+    // It can also use source chain and interleaving.
+    // TODO: do we need to handle cycle stealing?
+
+    // Scratchpad is considered a peripheral, so if chain mode is enabled
+    // it's source chain mode.
+    auto& channel = channels[9];
+
+    assert(channel.control.mode == Channel::Mode::Normal);
+    assert(!channel.control.from_memory);
+
+    if (channel.control.mode != Channel::Mode::Normal) {
+        LOG_TODO_NO_ARGS("handle non-normal mode for to spr transfer");
+    }
+
+    if (channel.quadword_count > 0) {
+        for (u32 i = 0; i < channel.quadword_count; i++) {
+            // Ensure the transfer address is in the physical address range.
+            u128 data = read_u128(channel.address & 0x7fffffff);
+
+            // Select writes to scratchpad.
+            write_u128(channel.scratchpad_address | (1 << 31), data);
+
+            // Update channel registers
+            channel.address += 16;
+            channel.scratchpad_address += 16;
+            channel.quadword_count--;
+        }
+
+        EndTransfer(9);
+    } else {
+        LOG_TODO_NO_ARGS("handle to spr transfer with no quadword count");
+    }
+}
+
 void DMAC::StartTransfer(int index) {
     common::Log("[ee::DMAC] %s start transfer", channel_names[index]);
 
     // in normal mode we shouldn't worry about dmatag reading
-    u8 mode = (channels[index].control >> 2) & 0x3;
-    channels[index].end_transfer = mode == 0;
+    channels[index].end_transfer = channels[index].control.mode == Channel::Mode::Normal;
 }
 
 void DMAC::EndTransfer(int index) {
     common::Log("[ee::DMAC] %s end transfer", channel_names[index]);
 
     channels[index].end_transfer = false;
-    channels[index].control &= ~(1 << 8);
+    channels[index].control.busy = false;
 
     // raise the stat flag in the stat register
     interrupt_status |= (1 << index);
@@ -339,13 +379,17 @@ void DMAC::EndTransfer(int index) {
 void DMAC::DoSourceChain(int index) {
     auto& channel = channels[index];
     u128 data = system.ee.read<u128>(channel.tag_address);
+
+    // TODO: create a union type for dma tag to easily extract fields
     u64 dma_tag = data.lo;
 
     common::Log("[ee::DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);
 
     channel.quadword_count = dma_tag & 0xFFFF;
-    channel.control = (channel.control & 0xFFFF) | (dma_tag & 0xFFFF0000);
 
+    // Update upper 16 bits of control with upper 16 bits of dma tag.
+    channel.control.dmatag_upper = (dma_tag >> 16) & 0xffff;
+    
     u8 id = (dma_tag >> 28) & 0x7;
 
     // lower 4 bits must be 0
@@ -377,11 +421,27 @@ void DMAC::DoSourceChain(int index) {
     }
 
     bool irq = (dma_tag >> 31) & 0x1;
-    bool tie = (channel.control >> 7) & 0x1;
-
-    if (irq && tie) {
+    if (irq && channel.control.dmatag_irq) {
         channel.end_transfer = true;
     }
+}
+
+u128 DMAC::read_u128(u32 addr) {
+    if (addr < 0x2000000) {
+        return common::Read<u128>(system.ee.rdram(), addr);
+    }
+
+    LOG_TODO("handle dma 128-bit read with address %08x", addr);
+}
+
+void DMAC::write_u128(u32 addr, u128 data) {
+    if ((addr & (1 << 31)) || (addr & 0x07000000) == 0x07000000) {
+        u32 masked_addr = addr & 0x3ff0;
+        common::Write<u128>(system.ee.scratchpad(), data, masked_addr);
+        return;
+    }
+
+    LOG_TODO("handle dma 128-bit write with address %08x", addr);
 }
 
 } // namespace ee

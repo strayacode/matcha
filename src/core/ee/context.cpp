@@ -50,7 +50,7 @@ static std::array<std::string, 256> syscall_info = {
 };
 
 Context::Context(System& system) : dmac(system), timers(intc), intc(*this), system(system), interpreter(*this) {
-    rdram = std::make_unique<std::array<u8, 0x2000000>>();
+    m_rdram = std::make_unique<std::array<u8, 0x2000000>>();
 }
 
 void Context::Reset() {
@@ -63,8 +63,8 @@ void Context::Reset() {
     lo1 = 0;
     sa = 0;
     
-    scratchpad.fill(0);
-    rdram->fill(0);
+    m_rdram->fill(0);
+    m_scratchpad.fill(0);
 
     mch_drd = 0;
     rdram_sdevid = 0;
@@ -79,18 +79,18 @@ void Context::Reset() {
 
     // do initial hardcoded mappings
     vtlb.Reset();
-    vtlb.Map(rdram->data(), 0x00000000, 0x2000000, 0x1ffffff);
-    vtlb.Map(rdram->data(), 0x20000000, 0x2000000, 0x1ffffff);
-    vtlb.Map(rdram->data(), 0x30100000, 0x2000000, 0x1ffffff);
-    vtlb.Map(scratchpad.data(), 0x70000000, 0x4000, 0x3fff);
-    vtlb.Map(rdram->data(), 0x80000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(m_rdram->data(), 0x00000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(m_rdram->data(), 0x20000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(m_rdram->data(), 0x30100000, 0x2000000, 0x1ffffff);
+    vtlb.Map(m_scratchpad.data(), 0x70000000, 0x4000, 0x3fff);
+    vtlb.Map(m_rdram->data(), 0x80000000, 0x2000000, 0x1ffffff);
     vtlb.Map(system.bios->data(), 0x9fc00000, 0x400000, 0x3fffff);
-    vtlb.Map(rdram->data(), 0xa0000000, 0x2000000, 0x1ffffff);
+    vtlb.Map(m_rdram->data(), 0xa0000000, 0x2000000, 0x1ffffff);
     vtlb.Map(system.bios->data(), 0xbfc00000, 0x400000, 0x3fffff);
 
     // deci2call tlb region which gets mapped in the bios
     // later when we handle the tlb we can remove this mapping
-    vtlb.Map(rdram->data(), 0xffff8000, 0x8000, 0x7ffff);
+    vtlb.Map(m_rdram->data(), 0xffff8000, 0x8000, 0x7ffff);
 }
 
 void Context::Run(int cycles) {

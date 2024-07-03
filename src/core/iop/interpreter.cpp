@@ -183,7 +183,7 @@ void Interpreter::COP0Instruction() {
         rfe();
         break;
     default:
-        common::Error("handle %d", format);
+        common::Error("iop cop instruction handle %d", format);
     }
 }
 

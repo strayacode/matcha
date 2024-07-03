@@ -243,8 +243,7 @@ void HostInterface::RenderDisplayWindow() {
     ImGui::PopStyleVar();
 }
 
-void HostInterface::RenderLibraryWindow() {
-    BeginFullscreenWindow("Library");
+void HostInterface::render_library_window() {
     static ImGuiTableFlags flags =
         ImGuiTableFlags_Resizable
         | ImGuiTableFlags_RowBg
@@ -295,8 +294,6 @@ void HostInterface::RenderLibraryWindow() {
 
         ImGui::EndTable();
     }
-
-    EndFullscreenWindow();
 }
 
 void HostInterface::BeginFullscreenWindow(const char *name, ImVec2 padding) {

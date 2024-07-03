@@ -22,6 +22,9 @@ struct Context {
     void Reset();
     void Run(int cycles);
 
+    u8* rdram() { return m_rdram->data(); }
+    u8* scratchpad() { return m_scratchpad.data(); }
+
     // credit goes to DobieStation for the elegant way of accessing 128 bit registers
     template <typename T>
     T GetReg(int reg, int offset = 0) {
@@ -65,8 +68,8 @@ private:
     u32 ReadIO(u32 paddr);
     void WriteIO(u32 paddr, u32 value);
     
-    std::array<u8, 0x4000> scratchpad;
-    std::unique_ptr<std::array<u8, 0x2000000>> rdram;
+    std::unique_ptr<std::array<u8, 0x2000000>> m_rdram;
+    std::array<u8, 0x4000> m_scratchpad;
 
     // rdram initialisation registers
     u32 mch_drd;
