@@ -142,39 +142,28 @@ void DMAC::WriteChannel(u32 addr, u32 data) {
 }
 
 int DMAC::GetChannelIndex(u32 addr) {
-    u8 channel = (addr >> 8) & 0xff;
-
+    auto channel = (addr >> 8) & 0xff;
     switch (channel) {
     case 0x80:
         return static_cast<int>(ChannelType::VIF0);
-        break;
     case 0x90:
         return static_cast<int>(ChannelType::VIF1);
-        break;
     case 0xA0:
         return static_cast<int>(ChannelType::GIF);
-        break;
     case 0xB0:
         return static_cast<int>(ChannelType::IPUFrom);
-        break;
     case 0xB4:
         return static_cast<int>(ChannelType::IPUTo);
-        break;
     case 0xC0:
         return static_cast<int>(ChannelType::SIF0);
-        break;
     case 0xC4:
         return static_cast<int>(ChannelType::SIF1);
-        break;
     case 0xC8:
         return static_cast<int>(ChannelType::SIF2);
-        break;
     case 0xD0:
         return static_cast<int>(ChannelType::SPRFrom);
-        break;
     case 0xD4:
         return static_cast<int>(ChannelType::SPRTo);
-        break;
     default:
         common::Error("[ee::DMAC] Random behaviour!");
     }
@@ -219,16 +208,13 @@ void DMAC::CheckInterruptSignal() {
 // note:
 // dmac can transfer one quadword (16 bytes / 128 bits) per bus cycle
 void DMAC::Run(int cycles) {
-    // don't run anything if the dmac is not enabled
     if (!(control & 0x1) || (disabled_status & (1 << 16))) {
         return;
     }
 
     while (cycles--) {
-        // run each channel
         for (int i = 0; i < 10; i++) {
-            Channel& channel = channels[i];
-
+            auto& channel = channels[i];
             if (channel.control & (1 << 8)) {
                 Transfer(i);
             }
@@ -239,24 +225,24 @@ void DMAC::Run(int cycles) {
 void DMAC::Transfer(int index) {
     switch (static_cast<ChannelType>(index)) {
     case ChannelType::GIF:
-        DoGIFTransfer();
+        do_gif_transfer();
         break;
     case ChannelType::SIF0:
-        DoSIF0Transfer();
+        do_sif0_transfer();
         break;
     case ChannelType::SIF1:
-        DoSIF1Transfer();
+        do_sif1_transfer();
         break;
     default:
         common::Error("handle %d", index);
     }
 }
 
-void DMAC::DoGIFTransfer() {
-    Channel& channel = channels[2];
+void DMAC::do_gif_transfer() {
+    auto& channel = channels[2];
 
     if (channel.quadword_count) {
-        u128 data = system.ee.Read<u128>(channel.address);
+        u128 data = system.ee.read<u128>(channel.address);
 
         system.gif.SendPath3(data);
         channel.address += 16;
@@ -266,8 +252,8 @@ void DMAC::DoGIFTransfer() {
     }
 }
 
-void DMAC::DoSIF0Transfer() {
-    Channel& channel = channels[5];
+void DMAC::do_sif0_transfer() {
+    auto& channel = channels[5];
 
     if (channel.quadword_count) {
         // dmac can only transfer a quadword at a time
@@ -277,7 +263,7 @@ void DMAC::DoSIF0Transfer() {
 
                 common::Log("[ee::DMAC] SIF0 reading data from fifo %08x", data);
 
-                system.ee.Write<u32>(channel.address, data);
+                system.ee.write<u32>(channel.address, data);
                 channel.address += 4;
             }
 
@@ -310,16 +296,15 @@ void DMAC::DoSIF0Transfer() {
     }
 }
 
-void DMAC::DoSIF1Transfer() {
-    Channel& channel = channels[6];
-
+void DMAC::do_sif1_transfer() {
+    auto& channel = channels[6];
     if (channel.quadword_count) {
         // push data to the sif1 fifo
-        u128 data = system.ee.Read<u128>(channel.address);
+        u128 data = system.ee.read<u128>(channel.address);
 
         common::Log("[ee::DMAC] SIF1 Fifo write %016lx%016lx dstat %08x", data.hi, data.lo, interrupt_status);
 
-        system.sif.WriteSIF1FIFO(data);
+        system.sif.write_sif1_fifo(data);
 
         // madr and qwc must be updated as the transfer proceeds
         channel.address += 16;
@@ -352,8 +337,8 @@ void DMAC::EndTransfer(int index) {
 }
 
 void DMAC::DoSourceChain(int index) {
-    Channel& channel = channels[index];
-    u128 data = system.ee.Read<u128>(channel.tag_address);
+    auto& channel = channels[index];
+    u128 data = system.ee.read<u128>(channel.tag_address);
     u64 dma_tag = data.lo;
 
     common::Log("[ee::DMAC] %s read DMATag %016lx d stat %08x", channel_names[index], dma_tag, interrupt_status);

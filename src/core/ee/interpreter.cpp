@@ -1,3 +1,4 @@
+#include <cassert>
 #include "common/types.h"
 #include "common/log.h"
 #include "common/bits.h"
@@ -18,7 +19,7 @@ void Interpreter::Reset() {
 
 void Interpreter::Run(int cycles) {
     while (cycles--) {
-        inst = Instruction{ctx.Read<u32>(ctx.pc)};
+        inst = Instruction{ctx.read<u32>(ctx.pc)};
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
         ctx.pc += 4;
@@ -159,7 +160,7 @@ void Interpreter::swc1() {
         common::Error("[ee::Interpreter] handle unaligned swc1 vaddr %08x", vaddr);
     }
     
-    ctx.Write<u32>(vaddr, ctx.cop1.GetReg(inst.ft));
+    ctx.write<u32>(vaddr, ctx.cop1.GetReg(inst.ft));
 }
 
 void Interpreter::mtc1() {
@@ -189,7 +190,7 @@ void Interpreter::lwc1() {
         common::Error("[ee::Interpreter] handle unaligned lwc1 vaddr", vaddr);
     }
 
-    ctx.cop1.SetReg(inst.ft, ctx.Read<u32>(vaddr));
+    ctx.cop1.SetReg(inst.ft, ctx.read<u32>(vaddr));
 }
 
 void Interpreter::mov_s() {
@@ -693,11 +694,11 @@ void Interpreter::addiu() {
 }
 
 void Interpreter::sw() {
-    ctx.Write<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u32>(inst.rt));
+    ctx.write<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u32>(inst.rt));
 }
 
 void Interpreter::sd() {
-    ctx.Write<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u64>(inst.rt));
+    ctx.write<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u64>(inst.rt));
 }
 
 void Interpreter::jal() {
@@ -726,15 +727,15 @@ void Interpreter::bnel() {
 }
 
 void Interpreter::lb() {
-    ctx.SetReg<s64>(inst.rt, static_cast<s8>(ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm)));
+    ctx.SetReg<s64>(inst.rt, static_cast<s8>(ctx.read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm)));
 }
 
 void Interpreter::lbu() {
-    ctx.SetReg<u64>(inst.rt, ctx.Read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.read<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::ld() {
-    ctx.SetReg<u64>(inst.rt, ctx.Read<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.read<u64>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::j() {
@@ -742,11 +743,11 @@ void Interpreter::j() {
 }
 
 void Interpreter::lw() {
-    ctx.SetReg<s64>(inst.rt, (s32)ctx.Read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, (s32)ctx.read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::sb() {
-    ctx.Write<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u8>(inst.rt));
+    ctx.write<u8>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u8>(inst.rt));
 }
 
 void Interpreter::blez() {
@@ -754,7 +755,7 @@ void Interpreter::blez() {
 }
 
 void Interpreter::lhu() {
-    ctx.SetReg<u64>(inst.rt, ctx.Read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::bgtz() {
@@ -762,7 +763,7 @@ void Interpreter::bgtz() {
 }
 
 void Interpreter::sh() {
-    ctx.Write<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u16>(inst.rt));
+    ctx.write<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm, ctx.GetReg<u16>(inst.rt));
 }
 
 void Interpreter::xori() {
@@ -776,17 +777,17 @@ void Interpreter::daddiu() {
 void Interpreter::sq() {
     u128 reg = ctx.GetReg<u128>(inst.rt);
     u32 addr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xf;
-    ctx.Write<u128>(addr, reg);
+    ctx.write<u128>(addr, reg);
 }
 
 void Interpreter::lq() {
     u32 vaddr = (ctx.GetReg<u32>(inst.rs) + inst.simm) & ~0xf;
-    u128 data = ctx.Read<u128>(vaddr);
+    u128 data = ctx.read<u128>(vaddr);
     ctx.SetReg<u128>(inst.rt, data);
 }
 
 void Interpreter::lh() {
-    ctx.SetReg<s64>(inst.rt, (s16)ctx.Read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<s64>(inst.rt, (s16)ctx.read<u16>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::cache() {
@@ -794,7 +795,7 @@ void Interpreter::cache() {
 }
 
 void Interpreter::lwu() {
-    ctx.SetReg<u64>(inst.rt, ctx.Read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
+    ctx.SetReg<u64>(inst.rt, ctx.read<u32>(ctx.GetReg<u32>(inst.rs) + inst.simm));
 }
 
 void Interpreter::ldl() {
@@ -807,7 +808,7 @@ void Interpreter::ldl() {
 
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
-    u64 data = ctx.Read<u64>(addr & ~0x7);
+    u64 data = ctx.read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.SetReg<u64>(inst.rt, (reg & mask[index]) | (data << shift[index]));
 }
@@ -822,7 +823,7 @@ void Interpreter::ldr() {
 
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
-    u64 data = ctx.Read<u64>(addr & ~0x7);
+    u64 data = ctx.read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
     ctx.SetReg<u64>(inst.rt, (reg & mask[index]) | (data >> shift[index]));
 }
@@ -838,9 +839,9 @@ void Interpreter::sdl() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
 
-    u64 data = ctx.Read<u64>(addr & ~0x7);
+    u64 data = ctx.read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
-    ctx.Write<u64>(addr & ~0x7, (reg >> shift[index]) | (data & mask[index]));
+    ctx.write<u64>(addr & ~0x7, (reg >> shift[index]) | (data & mask[index]));
 }
 
 void Interpreter::sdr() {
@@ -854,9 +855,9 @@ void Interpreter::sdr() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
     int index = addr & 0x7;
 
-    u64 data = ctx.Read<u64>(addr & ~0x7);
+    u64 data = ctx.read<u64>(addr & ~0x7);
     u64 reg = ctx.GetReg<u64>(inst.rt);
-    ctx.Write<u64>(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
+    ctx.write<u64>(addr & ~0x7, (reg << shift[index]) | (data & mask[index]));
 }
 
 void Interpreter::bgtzl() {
@@ -869,7 +870,7 @@ void Interpreter::blezl() {
 
 void Interpreter::lwl() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u32 aligned_data = ctx.read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xffffff >> shift;
     ctx.SetReg<s64>(inst.rt, static_cast<s32>((ctx.GetReg<u32>(inst.rt) & mask) | (aligned_data << (24 - shift))));
@@ -877,7 +878,7 @@ void Interpreter::lwl() {
 
 void Interpreter::lwr() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u32 aligned_data = ctx.read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xffffff00 << (24 - shift);
     u32 updated_data = (ctx.GetReg<u32>(inst.rt) & mask) | (aligned_data >> shift);
@@ -892,20 +893,20 @@ void Interpreter::lwr() {
 
 void Interpreter::swl() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u32 aligned_data = ctx.read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xffffff00 << shift;
     u32 updated_data = (aligned_data & mask) | (ctx.GetReg<u32>(inst.rt) >> (24 - shift));
-    ctx.Write<u32>(addr & ~0x3, updated_data);
+    ctx.write<u32>(addr & ~0x3, updated_data);
 }
 
 void Interpreter::swr() {
     u32 addr = ctx.GetReg<u32>(inst.rs) + inst.simm;
-    u32 aligned_data = ctx.Read<u32>(addr & ~0x3);
+    u32 aligned_data = ctx.read<u32>(addr & ~0x3);
     u8 shift = (addr & 0x3) * 8;
     u32 mask = 0xffffff >> (24 - shift);
     u32 updated_data = (aligned_data & mask) | (ctx.GetReg<u32>(inst.rt) << shift);
-    ctx.Write<u32>(addr & ~0x3, updated_data);
+    ctx.write<u32>(addr & ~0x3, updated_data);
 }
 
 void Interpreter::pref() {
@@ -1115,7 +1116,7 @@ void Interpreter::dsrl32() {
 }
 
 void Interpreter::syscall_exception() {
-    u8 opcode = ctx.Read<u8>(ctx.pc - 4);
+    u8 opcode = ctx.read<u8>(ctx.pc - 4);
 
     common::Log("[ee::Interpreter] executing syscall %s", ctx.GetSyscallInfo(opcode).c_str());
     DoException(0x80000180, ExceptionType::Syscall);

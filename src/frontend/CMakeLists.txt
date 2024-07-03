@@ -17,7 +17,7 @@ set(SOURCES
     imgui/imgui_impl_sdl2.h
     main.cpp
     host_interface.cpp
-    debugger/ee.cpp
+    debugger.cpp
     debugger/iop.cpp
 )
 

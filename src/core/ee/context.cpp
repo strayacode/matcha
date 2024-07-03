@@ -101,11 +101,11 @@ void Context::Run(int cycles) {
     dmac.Run(cycles / 2);
 }
 
-template u8 Context::Read(VirtualAddress vaddr);
-template u16 Context::Read(VirtualAddress vaddr);
-template u32 Context::Read(VirtualAddress vaddr);
+template u8 Context::read(VirtualAddress vaddr);
+template u16 Context::read(VirtualAddress vaddr);
+template u32 Context::read(VirtualAddress vaddr);
 template <typename T>
-T Context::Read(VirtualAddress vaddr) {
+T Context::read(VirtualAddress vaddr) {
     auto pointer = vtlb.Lookup<T>(vaddr);
     if (pointer) {
         return common::Read<T>(pointer);
@@ -115,7 +115,7 @@ T Context::Read(VirtualAddress vaddr) {
 }
 
 template <>
-u64 Context::Read<u64>(VirtualAddress vaddr) {
+u64 Context::read<u64>(VirtualAddress vaddr) {
     auto pointer = vtlb.Lookup<u64>(vaddr);
     if (pointer) {
         return common::Read<u64>(pointer);
@@ -126,7 +126,7 @@ u64 Context::Read<u64>(VirtualAddress vaddr) {
 }
 
 template <>
-u128 Context::Read<u128>(VirtualAddress vaddr) {
+u128 Context::read<u128>(VirtualAddress vaddr) {
     auto pointer = vtlb.Lookup<u128>(vaddr);
     if (pointer) {
         return common::Read<u128>(pointer);
@@ -141,11 +141,11 @@ u128 Context::Read<u128>(VirtualAddress vaddr) {
     }
 }
 
-template void Context::Write(VirtualAddress vaddr, u8 value);
-template void Context::Write(VirtualAddress vaddr, u16 value);
-template void Context::Write(VirtualAddress vaddr, u32 value);
+template void Context::write(VirtualAddress vaddr, u8 value);
+template void Context::write(VirtualAddress vaddr, u16 value);
+template void Context::write(VirtualAddress vaddr, u32 value);
 template <typename T>
-void Context::Write(VirtualAddress vaddr, T value) {
+void Context::write(VirtualAddress vaddr, T value) {
     auto pointer = vtlb.Lookup<T>(vaddr);
     if (pointer) {
         return common::Write<T>(pointer, value);
@@ -155,7 +155,7 @@ void Context::Write(VirtualAddress vaddr, T value) {
 }
 
 template <>
-void Context::Write<u64>(VirtualAddress vaddr, u64 value) {
+void Context::write<u64>(VirtualAddress vaddr, u64 value) {
     auto pointer = vtlb.Lookup<u64>(vaddr);
     if (pointer) {
         return common::Write<u64>(pointer, value);
@@ -167,7 +167,7 @@ void Context::Write<u64>(VirtualAddress vaddr, u64 value) {
 }
 
 template <>
-void Context::Write<u128>(VirtualAddress vaddr, u128 value) {
+void Context::write<u128>(VirtualAddress vaddr, u128 value) {
     auto pointer = vtlb.Lookup<u128>(vaddr);
     if (pointer) {
         return common::Write<u128>(pointer, value);

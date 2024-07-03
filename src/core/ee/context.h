@@ -36,10 +36,10 @@ struct Context {
     }
 
     template <typename T>
-    T Read(VirtualAddress vaddr);
+    T read(VirtualAddress vaddr);
 
     template <typename T>
-    void Write(VirtualAddress vaddr, T value);
+    void write(VirtualAddress vaddr, T value);
 
     void RaiseInterrupt(int signal, bool value);
     std::string GetSyscallInfo(int index);
@@ -47,10 +47,11 @@ struct Context {
     std::array<u8, 512> gpr;
     u32 pc = 0;
     u32 npc = 0;
-    u64 hi = 0;
+    
     u64 lo = 0;
-    u64 hi1 = 0;
+    u64 hi = 0;
     u64 lo1 = 0;
+    u64 hi1 = 0;
     u64 sa = 0;
 
     COP0 cop0;

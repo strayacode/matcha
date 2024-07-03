@@ -26,9 +26,9 @@ public:
 
     void Transfer(int index);
 
-    void DoGIFTransfer();
-    void DoSIF0Transfer();
-    void DoSIF1Transfer();
+    void do_gif_transfer();
+    void do_sif0_transfer();
+    void do_sif1_transfer();
 
     void StartTransfer(int index);
     void EndTransfer(int index);

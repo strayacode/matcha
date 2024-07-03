@@ -8,7 +8,7 @@ HostInterface::HostInterface() :
     }) {
 }
 
-bool HostInterface::Initialise() {
+bool HostInterface::initialise() {
     // initialise sdl
     if (SDL_Init(SDL_INIT_VIDEO) > 0) {
         common::Warn("error initialising SDL");
@@ -25,8 +25,18 @@ bool HostInterface::Initialise() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("matcha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    // SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow(
+        "matcha",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        800,
+        600,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+    );
+
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+
     gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -52,17 +62,12 @@ bool HostInterface::Initialise() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    // io.Fonts->AddFontFromFileTTF("../data/fonts/roboto-regular.ttf", 14.0f);
-    io.Fonts->AddFontFromFileTTF("../data/fonts/OpenSans-Regular.ttf", 15.0f);
-    io.Fonts->AddFontFromFileTTF("/../data/fonts/Consolas.ttf", 14.0f);
-    SetupStyle();
-
     games_list.Initialise();
 
     return true;
 }
 
-void HostInterface::Run() {
+void HostInterface::run() {
     while (running) {
         // poll events
         HandleInput();
@@ -76,32 +81,19 @@ void HostInterface::Run() {
 
         switch (window_state) {
         case WindowState::Library:
-            RenderLibraryWindow();
+            // RenderLibraryWindow();
             break;
         case WindowState::Display:
             RenderDisplayWindow();
             break;
         }
 
-        // show demo window
-        if (show_demo_window) {
-            ImGui::ShowDemoWindow(&show_demo_window);
+        if (m_show_debugger_window) {
+            render_debugger_window();
         }
 
-        if (ee_debugger.show_registers_window) {
-            ee_debugger.RegistersWindow(core.system.ee);
-        }
-
-        if (ee_debugger.show_disassembly_window) {
-            ee_debugger.DisassemblyWindow(core);
-        }
-
-        if (iop_debugger.show_registers_window) {
-            iop_debugger.RegistersWindow(core.system.iop);
-        }
-
-        if (iop_debugger.show_disassembly_window) {
-            iop_debugger.DisassemblyWindow(core);
+        if (m_show_demo_window) {
+            ImGui::ShowDemoWindow(&m_show_demo_window);
         }
 
         // rendering
@@ -114,7 +106,7 @@ void HostInterface::Run() {
     }
 }
 
-void HostInterface::Shutdown() {
+void HostInterface::shutdown() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -128,6 +120,7 @@ void HostInterface::HandleInput() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         ImGui_ImplSDL2_ProcessEvent(&event);
+        
         if (event.type == SDL_QUIT) {
             running = false;
         }
@@ -174,25 +167,11 @@ void HostInterface::RenderMenubar() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Debugger")) {
-            if (ImGui::BeginMenu("EE")) {
-                ImGui::MenuItem("Registers", nullptr, &ee_debugger.show_registers_window);
-                ImGui::MenuItem("Disassembly", nullptr, &ee_debugger.show_disassembly_window);
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("IOP")) {
-                ImGui::MenuItem("Registers", nullptr, &iop_debugger.show_registers_window);
-                ImGui::MenuItem("Disassembly", nullptr, &iop_debugger.show_disassembly_window);
-                ImGui::EndMenu();
-            }
-
-            ImGui::MenuItem("Demo Window", nullptr, &show_demo_window);
-            ImGui::EndMenu();
-        }
+        ImGui::MenuItem("Debugger", nullptr, &m_show_debugger_window);
+        ImGui::MenuItem("Demo", nullptr, &m_show_demo_window);
 
         if (core.GetState() == CoreState::Running && fps != 0.0f) {
-            std::string fps_string = common::Format("%.0f FPS | %.2f ms", fps, 1000.0f / fps);\
+            std::string fps_string = common::Format("%.0f FPS | %.2f ms", fps, 1000.0f / fps);
             auto pos = window_width - ImGui::CalcTextSize(fps_string.c_str()).x - ImGui::GetStyle().ItemSpacing.x;
 
             ImGui::SetCursorPosX(pos);
@@ -203,7 +182,7 @@ void HostInterface::RenderMenubar() {
             auto pos = window_width - ImGui::CalcTextSize(fps_string.c_str()).x - ImGui::GetStyle().ItemSpacing.x;
 
             ImGui::SetCursorPosX(pos);
-            ImGui::TextColored(colour_yellow, "%s", fps_string.c_str());
+            ImGui::Text("%s", fps_string.c_str());
         }
 
         ImGui::EndMainMenuBar();
@@ -218,60 +197,6 @@ void HostInterface::RenderMenubar() {
         window_state = WindowState::Display;
         file_dialog.ClearSelected();
     }
-}
-
-void HostInterface::SetupStyle() {
-    ImGui::GetStyle().WindowBorderSize = 1.0f;
-    ImGui::GetStyle().PopupBorderSize = 0.0f;
-    ImGui::GetStyle().ChildBorderSize = 0.0f;
-    ImGui::GetStyle().FrameBorderSize = 1.0f;
-    ImGui::GetStyle().GrabMinSize = 7.0f;
-    ImGui::GetStyle().WindowRounding = 4.0f;
-    ImGui::GetStyle().FrameRounding = 1.0f;
-    ImGui::GetStyle().PopupRounding = 0.0f;
-    ImGui::GetStyle().ChildRounding = 0.0f;
-    ImGui::GetStyle().GrabRounding = 4.0f;
-    ImGui::GetStyle().TabRounding = 0.0f;
-    ImGui::GetStyle().ScrollbarSize = 10.0f;
-    ImGui::GetStyle().ScrollbarRounding = 12.0f;
-    ImGui::GetStyle().WindowTitleAlign = ImVec2(0.50f, 0.50f);
-    ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
-    ImGui::GetStyle().FramePadding = ImVec2(4.0f, 2.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = colour_darker_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_Text] = colour_white;
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_Header] = colour_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_HeaderHovered] = colour_lighter_lighter_lighter_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_HeaderActive] = colour_lighter_lighter_lighter_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGrip] = colour_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGripHovered] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGripActive] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_Border] = colour_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_Button] = colour_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = colour_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] = colour_lighter_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_Tab] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocused] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_TabUnfocusedActive] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_TabHovered] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_TabActive] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_CheckMark] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_SliderGrab] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_SliderGrabActive] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_Separator] = colour_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_SeparatorHovered] = colour_clearer_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_SeparatorActive] = colour_blue;
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = colour_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBgHovered] = colour_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive] = colour_lighter_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_TableBorderStrong] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_MenuBarBg] = colour_lighter_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = colour_darker_grey;
-    ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = colour_black;
-    ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = colour_black;
-    // ImGui::GetStyle().Colors[ImGuiCol_DockingPreview] = colour_blue;
-    // ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = colour_black;
 }
 
 void HostInterface::TogglePause() {

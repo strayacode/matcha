@@ -1,6 +1,5 @@
 #include <array>
 #include <sstream>
-#include <iomanip>
 #include <map>
 #include "common/log.h"
 #include "core/ee/disassembler.h"

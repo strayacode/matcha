@@ -44,8 +44,8 @@ public:
 
     u32 ReadSIF0FIFO();
     u32 ReadSIF1FIFO();
-    void WriteSIF0FIFO(u32 data);
-    void WriteSIF1FIFO(u128 data);
+    void write_sif0_fifo(u32 data);
+    void write_sif1_fifo(u128 data);
     int GetSIF0FIFOSize();
     int GetSIF1FIFOSize();
 };
