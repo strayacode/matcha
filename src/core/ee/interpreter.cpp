@@ -294,6 +294,10 @@ void Interpreter::pand() {
     ctx.SetReg<u128>(inst.rd, ctx.GetReg<u128>(inst.rs) & ctx.GetReg<u128>(inst.rt));
 }
 
+void Interpreter::pxor() {
+    ctx.SetReg<u128>(inst.rd, ctx.GetReg<u128>(inst.rs) ^ ctx.GetReg<u128>(inst.rt));
+}
+
 void Interpreter::pcpyud() {
     ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rs, 1));
     ctx.SetReg<u64>(inst.rd, ctx.GetReg<u64>(inst.rt, 1), 1);

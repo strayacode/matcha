@@ -21,6 +21,7 @@ struct Interpreter : public Executor {
     std::string GetSyscallInfo(int index);
     void LogInstruction();
 
+    // TODO: separate instruction handlers into separate files for organisation
     void mfc0();
     void sll();
     void slti();
@@ -185,6 +186,7 @@ struct Interpreter : public Executor {
     void pcgtb();
     void pcgth();
     void pcgtw();
+    void pxor();
     void illegal_instruction();
     void stub_instruction();
 
