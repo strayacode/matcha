@@ -2,6 +2,7 @@
 
 #include <array>
 #include "common/types.h"
+#include "common/queue.h"
 #include "core/iop/intc.h"
 
 namespace iop {
@@ -21,7 +22,7 @@ private:
     std::array<u32, 4> send1;
     std::array<u32, 4> send2;
     std::array<u32, 16> send3;
-
+    common::Queue<u8, 256> fifo;
     INTC& intc;
 };
 

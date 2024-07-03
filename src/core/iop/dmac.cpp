@@ -204,7 +204,7 @@ void DMAC::DoSIF0Transfer() {
 
     if (channel.block_count) {
         // read data from iop ram and push to the sif0 fifo
-        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.address));
+        system.sif.write_sif0_fifo(system.iop.Read<u32>(channel.address));
 
         channel.address += 4;
         channel.block_count--;
@@ -216,8 +216,8 @@ void DMAC::DoSIF0Transfer() {
 
         common::Log("[iop::DMAC] SIF0 read DMATag %016lx", ((u64)block_count << 32) | data);
 
-        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 8));
-        system.sif.WriteSIF0FIFO(system.iop.Read<u32>(channel.tag_address + 12));
+        system.sif.write_sif0_fifo(system.iop.Read<u32>(channel.tag_address + 8));
+        system.sif.write_sif0_fifo(system.iop.Read<u32>(channel.tag_address + 12));
 
         // common::Log("[iop::DMAC] read sif0 dmatag %016lx", ((u64)block_count << 32) | data);
 

@@ -10,23 +10,29 @@ void SIO2::Reset() {
     send1.fill(0);
     send2.fill(0);
     send3.fill(0);
+    fifo.Reset();
 }
 
 u32 SIO2::ReadRegister(u32 addr) {
     switch (addr) {
     case 0x1f808264:
         // fifo out
+        common::Log("[iop::SIO2] fifo read %08x", 0);
         return 0;
     case 0x1f808268:
+        common::Log("[iop::SIO2] control read %08x", control);
         return control;
     case 0x1f80826c:
         // response status 1
-        return 0;
+        common::Log("[iop::SIO2] recv1 read %08x", 0x1d100);
+        return 0x1d100;
     case 0x1f808270:
         // response status 2
+        common::Log("[iop::SIO2] recv2 read %08x", 0xf);
         return 0xf;
     case 0x1f808274:
         // response status 3
+        common::Log("[iop::SIO2] recv3 read %08x", 0);
         return 0;
     case 0x1f808280:
         // istat
@@ -66,6 +72,7 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
         control = value;
 
         if (value & 0x1) {
+            common::Log("[iop::SIO2] raise sio2 interrupt");
             intc.RequestInterrupt(InterruptSource::SIO2);
             control &= ~0x1;
         }

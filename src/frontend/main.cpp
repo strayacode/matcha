@@ -4,11 +4,11 @@
 int main() {
     std::unique_ptr<HostInterface> host_interface = std::make_unique<HostInterface>();
 
-    if (host_interface->Initialise()) {
-        host_interface->Run();
+    if (host_interface->initialise()) {
+        host_interface->run();
     }
 
-    host_interface->Shutdown();
+    host_interface->shutdown();
 
     return 0;
 }

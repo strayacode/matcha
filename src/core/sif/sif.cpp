@@ -93,11 +93,11 @@ u32 SIF::ReadControl() {
     return control;
 }
 
-void SIF::WriteSIF0FIFO(u32 data) {
+void SIF::write_sif0_fifo(u32 data) {
     sif0_fifo.push(data);
 }
 
-void SIF::WriteSIF1FIFO(u128 data) {
+void SIF::write_sif1_fifo(u128 data) {
     for (int i = 0; i < 4; i++) {
         sif1_fifo.push(data.uw[i]);
     }

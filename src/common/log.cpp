@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include "common/log.h"
 
-constexpr static bool debug = true;
-
 #define RED "\x1B[31m"
 #define GREEN "\x1B[32m"
 #define YELLOW "\x1B[33m"
