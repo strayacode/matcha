@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <algorithm>
 #include "common/log.h"
 #include "common/bits.h"
 #include "core/ee/cop1.h"
@@ -132,10 +132,13 @@ void COP1::add_s(Instruction inst) {
 }
 
 void COP1::max_s(Instruction inst) {
-    if (fpr[inst.fs].f >= fpr[inst.ft].f) {
-        fpr[inst.fd].f = fpr[inst.fs].f;
+    const auto lhs = fpr[inst.fs].s;
+    const auto rhs = fpr[inst.ft].s;
+
+    if (lhs < 0 && rhs < 0) {
+        fpr[inst.fd].s = std::min<s32>(lhs, rhs);
     } else {
-        fpr[inst.fd].f = fpr[inst.ft].f;
+        fpr[inst.fd].s = std::max<s32>(lhs, rhs);
     }
 
     fcr31.o = false;
@@ -143,10 +146,13 @@ void COP1::max_s(Instruction inst) {
 }
 
 void COP1::min_s(Instruction inst) {
-    if (fpr[inst.fs].f <= fpr[inst.ft].f) {
-        fpr[inst.fd].f = fpr[inst.fs].f;
+    const auto lhs = fpr[inst.fs].s;
+    const auto rhs = fpr[inst.ft].s;
+
+    if (lhs < 0 && rhs < 0) {
+        fpr[inst.fd].s = std::max<s32>(lhs, rhs);
     } else {
-        fpr[inst.fd].f = fpr[inst.ft].f;
+        fpr[inst.fd].s = std::min<s32>(lhs, rhs);
     }
 
     fcr31.o = false;
