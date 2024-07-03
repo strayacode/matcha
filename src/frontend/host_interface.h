@@ -12,7 +12,6 @@
 #include "imgui/imfilebrowser.h"
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include "frontend/debugger/iop.h"
 
 class HostInterface {
 public:
@@ -47,8 +46,7 @@ private:
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     bool running = true;
     ImGui::FileBrowser file_dialog;
-    IOPDebugger iop_debugger;
-
+    
     int window_width;
     int window_height;
 
@@ -67,4 +65,5 @@ private:
     bool m_show_debugger_window{false};
     bool m_show_demo_window{false};
     int m_ee_disassembly_size{15};
+    int m_iop_disassembly_size{15};
 };

@@ -18,7 +18,6 @@ set(SOURCES
     main.cpp
     host_interface.cpp
     debugger.cpp
-    debugger/iop.cpp
 )
 
 add_executable(matcha ${SOURCES})
