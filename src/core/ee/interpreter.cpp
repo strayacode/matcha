@@ -229,9 +229,25 @@ void Interpreter::c_eq_s() {
     ctx.cop1.c_eq_s(inst);
 }
 
+void Interpreter::c_f_s() {
+    ctx.cop1.c_f_s();
+}
+
 // bc1 instructions
 void Interpreter::bc1f() {
     Branch(!ctx.cop1.condition());
+}
+
+void Interpreter::bc1fl() {
+    BranchLikely(!ctx.cop1.condition());
+}
+
+void Interpreter::bc1t() {
+    Branch(ctx.cop1.condition());
+}
+
+void Interpreter::bc1tl() {
+    BranchLikely(ctx.cop1.condition());
 }
 
 // COP2 instructions

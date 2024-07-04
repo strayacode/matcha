@@ -181,4 +181,8 @@ void COP1::c_eq_s(Instruction inst) {
     fcr31.c = fpr[inst.fs].u == fpr[inst.ft].u;
 }
 
+void COP1::c_f_s() {
+    fcr31.c = false;
+}
+
 } // namespace ee

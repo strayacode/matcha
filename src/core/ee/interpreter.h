@@ -189,6 +189,10 @@ struct Interpreter : public Executor {
     void pxor();
     void bc1f();
     void c_eq_s();
+    void c_f_s();
+    void bc1fl();
+    void bc1t();
+    void bc1tl();
     void illegal_instruction();
     void stub_instruction();
 

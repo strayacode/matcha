@@ -133,6 +133,9 @@ struct Decoder {
 
         // bc1 instructions
         RegisterOpcode(&D::bc1f, 0, InstructionType::BC1);
+        RegisterOpcode(&D::bc1t, 1, InstructionType::BC1);
+        RegisterOpcode(&D::bc1fl, 2, InstructionType::BC1);
+        RegisterOpcode(&D::bc1tl, 3, InstructionType::BC1);
 
         // fpu_s instructions
         RegisterOpcode(&D::add_s, 0, InstructionType::FPUS);
@@ -145,6 +148,7 @@ struct Decoder {
         RegisterOpcode(&D::madd_s, 28, InstructionType::FPUS);
         RegisterOpcode(&D::max_s, 40, InstructionType::FPUS);
         RegisterOpcode(&D::min_s, 41, InstructionType::FPUS);
+        RegisterOpcode(&D::c_f_s, 48, InstructionType::FPUS);
         RegisterOpcode(&D::c_eq_s, 50, InstructionType::FPUS);
 
         // cop2 instructions
