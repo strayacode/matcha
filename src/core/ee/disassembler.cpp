@@ -199,6 +199,7 @@ static std::map<int, DisassemblyInfo> fpu_s_table = {
     {28, DisassemblyInfo{"madd.s $fd, $fs, $ft", InstructionType::Register}},
     {40, DisassemblyInfo{"max.s $fd, $fs, $ft", InstructionType::Register}},
     {41, DisassemblyInfo{"min.s $fd, $fs, $ft", InstructionType::Register}},
+    {50, DisassemblyInfo{"c.eq.s, $fs, $ft", InstructionType::Register}},
 };
 
 static std::map<int, DisassemblyInfo> fpu_w_table = {

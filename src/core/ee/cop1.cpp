@@ -68,11 +68,11 @@ f32 COP1::AsFloat(u32 value) {
     }
 }
 
-bool COP1::IsInfinity(const Register& fpr) {
+bool COP1::IsInfinity(const Float& fpr) {
     return (fpr.exponent == 0xff) && (fpr.fraction == 0);
 }
 
-void COP1::CheckOverflow(Register& fpr, bool set_flags) {
+void COP1::CheckOverflow(Float& fpr, bool set_flags) {
     if (IsInfinity(fpr)) {
         fpr.u = (fpr.u & 0x80000000) | 0x7f7fffff;
         
@@ -87,7 +87,7 @@ void COP1::CheckOverflow(Register& fpr, bool set_flags) {
     }
 }
 
-void COP1::CheckUnderflow(Register& fpr, bool set_flags) {
+void COP1::CheckUnderflow(Float& fpr, bool set_flags) {
     if ((fpr.exponent == 0) && (fpr.fraction != 0)) {
         fpr.u &= 0x80000000;
         if (set_flags) {
@@ -175,6 +175,10 @@ void COP1::suba_s(Instruction inst) {
     accumulator.f = AsFloat(fpr[inst.fs].u) - AsFloat(fpr[inst.ft].u);
     CheckOverflow(accumulator, true);
     CheckUnderflow(accumulator, true);
+}
+
+void COP1::c_eq_s(Instruction inst) {
+    fcr31.c = fpr[inst.fs].u == fpr[inst.ft].u;
 }
 
 } // namespace ee

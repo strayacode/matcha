@@ -187,6 +187,8 @@ struct Interpreter : public Executor {
     void pcgth();
     void pcgtw();
     void pxor();
+    void bc1f();
+    void c_eq_s();
     void illegal_instruction();
     void stub_instruction();
 

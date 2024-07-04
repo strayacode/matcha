@@ -225,6 +225,15 @@ void Interpreter::suba_s() {
     ctx.cop1.suba_s(inst);
 }
 
+void Interpreter::c_eq_s() {
+    ctx.cop1.c_eq_s(inst);
+}
+
+// bc1 instructions
+void Interpreter::bc1f() {
+    Branch(!ctx.cop1.condition());
+}
+
 // COP2 instructions
 void Interpreter::cfc2() {
     // handle vu stuff

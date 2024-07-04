@@ -16,6 +16,8 @@ public:
     void SetControlReg(int reg, u32 value);
     f32 AsFloat(u32 value);
 
+    bool condition() const { return fcr31.c; }
+
     void adda_s(Instruction inst);
     void madd_s(Instruction inst);
     void mov_s(Instruction inst);
@@ -26,9 +28,10 @@ public:
     void neg_s(Instruction inst);
     void sub_s(Instruction inst);
     void suba_s(Instruction inst);
+    void c_eq_s(Instruction inst);
 
 private:
-    union Register {
+    union Float {
         struct {
             u32 fraction : 23;
             u32 exponent : 8;
@@ -38,6 +41,15 @@ private:
         f32 f;
         u32 u;
         s32 s;
+
+        static constexpr u32 MAX_POSITIVE = 0x7fffffff;
+        static constexpr u32 MAX_NEGATIVE = 0xffffffff;
+        static constexpr u32 POSITIVE_INFINITY = 0x7f800000;
+        static constexpr u32 NEGATIVE_INFINITY = 0x7f800000;
+
+        bool is_abnormal() {
+            return u == MAX_POSITIVE || u == MAX_NEGATIVE || u == POSITIVE_INFINITY || u == NEGATIVE_INFINITY;
+        }
     };
 
     union FCR0 {
@@ -70,12 +82,12 @@ private:
         u32 data;
     };
 
-    bool IsInfinity(const Register& fpr);
-    void CheckOverflow(Register& fpr, bool set_flags);
-    void CheckUnderflow(Register& fpr, bool set_flags);
+    bool IsInfinity(const Float& fpr);
+    void CheckOverflow(Float& fpr, bool set_flags);
+    void CheckUnderflow(Float& fpr, bool set_flags);
 
-    Register fpr[32];
-    Register accumulator;
+    Float fpr[32];
+    Float accumulator;
     FCR0 fcr0;
     FCR31 fcr31;
 };
