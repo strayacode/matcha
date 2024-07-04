@@ -30,6 +30,8 @@ public:
     void suba_s(Instruction inst);
     void c_eq_s(Instruction inst);
     void c_f_s();
+    void c_le_s(Instruction inst);
+    void c_lt_s(Instruction inst);
 
 private:
     union Float {

@@ -150,6 +150,8 @@ struct Decoder {
         RegisterOpcode(&D::min_s, 41, InstructionType::FPUS);
         RegisterOpcode(&D::c_f_s, 48, InstructionType::FPUS);
         RegisterOpcode(&D::c_eq_s, 50, InstructionType::FPUS);
+        RegisterOpcode(&D::c_lt_s, 52, InstructionType::FPUS);
+        RegisterOpcode(&D::c_le_s, 54, InstructionType::FPUS);
 
         // cop2 instructions
         RegisterOpcode(&D::cfc2, 2, InstructionType::COP2);

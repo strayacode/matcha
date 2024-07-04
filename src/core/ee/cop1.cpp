@@ -178,11 +178,19 @@ void COP1::suba_s(Instruction inst) {
 }
 
 void COP1::c_eq_s(Instruction inst) {
-    fcr31.c = fpr[inst.fs].u == fpr[inst.ft].u;
+    fcr31.c = AsFloat(fpr[inst.fs].u) == AsFloat(fpr[inst.ft].u);
 }
 
 void COP1::c_f_s() {
     fcr31.c = false;
+}
+
+void COP1::c_le_s(Instruction inst) {
+    fcr31.c = AsFloat(fpr[inst.fs].u) <= AsFloat(fpr[inst.ft].u);
+}
+
+void COP1::c_lt_s(Instruction inst) {
+    fcr31.c = AsFloat(fpr[inst.fs].u) < AsFloat(fpr[inst.ft].u);
 }
 
 } // namespace ee

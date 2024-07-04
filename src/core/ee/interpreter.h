@@ -193,6 +193,8 @@ struct Interpreter : public Executor {
     void bc1fl();
     void bc1t();
     void bc1tl();
+    void c_le_s();
+    void c_lt_s();
     void illegal_instruction();
     void stub_instruction();
 

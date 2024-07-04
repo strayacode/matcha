@@ -233,6 +233,14 @@ void Interpreter::c_f_s() {
     ctx.cop1.c_f_s();
 }
 
+void Interpreter::c_le_s() {
+    ctx.cop1.c_le_s(inst);
+}
+
+void Interpreter::c_lt_s() {
+    ctx.cop1.c_lt_s(inst);
+}
+
 // bc1 instructions
 void Interpreter::bc1f() {
     Branch(!ctx.cop1.condition());
