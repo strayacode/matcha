@@ -17,14 +17,15 @@ u32 SIO2::ReadRegister(u32 addr) {
     switch (addr) {
     case 0x1f808264:
         // fifo out
-        LOG_TODO("[iop::SIO2] fifo read %08x", 0);
-        return 0;
+        common::Log("[iop::SIO2] fifo read %08x", 0);
+        return fifo.Pop<u8>();
     case 0x1f808268:
         common::Log("[iop::SIO2] control read %08x", control);
         return control;
     case 0x1f80826c:
         // response status 1
-        LOG_TODO("[iop::SIO2] recv1 read %08x", 0x1d100);
+        // For now just return disconnected peripheral status
+        common::Log("[iop::SIO2] recv1 read %08x", 0x1d100);
         return 0x1d100;
     case 0x1f808270:
         // response status 2
@@ -32,7 +33,7 @@ u32 SIO2::ReadRegister(u32 addr) {
         return 0xf;
     case 0x1f808274:
         // response status 3
-        LOG_TODO("[iop::SIO2] recv3 read %08x", 0);
+        common::Log("[iop::SIO2] recv3 read %08x", 0);
         return 0;
     case 0x1f808280:
         // istat
@@ -47,7 +48,7 @@ u32 SIO2::ReadRegister(u32 addr) {
 void SIO2::WriteRegister(u32 addr, u32 value) {
     if (addr >= 0x1f808200 && addr < 0x1f808240) {
         int index = (addr - 0x1f808200) / 4;
-        LOG_TODO("[iop::SIO2] send3[%d] write %08x", index, value);
+        common::Log("[iop::SIO2] send3[%d] write %08x", index, value);
         send3[index] = value;
         return;
     }
@@ -55,10 +56,10 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
     if (addr >= 0x1f808240 && addr < 0x1f808260) {
         int index = (addr - 0x1f808240) / 8;
         if (addr & 0x4) {
-            LOG_TODO("[iop::SIO2] send2[%d] write %08x", index, value);
+            common::Log("[iop::SIO2] send2[%d] write %08x", index, value);
             send2[index] = value;
         } else {
-            LOG_TODO("[iop::SIO2] send1[%d] write %08x", index, value);
+            common::Log("[iop::SIO2] send1[%d] write %08x", index, value);
             send1[index] = value;
         }
         return;
@@ -66,13 +67,13 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
 
     switch (addr) {
     case 0x1f808260:
-        LOG_TODO("[iop::SIO2] fifo write %08x", value);
+        common::Log("[iop::SIO2] fifo write %08x", value);
+        fifo.Push<u8>(value);
         break;
     case 0x1f808268:
         control = value;
 
         if (value & 0x1) {
-            LOG_TODO_NO_ARGS("[iop::SIO2] raise sio2 interrupt");
             intc.RequestInterrupt(InterruptSource::SIO2);
             control &= ~0x1;
         }
@@ -91,12 +92,14 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
 }
 
 u8 SIO2::ReadDMA() {
-    LOG_TODO_NO_ARGS("[iop::SIO2] dma read");
-    return 0;
+    u8 data = fifo.Pop<u8>();
+    common::Log("[iop::SIO2] dma read %02x", data);
+    return data;
 }
 
 void SIO2::WriteDMA(u8 data) {
-    LOG_TODO("[iop::SIO2] dma data %02x", data);
+    common::Log("[iop::SIO2] dma data write %02x", data);
+    fifo.Push<u8>(data);
 }
 
 } // namespace iop
