@@ -18,7 +18,7 @@ struct SIO2 {
     void WriteDMA(u8 data);
 
 private:
-    u8 control;
+    u32 control;
     std::array<u32, 4> send1;
     std::array<u32, 4> send2;
     std::array<u32, 16> send3;

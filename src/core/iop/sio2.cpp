@@ -17,14 +17,14 @@ u32 SIO2::ReadRegister(u32 addr) {
     switch (addr) {
     case 0x1f808264:
         // fifo out
-        common::Log("[iop::SIO2] fifo read %08x", 0);
+        LOG_TODO("[iop::SIO2] fifo read %08x", 0);
         return 0;
     case 0x1f808268:
         common::Log("[iop::SIO2] control read %08x", control);
         return control;
     case 0x1f80826c:
         // response status 1
-        common::Log("[iop::SIO2] recv1 read %08x", 0x1d100);
+        LOG_TODO("[iop::SIO2] recv1 read %08x", 0x1d100);
         return 0x1d100;
     case 0x1f808270:
         // response status 2
@@ -32,13 +32,13 @@ u32 SIO2::ReadRegister(u32 addr) {
         return 0xf;
     case 0x1f808274:
         // response status 3
-        common::Log("[iop::SIO2] recv3 read %08x", 0);
+        LOG_TODO("[iop::SIO2] recv3 read %08x", 0);
         return 0;
     case 0x1f808280:
         // istat
         return 0;
     default:
-        common::Error("[iop::SIO2] handle read %08x", addr);
+        LOG_TODO("[iop::SIO2] handle read %08x", addr);
     }
 
     return 0;
@@ -47,7 +47,7 @@ u32 SIO2::ReadRegister(u32 addr) {
 void SIO2::WriteRegister(u32 addr, u32 value) {
     if (addr >= 0x1f808200 && addr < 0x1f808240) {
         int index = (addr - 0x1f808200) / 4;
-        common::Log("[iop::SIO2] send3[%d] write %08x", index, value);
+        LOG_TODO("[iop::SIO2] send3[%d] write %08x", index, value);
         send3[index] = value;
         return;
     }
@@ -55,10 +55,10 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
     if (addr >= 0x1f808240 && addr < 0x1f808260) {
         int index = (addr - 0x1f808240) / 8;
         if (addr & 0x4) {
-            common::Log("[iop::SIO2] send2[%d] write %08x", index, value);
+            LOG_TODO("[iop::SIO2] send2[%d] write %08x", index, value);
             send2[index] = value;
         } else {
-            common::Log("[iop::SIO2] send1[%d] write %08x", index, value);
+            LOG_TODO("[iop::SIO2] send1[%d] write %08x", index, value);
             send1[index] = value;
         }
         return;
@@ -66,22 +66,19 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
 
     switch (addr) {
     case 0x1f808260:
-        common::Log("[iop::SIO2] fifo write %08x", value);
+        LOG_TODO("[iop::SIO2] fifo write %08x", value);
         break;
     case 0x1f808268:
         control = value;
 
         if (value & 0x1) {
-            common::Log("[iop::SIO2] raise sio2 interrupt");
+            LOG_TODO_NO_ARGS("[iop::SIO2] raise sio2 interrupt");
             intc.RequestInterrupt(InterruptSource::SIO2);
             control &= ~0x1;
         }
 
-        if (value & 0x4) {
-            common::Log("[iop::SIO2] reset sio2");
-        }
-
-        if (value & 0x8) {
+        if (value & 0xc) {
+            // TODO: reset state here for next transfer
             common::Log("[iop::SIO2] reset sio2");
         }
 
@@ -89,17 +86,17 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
     case 0x1f808280:
         break;
     default:
-        common::Error("[iop::SIO2] handle write %08x = %08x", addr, value);
+        LOG_TODO("[iop::SIO2] handle write %08x = %08x", addr, value);
     }
 }
 
 u8 SIO2::ReadDMA() {
-    common::Log("[iop::SIO2] dma read");
+    LOG_TODO_NO_ARGS("[iop::SIO2] dma read");
     return 0;
 }
 
 void SIO2::WriteDMA(u8 data) {
-    common::Log("[iop::SIO2] dma data %02x", data);
+    LOG_TODO("[iop::SIO2] dma data %02x", data);
 }
 
 } // namespace iop
