@@ -18,12 +18,26 @@ struct SIO2 {
     void WriteDMA(u8 data);
 
 private:
+    void upload_command(u8 data);
+
+    enum class PeripheralType {
+        Controller,
+        Multitap,
+        Infrared,
+        Memcard,
+        None,
+    };
+
     u32 control;
     std::array<u32, 4> send1;
     std::array<u32, 4> send2;
     std::array<u32, 16> send3;
     common::Queue<u8, 256> fifo;
     INTC& intc;
+
+    u8 m_command_length{0};
+    u8 m_command_index{0};
+    PeripheralType m_peripheral_type{PeripheralType::None};
 };
 
 } // namespace iop

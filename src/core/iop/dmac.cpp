@@ -290,7 +290,7 @@ void DMAC::DoSPU2Transfer() {
 
 void DMAC::DoSIO2InTransfer() {
     Channel& channel = channels[11];
-    int length = channel.block_size * channel.block_count * 4;
+    int length = 4;
 
     for (int i = 0; i < length; i++) {
         u8 data = system.iop.Read<u8>(channel.address);
@@ -298,7 +298,7 @@ void DMAC::DoSIO2InTransfer() {
         channel.address++;
     }
     
-    channel.block_count = 0;
+    channel.block_count--;
     if (channel.block_count == 0) {
         EndTransfer(11);
     }
@@ -308,7 +308,7 @@ void DMAC::DoSIO2InTransfer() {
 
 void DMAC::DoSIO2OutTransfer() {
     Channel& channel = channels[12];
-    int length = channel.block_size * channel.block_count * 4;
+    int length = 4;
 
     for (int i = 0; i < length; i++) {
         u8 data = sio2.ReadDMA();
@@ -316,7 +316,7 @@ void DMAC::DoSIO2OutTransfer() {
         channel.address++;
     }
 
-    channel.block_count = 0;
+    channel.block_count--;
     if (channel.block_count == 0) {
         EndTransfer(12);
     }

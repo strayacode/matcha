@@ -20,6 +20,11 @@ void Interpreter::Reset() {
 void Interpreter::Run(int cycles) {
     while (cycles--) {
         inst = Instruction{ctx.read<u32>(ctx.pc)};
+
+        if (ctx.pc < 0x81fc0 || ctx.pc > 0x81fdc) {
+            LogInstruction();
+        }
+
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
         ctx.pc += 4;

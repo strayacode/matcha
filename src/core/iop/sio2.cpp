@@ -11,6 +11,9 @@ void SIO2::Reset() {
     send2.fill(0);
     send3.fill(0);
     fifo.Reset();
+    m_command_length = 0;
+    m_command_index = 0;
+    m_peripheral_type = PeripheralType::None;
 }
 
 u32 SIO2::ReadRegister(u32 addr) {
@@ -67,8 +70,7 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
 
     switch (addr) {
     case 0x1f808260:
-        common::Log("[iop::SIO2] fifo write %08x", value);
-        fifo.Push<u8>(value);
+        upload_command(value);
         break;
     case 0x1f808268:
         control = value;
@@ -80,6 +82,9 @@ void SIO2::WriteRegister(u32 addr, u32 value) {
 
         if (value & 0xc) {
             // TODO: reset state here for next transfer
+            m_command_length = 0;
+            m_command_index = 0;
+            m_peripheral_type = PeripheralType::None;
             common::Log("[iop::SIO2] reset sio2");
         }
 
@@ -99,7 +104,51 @@ u8 SIO2::ReadDMA() {
 
 void SIO2::WriteDMA(u8 data) {
     common::Log("[iop::SIO2] dma data write %02x", data);
-    fifo.Push<u8>(data);
+    upload_command(data);
+}
+
+void SIO2::upload_command(u8 data) {
+    if (m_command_length == 0) {
+        // Start new transfer.
+        switch (data) {
+        case 0x00:
+            m_peripheral_type = PeripheralType::None;
+            break;
+        case 0x01:
+            m_peripheral_type = PeripheralType::Controller;
+            break;
+        case 0x81:
+            m_peripheral_type = PeripheralType::Memcard;
+            break;
+        default:
+            LOG_TODO("start new transfer with peripheral byte %02x", data);
+        }
+
+        u32 params = send3[m_command_index];
+        common::Log("get params %08x from index in send3 %d", params, m_command_index);
+        if (params == 0) {
+            common::Log("[iop::sio2] params is empty!");
+        }
+
+        m_command_index++;
+        m_command_length = (params >> 18) & 0x7f;
+        common::Log("[iop::sio2] start transfer with length %d", m_command_length);
+    }
+
+    m_command_length--;
+
+    switch (m_peripheral_type) {
+    case PeripheralType::Controller:
+        // Just stub reply for now.
+        fifo.Push<u8>(0x00);
+        break;
+    case PeripheralType::Memcard:
+        // Just stub reply for now.
+        fifo.Push<u8>(0xff);
+        break;
+    default:
+        common::Log("[iop::sio2] handle non-controller transfer"); 
+    }
 }
 
 } // namespace iop
