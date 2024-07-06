@@ -5,7 +5,7 @@
 
 namespace iop {
 
-Context::Context(System& system) : dmac(system, sio2), timers(system), intc(*this), sio2(intc), system(system), interpreter(*this) {}
+Context::Context(System& system) : dmac(system, sio2), intc(*this), timers(intc), sio2(intc), system(system), interpreter(*this) {}
 
 void Context::Reset() {
     gpr.fill(0);
@@ -17,8 +17,8 @@ void Context::Reset() {
     cop0.Reset();
     cdvd.Reset();
     dmac.Reset();
-    timers.Reset();
     intc.Reset();
+    timers.reset();
     sio2.Reset();
     interpreter.Reset();
 
@@ -34,7 +34,7 @@ void Context::Reset() {
 void Context::Run(int cycles) {
     interpreter.Run(cycles);
     dmac.Run(cycles);
-    timers.Run(cycles);
+    timers.run(cycles);
 }
 
 template u8 Context::Read(VirtualAddress vaddr);
@@ -80,9 +80,9 @@ u32 Context::ReadIO(u32 paddr) {
     } else if (paddr >= 0x1f801080 && paddr < 0x1f801100) {
         return dmac.ReadRegister(paddr);
     } else if (paddr >= 0x1f801100 && paddr < 0x1f801130) {
-        return timers.ReadRegister(paddr);
+        return timers.read(paddr);
     } else if (paddr >= 0x1f801480 && paddr < 0x1f8014b0) {
-        return timers.ReadRegister(paddr);
+        return timers.read(paddr);
     } else if (paddr >= 0x1f801500 && paddr < 0x1f80155f) {
         return dmac.ReadRegister(paddr);
     } else if (paddr >= 0x1f801570 && paddr < 0x1f80157f) {
@@ -130,10 +130,10 @@ void Context::WriteIO(u32 paddr, u32 value) {
         dmac.WriteRegister(paddr, value);
         return;
     } else if (paddr >= 0x1f801100 && paddr < 0x1f801130) {
-        timers.WriteRegister(paddr, value);
+        timers.write(paddr, value);
         return;
     } else if (paddr >= 0x1f801480 && paddr < 0x1f8014b0) {
-        timers.WriteRegister(paddr, value);
+        timers.write(paddr, value);
         return;
     } else if (paddr >= 0x1f801500 && paddr < 0x1f80155f) {
         dmac.WriteRegister(paddr, value);

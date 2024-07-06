@@ -48,8 +48,8 @@ struct Context {
     COP0 cop0;
     CDVD cdvd;
     DMAC dmac;
-    Timers timers;
     INTC intc;
+    Timers timers;
     SIO2 sio2;
     System& system;
     

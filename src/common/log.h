@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cstdlib>
+
 namespace common {
 
 void Info(const char* format, ...);

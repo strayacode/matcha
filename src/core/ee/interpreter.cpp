@@ -20,11 +20,7 @@ void Interpreter::Reset() {
 void Interpreter::Run(int cycles) {
     while (cycles--) {
         inst = Instruction{ctx.read<u32>(ctx.pc)};
-
-        if (ctx.pc < 0x81fc0 || ctx.pc > 0x81fdc) {
-            LogInstruction();
-        }
-
+        
         auto handler = decoder.GetHandler(inst);
         (this->*handler)();
         ctx.pc += 4;
@@ -79,8 +75,10 @@ void Interpreter::CheckInterrupts() {
         bool int0_enable = (ctx.cop0.gpr[12] >> 10) & 0x1;
         bool timer_enable = (ctx.cop0.gpr[12] >> 15) & 0x1;
 
-        assert(timer_enable == false);
-        
+        if (timer_enable) {
+            LOG_TODO_NO_ARGS("handle timer enable interrupt");
+        }
+
         if (int0_enable && ctx.cop0.cause.int0_pending) {
             common::Log("[ee::Interpreter] do int0 interrupt");
             DoException(0x80000200, ExceptionType::Interrupt);

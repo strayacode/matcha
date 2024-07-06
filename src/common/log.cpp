@@ -1,6 +1,4 @@
-#include <cstdio>
 #include <cstdarg>
-#include <cstdlib>
 #include "common/log.h"
 
 #define RED "\x1B[31m"
