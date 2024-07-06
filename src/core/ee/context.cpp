@@ -308,7 +308,7 @@ void Context::WriteIO(u32 paddr, u32 value) {
         break;
     case 0x1000F180:
         // kputchar
-        printf("%c", value);
+        common::LogNoNewline("%c", value);
         break;
     case 0x1000F200:
         system.sif.WriteMSCOM(value);

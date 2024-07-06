@@ -192,7 +192,7 @@ void Interpreter::IOPPuts() {
     u32 length = ctx.GetReg(6);
     
     for (u32 i = 0; i < length; i++) {
-        printf("%c", ctx.system.iop_ram->data()[address & 0x1fffff]);
+        common::LogNoNewline("%c", ctx.system.iop_ram->data()[address & 0x1fffff]);
         address++;
     }
 }
