@@ -28,14 +28,17 @@ u32 Timers::read(u32 addr) {
 
     switch (addr & 0xf) {
     case 0x0:
+        common::Log("[iop::Timers] channel %d counter read %08x", index, static_cast<u32>(channel.counter));
         return channel.counter;
     case 0x4:
         // reads clear the two raised interrupt flags
         channel.mode.compare_irq_raised = false;
         channel.mode.overflow_irq_raised = false;
 
+        common::Log("[iop::Timers] channel %d mode read %08x", index, channel.mode.data);
         return channel.mode.data;
     case 0x8:
+        common::Log("[iop::Timers] channel %d target read %08x", index, channel.target);
         return channel.target;
     default:
         LOG_TODO("unknown timer read %08x", addr);
@@ -48,9 +51,11 @@ void Timers::write(u32 addr, u32 data) {
     
     switch (addr & 0xf) {
     case 0x0:
+        common::Log("[iop::Timers] channel %d counter write %08x", index, data);
         channel.counter = data;
         break;
     case 0x4: {
+        common::Log("[iop::Timers] channel %d mode write %08x", index, data);
         channel.mode.data = data;
 
         if (channel.mode.gate_enable) {
@@ -89,6 +94,7 @@ void Timers::write(u32 addr, u32 data) {
         break;
     }
     case 0x8:
+        common::Log("[iop::Timers] channel %d target write %08x", index, data);
         channel.target = data;
 
         if (index < 4) {
@@ -151,6 +157,7 @@ void Timers::run_channel(int index, int cycles) {
 
         // Check for timer overflows.
         if (overflow_occured(index) && channel.mode.overflow_irq && !channel.mode.overflow_irq_raised) {
+            common::Log("[iop::Timers] overflow irq occured for channel %d with counter %08x", index, static_cast<u32>(channel.counter));
             raise_irq(index);
             channel.mode.overflow_irq_raised = true;
         }
@@ -163,6 +170,7 @@ void Timers::run_channel(int index, int cycles) {
         }
 
         if (channel.counter == channel.target && channel.mode.compare_irq && !channel.mode.compare_irq_raised) {
+            common::Log("[iop::Timers] compare irq occured for channel %d with counter %08x", index, static_cast<u32>(channel.counter));
             raise_irq(index);
             channel.mode.compare_irq_raised = true;
 
@@ -186,13 +194,15 @@ bool Timers::overflow_occured(int index) {
 
 void Timers::raise_irq(int index) {
     auto& channel = m_channels[index];
-    int irq = irq < 3 ? 4 + index : 11 + index;
+    int irq = index < 3 ? 4 + index : 11 + index;
 
     m_intc.RequestInterrupt(static_cast<InterruptSource>(irq));
 
     if (!channel.mode.repeat_irq) {
+        common::Log("[iop::Timers] repeat irq disabled for channel %d, so disable irq", index);
         channel.mode.irqs_enabled = false;
     } else if (channel.mode.levl) {
+        common::Log("[iop::Timers] toggle irq enabled for channel %d, so toggle irq", index);
         channel.mode.irqs_enabled ^= true;
     }
 }
