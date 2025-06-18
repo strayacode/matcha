@@ -2,15 +2,13 @@
 
 #include "common/types.h"
 
-class SPU {
-public:
-    void Reset();
+typedef struct {
+    u16 master_volume_left;
+    u16 status;
+} spu_t;
 
-    u32 ReadRegister(u32 addr);
-    void WriteRegister(u32 addr, u32 data);
-    void RequestInterrupt();
+spu_t* spu_init(void);
 
-private:
-    u16 master_volume_left = 0;
-    u16 status = 0;
-};
+u32 spu_read(spu_t* spu, u32 addr);
+void spu_write(spu_t* spu, u32 addr, u32 data);
+void spu_request_interrupt(spu_t* spu);

@@ -23,7 +23,6 @@ enum class BootMode {
 struct System {
     System();
 
-    void Reset();
     void RunFrame();
     void SingleStep();
     void VBlankStart();

@@ -1,30 +1,32 @@
 #include "common/log.h"
 #include "core/spu/spu.h"
+#include <stdlib.h>
 
-void SPU::Reset() {
-    master_volume_left = 0;
-    status = 0;
+spu_t* spu_init(void) {
+    spu_t* spu = malloc(sizeof(spu_t));
+    spu->master_volume_left = 0;
+    spu->status = 0;
+
+    return spu;
 }
 
-u32 SPU::ReadRegister(u32 addr) {
-    u32 return_value = 0;
-
+u32 spu_read(spu_t* spu, u32 addr) {
     switch (addr) {
-    case 0x1F900744:
-        // status
-        return_value = status;
-        status &= ~0x80;
-        break;
+    case 0x1f900744: {
+        u32 result = spu->status;
+        spu->status &= ~0x80;
+
+        return result;
+    }
     default:
         common::Log("[SPU] handle read %08x", addr);
+        return 0;
     }
-
-    return return_value;
 }
 
-void SPU::WriteRegister(u32 addr, u32 data) {
+void spu_write(spu_t* spu, u32 addr, u32 data) {
     switch (addr) {
-    case 0x1F900744:
+    case 0x1f900744:
         // status
         break;
     default:
@@ -32,6 +34,6 @@ void SPU::WriteRegister(u32 addr, u32 data) {
     }
 }
 
-void SPU::RequestInterrupt() {
-    status |= 0x80;
+void spu_request_interrupt(spu_t* spu) {
+    spu->status |= 0x80;
 }
